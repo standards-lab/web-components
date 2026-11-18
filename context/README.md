@@ -9,15 +9,16 @@ needs it.
 It is a package under the `@standards-lab` scope, starting at v0.1.0 and released by a plain
 `vX.Y.Z` tag. Its goals live in the coordinator's roadmap (`standards-lab/context/roadmap.toml`,
 v1.client.stack), and its strategy is `standards-lab/context/web-client.md`. It is seeded by copy
-from spike-html-apps-components, with a provenance line on every copied file; the spike is archived and never a
-dependency.
+from spike-html-apps-components, with a provenance line on every copied file; the spike is
+archived and never a dependency.
 
 ## Provenance
 
 The package is seeded by copy from spike-html-apps-components at 10dde51, the parent of its v0.10.3
-pack commit. The spike is archived and never a dependency. Each copied file that takes comments
-names its source in a provenance line; the workflows name theirs, web-foundation's at ceaab61. The
-JSON files take no comment, so their provenance is here:
+pack commit, and moved onto web-foundation v0.2.0's four themes. The spike is archived and never a
+dependency. Each copied file that takes comments names its source in a provenance line; the
+workflows and CHANGELOG.md name theirs, web-foundation's at ceaab61. The files with no line have
+their provenance here:
 
 - `package.json` is adapted from spike-html-apps-components (10dde51): package.json. It is renamed
   `@standards-lab/web-components` at 0.1.0, takes `@standards-lab/web-foundation` as its peer at
@@ -25,11 +26,15 @@ JSON files take no comment, so their provenance is here:
   tooling devDependency, in place of the spike's foundation and tooling, with marked at 18.2.1 and
   typescript-eslint at 8.73.0.
 - `.prettierrc.json` is from spike-html-apps-components (10dde51): .prettierrc.json.
+- `LICENSE` is from spike-html-apps-components (10dde51): LICENSE, unchanged.
 - `pnpm-lock.yaml` is generated, not copied.
+- `test/unit/marked.test.ts`, `test/browser/themes.test.ts`, and
+  `test/browser/support/profiles.ts` are written here, with no source.
+- `CLAUDE.md`, `.claude/`, and this directory are marathon's working files, written here.
 
 ## Capability map
 
-- **Conversation**: the chat thread, with citations, and the composer.
-- **Ingest**: the upload dropzone and the stage timeline driven by the event protocol.
+- **Conversation**: the chat thread and the composer.
+- **Ingest**: the upload dropzone and the stage timeline, its stages given by the app.
 - **Inspection**: the event log, search results, artifact viewer, and document list.
 - **Controls**: the status badge, entry, pagination, and `sl-drawer`.

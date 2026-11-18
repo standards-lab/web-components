@@ -1,3 +1,4 @@
+# Adapted from spike-html-apps-components (10dde51): .gitignore, with the editor and OS files.
 # marathon working files.
 .claude/plans/
 .claude/briefs/
