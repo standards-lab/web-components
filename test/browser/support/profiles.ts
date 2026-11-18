@@ -7,6 +7,7 @@
 import "@standards-lab/web-foundation/register-full.js";
 import { DEFAULTS, profiles } from "@standards-lab/web-foundation/registry.js";
 
+/** Each facet's default profile, as the registry gives it. */
 export { DEFAULTS };
 
 /** Every built-in color profile, in registration order, the default first. */
