@@ -5,8 +5,7 @@
 // defaults, then compact and sans at github; the profiles each page registers, from the
 // foundation's registry; and the repository served as the browser tier serves it.
 // Adapted from spike-html-apps-components (10dde51): scripts/screenshots.config.ts, on
-// @standards-lab/web-tooling, web-foundation v0.2.0's themes and registry key, its pages the
-// controls' and the inspection components'.
+// @standards-lab/web-tooling, web-foundation v0.2.0's themes and registry key.
 
 import type {
   DescribedPage,
@@ -76,6 +75,10 @@ const pages: DescribedPage[] = (
     ["entry", "the entry"],
     ["pagination", "the pagination"],
     ["artifact-viewer", "the artifact viewer"],
+    ["chat-thread", "the chat thread"],
+    ["composer", "the composer"],
+    ["upload-dropzone", "the upload dropzone"],
+    ["stage-timeline", "the stage timeline"],
     ["event-log", "the event log"],
     ["search-results", "the search results"],
     ["document-list", "the document list"],

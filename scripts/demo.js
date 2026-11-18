@@ -2,7 +2,7 @@
 // pages' URLs, the components page and each component's specimen page, which load dist/, until
 // Ctrl-C.
 // Adapted from spike-html-apps-components (10dde51): scripts/demo.js, on
-// @standards-lab/web-tooling, its pages the controls' and the inspection components'.
+// @standards-lab/web-tooling.
 
 import { serve } from "@standards-lab/web-tooling/server.js";
 
@@ -15,6 +15,10 @@ for (const page of [
   "entry",
   "pagination",
   "artifact-viewer",
+  "chat-thread",
+  "composer",
+  "upload-dropzone",
+  "stage-timeline",
   "event-log",
   "search-results",
   "document-list",

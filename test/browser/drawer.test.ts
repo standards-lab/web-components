@@ -414,8 +414,8 @@ describe("drawer", { timeout: 60_000 }, () => {
   });
 
   // A control's focus outline inside the scrolling body, in both modes, the body held short so it
-  // scrolls: a status badge at the body's start, over a pagination whose entries span the body,
-  // its Next button flush with the controls' row's end. Each control the
+  // scrolls: the app's composition, an upload dropzone with an upload in progress, its Cancel
+  // flush with the row's end, over a document list, whose entries span the body. Each control the
   // keyboard reaches there, by Tab down to the last and Shift+Tab back up to the first, scrolled
   // into view by its focus, draws its whole outline, the control's box grown by the outline's
   // width and offset, inside the body's clip box, its padding box, cut by the wrapper's.
@@ -425,24 +425,28 @@ describe("drawer", { timeout: 60_000 }, () => {
   ] as const) {
     test(`${mode}, a control focused in the scrolling body draws its whole outline, at either edge`, async () => {
       await page.evaluate(
-        `Promise.all(["status-badge", "pagination", "entry"].map((name) => import("/dist/" + name + ".js")))`,
+        `Promise.all([import("/dist/upload-dropzone.js"), import("/dist/document-list.js")])`,
       );
-      const parts = "<sl-status-badge></sl-status-badge><sl-pagination></sl-pagination>";
+      const parts =
+        "<sl-upload-dropzone></sl-upload-dropzone><sl-document-list></sl-document-list>";
       await mount(width, {}, parts, height);
       await page.evaluate(`(async () => {
         const drawer = document.querySelector("sl-drawer");
         if (${mode === "docked"}) drawer.style.blockSize = "300px";
-        const badge = drawer.querySelector("sl-status-badge");
-        const pagination = drawer.querySelector("sl-pagination");
-        badge.label = "Draft";
-        Object.assign(pagination, { page: 1, size: 4, total: 12, pageSizes: [4] });
-        const entries = ["terms.md", "retainer.md", "notes.txt", "brief.docx"].map((name, i) =>
-          Object.assign(document.createElement("sl-entry"), { item: {
-            id: "doc-" + i, name, status: "available", size: 3120, content_type: "text/plain",
-            updated_at: "2026-10-27T11:12:44Z",
-          } }));
-        pagination.append(...entries);
-        await Promise.all([badge, pagination, ...entries].map((element) => element.updateComplete));
+        const dropzone = drawer.querySelector("sl-upload-dropzone");
+        const list = drawer.querySelector("sl-document-list");
+        dropzone.uploads = [
+          { id: "u-1", name: "quarterly-report.pdf", size: 4600000, sent: 1200000, state: "uploading" },
+          { id: "d-1", name: "brand-guide.pdf", size: 2400000, sent: 2400000, state: "done" },
+        ];
+        Object.assign(list, {
+          page: 1, size: 3, total: 3, more: false, pageSizes: [3],
+          items: ["terms.md", "retainer.md", "notes.txt"].map((name, i) => ({
+            id: "doc-" + i, name, content_type: "text/plain", size: 3120,
+            created_at: "2026-10-27T11:12:44Z", run_id: "run-" + i, status: "complete",
+          })),
+        });
+        await Promise.all([dropzone.updateComplete, list.updateComplete]);
       })()`);
       if (mode === "drawer") await openByKeyboard();
       // The focused control in the body, null once focus leaves it, with its outline and the clip.
@@ -502,12 +506,12 @@ describe("drawer", { timeout: 60_000 }, () => {
         if (!shift) await tab(true);
       }
       const names = new Set(seen.map(({ name }) => name.split(" ").slice(0, 2).join(" ")));
-      for (const control of ["sl-status-badge button", "sl-entry button", "sl-pagination select"]) {
+      for (const control of ["sl-upload-dropzone button", "sl-entry button"]) {
         assert.ok(names.has(control), `the keyboard reached ${control}: ${[...names].join(", ")}`);
       }
       assert.ok(
-        seen.some(({ name }) => name.endsWith("page-step")),
-        "the keyboard reached the Next button",
+        seen.some(({ name }) => name.endsWith("cancel")),
+        "the keyboard reached the Cancel button",
       );
       const scrolled: number = await page.evaluate(
         `document.querySelector("sl-drawer").shadowRoot.querySelector(".body").scrollHeight`,
