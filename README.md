@@ -17,14 +17,14 @@ Each release is a tag, `v<version>`, of
 package as `pnpm pack` builds it: `package.json`, this README, the LICENSE, and `dist/`, the build.
 The build lives only in the tag's tree, so the tag installs with no build step, and its manifest
 has no scripts. It depends on lit 3.3.3 and marked 18.2.1, and takes the foundation as a peer at
-`^0.2.0`: a consumer declares the foundation beside the components, and the one copy serves both,
+`^0.3.0`: a consumer declares the foundation beside the components, and the one copy serves both,
 so a restyle of the foundation's sheets by package name reaches the components' shadow roots too.
 Install both by their tags:
 
 ```
-pnpm add github:standards-lab/web-components#v0.1.0 github:standards-lab/web-foundation#v0.2.0
-bun add github:standards-lab/web-components#v0.1.0 github:standards-lab/web-foundation#v0.2.0
-npm install --allow-git=root github:standards-lab/web-components#v0.1.0 github:standards-lab/web-foundation#v0.2.0
+pnpm add github:standards-lab/web-components#v0.1.0 github:standards-lab/web-foundation#v0.3.0
+bun add github:standards-lab/web-components#v0.1.0 github:standards-lab/web-foundation#v0.3.0
+npm install --allow-git=root github:standards-lab/web-components#v0.1.0 github:standards-lab/web-foundation#v0.3.0
 ```
 
 npm 12 refuses git dependencies unless `--allow-git` allows them; `root` allows the ones the
@@ -200,11 +200,11 @@ mise run install                          # the pinned tools, and node_modules w
 mise run check                            # lint, types, build, and the unit and browser tiers; reads no network
 mise run build                            # src/ into dist/
 mise run demo                             # serve the components demo page and the specimen pages on dist/
-mise run screenshots                      # capture each specimen page at the defaults, github, regular, and mono, light and dark, in tiles, inline in kitty
-mise run screenshots --palette zenwritten # the same, in the palette named; the facet flags combine
+mise run screenshots                      # capture each specimen page at the defaults, zen, regular, and mono, light and dark, in tiles, inline in kitty
+mise run screenshots --palette github     # the same, in the palette named; the facet flags combine
 mise run screenshots --space compact      # the same, in the space named
 mise run screenshots --type sans          # the same, in the type named
-mise run screenshots --all                # every palette the foundation registers at the defaults, then compact and sans at github
+mise run screenshots --all                # every palette the foundation registers at the defaults, then compact and sans at zen
 mise run screenshots --page entry         # only the page named; repeatable, and with any of the above
 mise run screenshots --scheme dark        # only the scheme named, light or dark; with any of the above
 mise run screenshots --output browser     # a gallery of the captures, opened in the browser; directory keeps the files
@@ -258,7 +258,7 @@ the tag's tree to the pack, file for file; and creates the GitHub release from t
 ## Provenance
 
 The package is seeded by copy from spike-html-apps-components at 10dde51, the parent of its
-v0.10.3 pack commit, and moved onto web-foundation v0.2.0 and web-tooling v0.1.0. Each copied file
+v0.10.3 pack commit, and moved onto web-foundation v0.3.0 and web-tooling v0.1.0. Each copied file
 that takes comments names its source in a provenance line.
 
 ## License

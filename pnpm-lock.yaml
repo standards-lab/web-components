@@ -19,8 +19,8 @@ importers:
         specifier: 10.0.1
         version: 10.0.1(eslint@10.15.0(supports-color@7.2.0))
       '@standards-lab/web-foundation':
-        specifier: github:standards-lab/web-foundation#v0.2.0
-        version: https://codeload.github.com/standards-lab/web-foundation/tar.gz/030bef9b09b2ed3d0d4eb449571e3001df624ec9
+        specifier: github:standards-lab/web-foundation#v0.3.0
+        version: https://codeload.github.com/standards-lab/web-foundation/tar.gz/f8b3edc0dc658cfff64ec4eb60b5dd7019798b0b
       '@standards-lab/web-tooling':
         specifier: github:standards-lab/web-tooling#v0.1.0
         version: https://codeload.github.com/standards-lab/web-tooling/tar.gz/24363f36750fe287250ac8b48310b6e02f22f794
@@ -149,9 +149,9 @@ packages:
   '@lit/reactive-element@2.1.2':
     resolution: {integrity: sha512-pbCDiVMnne1lYUIaYNN5wrwQXDtHaYtg7YEFPeW+hws6U47WeFvISGUWekPGKWOP1ygrs0ef0o1VJMk1exos5A==}
 
-  '@standards-lab/web-foundation@https://codeload.github.com/standards-lab/web-foundation/tar.gz/030bef9b09b2ed3d0d4eb449571e3001df624ec9':
-    resolution: {gitHosted: true, integrity: sha512-2YeMXzTULcuF4sipKT2eGYlnNpH9Pi+agHpgQqvxgt4Jd+MvcF4rPjXZ5ynQtVDYguvb2IG9FGVDW14rgy3Wnw==, tarball: https://codeload.github.com/standards-lab/web-foundation/tar.gz/030bef9b09b2ed3d0d4eb449571e3001df624ec9}
-    version: 0.2.0
+  '@standards-lab/web-foundation@https://codeload.github.com/standards-lab/web-foundation/tar.gz/f8b3edc0dc658cfff64ec4eb60b5dd7019798b0b':
+    resolution: {gitHosted: true, integrity: sha512-yOEDzhuWiRQt9+0KTv3hj4GOqGOx6uvQQLi7es9GqR+gENMp2nM+LZ/fp1vNYP3VktDeyXIxTLjyjLGysYTtWA==, tarball: https://codeload.github.com/standards-lab/web-foundation/tar.gz/f8b3edc0dc658cfff64ec4eb60b5dd7019798b0b}
+    version: 0.3.0
 
   '@standards-lab/web-tooling@https://codeload.github.com/standards-lab/web-tooling/tar.gz/24363f36750fe287250ac8b48310b6e02f22f794':
     resolution: {gitHosted: true, integrity: sha512-D+0nTntEPlGCsjg82qXCVPb0INy38/uyiEbYbewQ+gq7pGSMMd9Mw1BDL2/VbuIQMI17cxXRKnnPZDrvP9eAyg==, tarball: https://codeload.github.com/standards-lab/web-tooling/tar.gz/24363f36750fe287250ac8b48310b6e02f22f794}
@@ -923,7 +923,7 @@ snapshots:
     dependencies:
       '@lit-labs/ssr-dom-shim': 1.6.0
 
-  '@standards-lab/web-foundation@https://codeload.github.com/standards-lab/web-foundation/tar.gz/030bef9b09b2ed3d0d4eb449571e3001df624ec9': {}
+  '@standards-lab/web-foundation@https://codeload.github.com/standards-lab/web-foundation/tar.gz/f8b3edc0dc658cfff64ec4eb60b5dd7019798b0b': {}
 
   '@standards-lab/web-tooling@https://codeload.github.com/standards-lab/web-tooling/tar.gz/24363f36750fe287250ac8b48310b6e02f22f794': {}
 

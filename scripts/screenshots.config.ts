@@ -1,13 +1,13 @@
 // mise run screenshots' description, which web-tooling's web-screenshots bin reads: each specimen
 // page under demo/, captured whole in tiles, and the drawer's page in its viewport at a wide and a
 // narrow width, its drawer docked, closed, open, and open right to left; the profile's facets,
-// palette, space, and type, at the foundation's defaults, github, regular, and mono; --all's
+// palette, space, and type, at the foundation's defaults, zen, regular, and mono; --all's
 // profiles, every palette the foundation registers at the defaults, light and dark, then each other
-// space and type, compact and sans, at github, read from its registry as the browser tier reads
+// space and type, compact and sans, at zen, read from its registry as the browser tier reads
 // them; the profiles each page registers, from the page's registry; and the repository served as
 // the browser tier serves it.
 // Adapted from spike-html-apps-components (10dde51): scripts/screenshots.config.ts, on
-// @standards-lab/web-tooling, web-foundation v0.2.0's themes and registry key.
+// @standards-lab/web-tooling, web-foundation v0.3.0's themes and registry key.
 
 import type {
   DescribedPage,

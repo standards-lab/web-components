@@ -158,7 +158,7 @@ describe("themes", { timeout: 120_000 }, () => {
   test("the registry lists the four built-in colors, the default first, and a space and a type besides the defaults", () => {
     // The cases below run over whatever the registry lists; this pins that it lists at least the
     // foundation's four, so a registry read gone empty can't pass them vacuously.
-    for (const color of ["github", "zenwritten", "everforest", "catppuccin"]) {
+    for (const color of ["zen", "github", "catppuccin", "everforest"]) {
       assert.ok(colors.includes(color), `${color} in ${colors}`);
     }
     assert.equal(colors[0], DEFAULTS.color);

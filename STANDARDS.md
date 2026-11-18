@@ -23,7 +23,7 @@ The architecture pages that apply, in the architecture repository:
 ## Design
 
 - spike-html-design v0.7.0 is the visual baseline: native elements keep its styling, and every
-  profile renders as it does there, its color profiles as web-foundation v0.2.0's themes give them.
+  profile renders as it does there, its color profiles as web-foundation v0.3.0's themes give them.
 - A component is finished in every state it can show (empty, loading, streaming, error, long
   content, narrow width) and in every profile, light and dark, regular and compact.
 - Focus is always visible, and nothing shifts layout as data arrives. Motion is brief, or a quiet

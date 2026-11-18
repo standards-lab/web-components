@@ -18,11 +18,11 @@
     "marked": "18.2.1"
   },
   "peerDependencies": {
-    "@standards-lab/web-foundation": "^0.2.0"
+    "@standards-lab/web-foundation": "^0.3.0"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
-    "@standards-lab/web-foundation": "github:standards-lab/web-foundation#v0.2.0",
+    "@standards-lab/web-foundation": "github:standards-lab/web-foundation#v0.3.0",
     "@standards-lab/web-tooling": "github:standards-lab/web-tooling#v0.1.0",
     "@types/node": "26.6.6",
     "eslint": "10.15.0",
