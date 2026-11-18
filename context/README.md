@@ -6,11 +6,9 @@ its own UI state; it holds no services, fetches no data, holds no application st
 imports the SDK. An application's internal element becomes a component once a second application
 needs it.
 
-It is a package under the `@standards-lab` scope, starting at v0.1.0 and released by a plain
-`vX.Y.Z` tag. Its goals live in the coordinator's roadmap (`standards-lab/context/roadmap.toml`,
-v1.client.stack), and its strategy is `standards-lab/context/web-client.md`. It is seeded by copy
-from spike-html-apps-components, with a provenance line on every copied file; the spike is
-archived and never a dependency.
+It is a package under the `@standards-lab` scope, released by a plain `vX.Y.Z` tag. Its goals
+live in the coordinator's roadmap (`standards-lab/context/roadmap.toml`, v1.client.stack), and its
+strategy is `standards-lab/context/web-client.md`.
 
 ## Provenance
 
@@ -22,9 +20,9 @@ their provenance here:
 
 - `package.json` is adapted from spike-html-apps-components (10dde51): package.json. It is renamed
   `@standards-lab/web-components` at 0.1.0, takes `@standards-lab/web-foundation` as its peer at
-  `^0.2.0` and as its devDependency at v0.2.0, and `@standards-lab/web-tooling` at v0.1.0 as its
-  tooling devDependency, in place of the spike's foundation and tooling, with marked at 18.2.1 and
-  typescript-eslint at 8.73.0.
+  `^0.2.0`, and replaces the spike's foundation and tooling devDependencies with web-foundation's
+  v0.2.0 tag and web-tooling's v0.1.0 tag; it pins marked at 18.2.1 and typescript-eslint at
+  8.73.0.
 - `.prettierrc.json` is from spike-html-apps-components (10dde51): .prettierrc.json.
 - `LICENSE` is from spike-html-apps-components (10dde51): LICENSE, unchanged.
 - `pnpm-lock.yaml` is generated, not copied.

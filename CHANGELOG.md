@@ -13,7 +13,7 @@ All notable changes to `@standards-lab/web-components` are documented here. The 
 
 - The components package, seeded by copy from spike-html-apps-components v0.10.3 (10dde51) and
   moved onto `@standards-lab/web-foundation` v0.2.0, its one peer at `^0.2.0`, and its four color
-  themes: GitHub, the default, Zenwritten, Everforest, and Catppuccin. It depends on lit 3.3.3 and
+  themes: GitHub (the default), Zenwritten, Everforest, and Catppuccin. It depends on lit 3.3.3 and
   marked 18.2.1, each pinned exactly; its sources are CSS and TypeScript, which tsc builds into
   `dist/`, each module's `.js` with its `.d.ts`, the sheets beside them. Each element's shadow root
   adopts the foundation's reset and elements sheets, then its own layout-only sheet.

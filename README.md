@@ -177,8 +177,7 @@ the foundation's `page.css`:
   and `close` as the modal drawer opens and closes, never as the viewport crosses `dock`, which
   swaps only the wrapper, so the slotted content is never moved, disconnected, or re-created: an
   open drawer docks, and docked content becomes a closed drawer. It slides only when the reader
-  allows motion. Its mode is the custom state `docked` or `drawer`, which a page
-  may style.
+  allows motion. Its mode is the custom state `docked` or `drawer`, which a page may style.
 - `./*.css`: each component's sheet, which its module imports itself.
 
 `demo/components.html` puts the status badge, the entry, and the pagination on one page, with its

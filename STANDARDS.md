@@ -41,9 +41,8 @@ The architecture pages that apply, in the architecture repository:
 
 - The package is `@standards-lab/web-components`, the components layer of the web client stack,
   built on `@standards-lab/web-foundation`, its one peer.
-- lit and marked are its two runtime dependencies, each pinned exactly
-  (`architecture/principles/minimal-footprint.md`); marked stays in the Markdown module alone, as
-  `test/unit/marked.test.ts` holds it.
+- lit and marked are each pinned exactly, and only the Markdown module imports marked
+  (`test/unit/marked.test.ts` enforces it).
 - `dist/` lives only in a release tag's tree, the pack, never on a branch.
 - Releases are plain `vX.Y.Z` annotated tags on a pack commit whose one parent is main's merge
   commit, cut by hand on a green check from `package.json`'s version, each with its `CHANGELOG.md`
