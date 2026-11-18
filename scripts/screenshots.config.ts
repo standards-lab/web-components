@@ -1,9 +1,11 @@
 // mise run screenshots' description, which web-tooling's web-screenshots bin reads: each specimen
 // page under demo/, captured whole in tiles, and the drawer's page in its viewport at a wide and a
 // narrow width, its drawer docked, closed, open, and open right to left; the profile's facets,
-// palette, space, and type, at github, regular, and mono; --all's profiles, every palette at the
-// defaults, then compact and sans at github; the profiles each page registers, from the
-// foundation's registry; and the repository served as the browser tier serves it.
+// palette, space, and type, at the foundation's defaults, github, regular, and mono; --all's
+// profiles, every palette the foundation registers at the defaults, light and dark, then each other
+// space and type, compact and sans, at github, read from its registry as the browser tier reads
+// them; the profiles each page registers, from the page's registry; and the repository served as
+// the browser tier serves it.
 // Adapted from spike-html-apps-components (10dde51): scripts/screenshots.config.ts, on
 // @standards-lab/web-tooling, web-foundation v0.2.0's themes and registry key.
 
@@ -14,6 +16,7 @@ import type {
   Step,
 } from "@standards-lab/web-tooling/screenshots.js";
 
+import { DEFAULTS, colors, spaces, types } from "../test/browser/support/profiles.ts";
 import { served } from "../test/browser/support/served.ts";
 
 /** The drawer page's mode is the viewport's: at its dock, 48rem, and wider, and below it. */
@@ -102,14 +105,14 @@ const REGISTRY = `(() => {
 const description: Description = {
   pages,
   facets: [
-    { flag: "palette", attribute: "data-palette", default: "github" },
-    { flag: "space", attribute: "data-space", default: "regular" },
-    { flag: "type", attribute: "data-type", default: "mono" },
+    { flag: "palette", attribute: "data-palette", default: DEFAULTS.color },
+    { flag: "space", attribute: "data-space", default: DEFAULTS.space },
+    { flag: "type", attribute: "data-type", default: DEFAULTS.type },
   ],
   all: [
-    ...["github", "zenwritten", "everforest", "catppuccin"].map((palette) => ({ palette })),
-    { space: "compact" },
-    { type: "sans" },
+    ...colors.map((palette) => ({ palette })),
+    ...spaces.map((space) => ({ space })),
+    ...types.map((type) => ({ type })),
   ],
   profiles: (page) => page.evaluate(REGISTRY),
   server: served,

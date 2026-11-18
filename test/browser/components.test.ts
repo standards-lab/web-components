@@ -18,6 +18,7 @@ import type { Browser, Page } from "@standards-lab/web-tooling/browser.js";
 import { serve } from "@standards-lab/web-tooling/server.js";
 import type { Server } from "@standards-lab/web-tooling/server.js";
 
+import { DEFAULTS, colors, spaces, types } from "./support/profiles.ts";
 import { served } from "./support/served.ts";
 
 /** A profile combination: the facets it sets, the rest at their defaults, and its scheme. */
@@ -71,10 +72,10 @@ describe("components", { timeout: 60_000 }, () => {
     await server?.stop();
   });
 
-  // The profiles the foundation's full entry carries: each color at the other facets' defaults,
-  // then compact and sans each at the rest's, and each of those light and dark.
+  // The profiles the foundation's full entry carries, as its registry lists them: each color at
+  // the other facets' defaults, then each other space and type, compact and sans, at the rest's,
+  // and each of those light and dark.
   const schemes = ["light", "dark"];
-  const colors = ["github", "zenwritten", "everforest", "catppuccin"];
 
   // The components the package defines, each its element's tag.
   const tags = [
@@ -93,13 +94,13 @@ describe("components", { timeout: 60_000 }, () => {
   ];
   const profiles: Profile[] = [
     ...colors.map((color) => ({ color })),
-    { space: "compact" },
-    { type: "sans" },
+    ...spaces.map((space) => ({ space })),
+    ...types.map((type) => ({ type })),
   ].flatMap((profile) => schemes.map((scheme) => ({ ...profile, scheme })));
 
   // Each case on the components page runs once on the lean entry, page.css, with no profile set,
   // and once in each profile combination on the full entry, page-full.css with register-full.js.
-  const defaults = { color: "github", space: "regular", type: "mono" };
+  const defaults = { ...DEFAULTS };
   const runs: Run[] = [
     { name: "on the lean page.css", query: "", dataset: {} },
     ...profiles.map((profile) => {
@@ -554,8 +555,8 @@ describe("components", { timeout: 60_000 }, () => {
       // carries.
       assert.deepEqual(registered, {
         color: colors,
-        space: ["regular", "compact"],
-        type: ["mono", "sans"],
+        space: [defaults.space, ...spaces],
+        type: [defaults.type, ...types],
       });
       assert.equal(rendered.length, profiles.length * tags.length);
       for (const { profile, tag, width, height } of rendered) {
@@ -567,7 +568,10 @@ describe("components", { timeout: 60_000 }, () => {
       const looks = (tag: string, where: (shown: Rendered) => boolean) =>
         rendered.filter((shown) => shown.tag === tag && where(shown)).map((shown) => shown.look);
       for (const tag of tags) {
-        const colored = looks(tag, ({ space, type }) => space === "regular" && type === "mono");
+        const colored = looks(
+          tag,
+          ({ space, type }) => space === defaults.space && type === defaults.type,
+        );
         assert.equal(
           new Set(colored.map((look) => look.color)).size,
           colors.length * schemes.length,
@@ -813,8 +817,10 @@ describe("components", { timeout: 60_000 }, () => {
     // every part of every entry, the name, the status, and each meta part, keeps inside
     // its button; the size and the time's clock each render on one line; and each word of the
     // date, its text between spaces, renders on one line, so the date breaks only at its spaces.
-    const over = ["mono", "sans"].flatMap((type) =>
-      ["regular", "compact"].flatMap((space) => schemes.map((scheme) => ({ type, space, scheme }))),
+    const over = [defaults.type, ...types].flatMap((type) =>
+      [defaults.space, ...spaces].flatMap((space) =>
+        schemes.map((scheme) => ({ type, space, scheme })),
+      ),
     );
     const measure = `() => {
       const section = document.querySelector(".narrow");
@@ -920,8 +926,10 @@ describe("components", { timeout: 60_000 }, () => {
     // field's content box, its border box less its inline padding and border, and the field
     // scrolls none of it; every field on the page, its page one, two, or three digits or none, is
     // one width, so the field never jumps as the page changes; and page 1000's field is wider.
-    const over = ["mono", "sans"].flatMap((type) =>
-      ["regular", "compact"].flatMap((space) => schemes.map((scheme) => ({ type, space, scheme }))),
+    const over = [defaults.type, ...types].flatMap((type) =>
+      [defaults.space, ...spaces].flatMap((space) =>
+        schemes.map((scheme) => ({ type, space, scheme })),
+      ),
     );
     const measure = `async () => {
       const context = document.createElement("canvas").getContext("2d");
