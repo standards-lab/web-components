@@ -2,10 +2,13 @@
 // adopted sheets, and the entry's formatting, on test/fixtures/components.html, on the lean entry
 // and in every profile on the full entry; the marks the accent and interaction hooks color, on
 // test/fixtures/components.html; each component in every profile, on
-// test/fixtures/profiles.html; and the entry's and the pagination's geometry on their specimen
-// pages under demo/, in every profile, the entry's in parents that size it to its content too.
+// test/fixtures/profiles.html; and the entry's, the pagination's, the artifact viewer's, the event
+// log's, the search results', and the document list's geometry on their specimen pages under
+// demo/, in every profile, the entry's, the viewer's, the log's, the results', and the list's in
+// parents that size them to their content too.
 // Adapted from spike-html-apps-components (10dde51): test/browser/components.test.ts, on
-// @standards-lab/web-tooling and web-foundation v0.2.0's themes, its cases the controls'.
+// @standards-lab/web-tooling and web-foundation v0.2.0's themes, its cases the controls' and the
+// inspection components'.
 
 import assert from "node:assert/strict";
 import { after, before, describe, test } from "node:test";
@@ -35,6 +38,12 @@ interface Run {
 /** A specimen measure's result in one profile, which it names by its facets as JSON. */
 type Measured<T> = T & { profile: string };
 
+/** A states measure: how far the states overflow the column, and each component they show. */
+interface States<T> {
+  overflow: number;
+  shown: T[];
+}
+
 /** A fits measure: each component in the fit section. */
 interface Fits<T> {
   fits: T[];
@@ -42,6 +51,13 @@ interface Fits<T> {
 
 /** A line's text and the number of lines it renders on. */
 type Lines = [string, number];
+
+/** A component in the fit section: its parent's class, its width, and the column's. */
+interface Fit {
+  parent: string;
+  width: number;
+  column: number;
+}
 
 describe("components", { timeout: 60_000 }, () => {
   let server: Server;
@@ -61,7 +77,16 @@ describe("components", { timeout: 60_000 }, () => {
   const colors = ["github", "zenwritten", "everforest", "catppuccin"];
 
   // The components the package defines, each its element's tag.
-  const tags = ["sl-drawer", "sl-pagination", "sl-entry", "sl-status-badge"];
+  const tags = [
+    "sl-drawer",
+    "sl-document-list",
+    "sl-search-results",
+    "sl-event-log",
+    "sl-artifact-viewer",
+    "sl-pagination",
+    "sl-entry",
+    "sl-status-badge",
+  ];
   const profiles: Profile[] = [
     ...colors.map((color) => ({ color })),
     { space: "compact" },
@@ -145,6 +170,10 @@ describe("components", { timeout: 60_000 }, () => {
         const elements = await sheet(foundation + "/baseline/elements.css");
         const components = [
           ["sl-drawer", "drawer", "drawer.css"],
+          ["sl-document-list", "document-list", "document-list.css"],
+          ["sl-search-results", "search-results", "search-results.css"],
+          ["sl-event-log", "event-log", "event-log.css"],
+          ["sl-artifact-viewer", "artifact-viewer", "artifact-viewer.css"],
           ["sl-pagination", "pagination", "pagination.css"],
           ["sl-entry", "entry", "entry.css"],
           ["sl-status-badge", "status-badge", "status-badge.css"],
@@ -375,16 +404,44 @@ describe("components", { timeout: 60_000 }, () => {
         await page.evaluate(`(async () => {
         const registry = await import("@standards-lab/web-foundation/registry.js");
         const { directories, files } = await import("/demo/documents.js");
-        await Promise.all(["drawer", "pagination", "entry", "status-badge"].map(
+        await Promise.all(["drawer", "document-list", "search-results", "event-log", "artifact-viewer", "pagination", "entry", "status-badge"].map(
           (module) => import("/dist/" + module + ".js")));
         // Each component as a host composes it: a drawer, docked at the page's width, holding one
-        // button, the pagination holding one entry per item, a lone entry, and a labelled badge.
+        // button, a document list of one document on its first page, search results of a match in
+        // content, whose button the profile styles, an event log of a stage event, an artifact
+        // viewer of a Markdown document, the pagination holding one entry per item, a lone entry,
+        // and a labelled badge.
         const components = {
           "sl-drawer": () => {
             const drawer = Object.assign(document.createElement("sl-drawer"), { label: "Documents" });
             drawer.append(Object.assign(document.createElement("button"), { textContent: "notes.md" }));
             return drawer;
           },
+          "sl-document-list": () =>
+            Object.assign(document.createElement("sl-document-list"), {
+              page: 1, size: 3, total: 1, pageSizes: [3, 6, 12], selected: "doc-1",
+              items: [{ id: "doc-1", name: "notes.md", content_type: "text/markdown", size: 18432,
+                created_at: "2026-10-29T15:42:07Z", run_id: "run-1", status: "complete" }],
+            }),
+          "sl-search-results": () =>
+            Object.assign(document.createElement("sl-search-results"), {
+              query: "report",
+              items: [{ id: "doc-1", name: "quarterly-report.md", field: "content",
+                snippet: "\u2026This report covers the three regions\u2026" }],
+            }),
+          "sl-event-log": () =>
+            Object.assign(document.createElement("sl-event-log"), {
+              events: [
+                { id: "run-1.1", type: "emulator.run.stage", source: "/emulator/lab-a", subject: "run-1",
+                  time: "2026-10-29T15:42:07Z", data: { stage: "upload", position: 1 } },
+              ],
+            }),
+          "sl-artifact-viewer": () =>
+            Object.assign(document.createElement("sl-artifact-viewer"), {
+              name: "notes.md",
+              contentType: "text/markdown",
+              content: "# Notes\\n\\nA paragraph, then a list:\\n\\n- one\\n- two",
+            }),
           "sl-pagination": () => {
             const pagination = document.createElement("sl-pagination");
             Object.assign(pagination, { page: 2, size: 3, total: 8, pageSizes: [3, 6, 12] });
@@ -408,14 +465,33 @@ describe("components", { timeout: 60_000 }, () => {
           for (const [tag, make] of Object.entries(components)) {
             const element = document.querySelector("main").appendChild(make());
             await element.updateComplete;
+            // The document list's entries render in their own shadow roots, after the list's.
+            const entries = [...element.shadowRoot.querySelectorAll("sl-entry")];
+            await Promise.all(entries.map((entry) => entry.updateComplete));
             const { width, height } = element.getBoundingClientRect();
-            // The look the profile gives the component's first button, inside its shadow root; the
-            // drawer, docked, which holds no button of its own there, its aside's color, its body's
-            // padding, and its slotted button's font, the interface font, since it sets no font
-            // itself.
+            // The look the profile gives the component's first button, inside its shadow root, the
+            // search results' their first match's, the document list's its first entry's; the
+            // artifact viewer, which holds no button, the color and padding of what its region
+            // scrolls, and its Markdown heading's font, since the region's text is the body font,
+            // which the type facet's profiles share; the event log, which holds no button but its
+            // data's toggle, its list's color and padding, and its time's font, the interface font;
+            // the drawer, docked, which holds no button of its own there, its aside's color, its
+            // body's padding, and its slotted button's font, the interface font, since it sets no
+            // font itself.
             const drawer = tag === "sl-drawer";
-            const style = getComputedStyle(element.shadowRoot.querySelector(drawer ? "aside" : "button"));
-            const font = drawer ? getComputedStyle(element.querySelector("button")) : style;
+            const viewer = tag === "sl-artifact-viewer";
+            const log = tag === "sl-event-log";
+            const style = getComputedStyle(entries.length
+              ? entries[0].shadowRoot.querySelector("button")
+              : element.shadowRoot.querySelector(
+                drawer ? "aside" : viewer ? ".body > *" : log ? ".events" : "button"));
+            const font = drawer
+              ? getComputedStyle(element.querySelector("button"))
+              : viewer
+                ? getComputedStyle(element.shadowRoot.querySelector("h1"))
+                : log
+                  ? getComputedStyle(element.shadowRoot.querySelector(".when"))
+                  : style;
             const look = {
               color: style.color + " on " + style.backgroundColor,
               font: font.fontFamily,
@@ -497,6 +573,9 @@ describe("components", { timeout: 60_000 }, () => {
         const tags = ${JSON.stringify(tags)}.filter((tag) => document.querySelector(tag));
         await Promise.all(tags.map((tag) => customElements.whenDefined(tag)));
         await Promise.all([...document.querySelectorAll(tags.join(","))].map((el) => el.updateComplete));
+        // A document list's entries and pagination render in its shadow root, after it.
+        await Promise.all([...document.querySelectorAll("sl-document-list")].flatMap((list) =>
+          [...list.shadowRoot.querySelectorAll("sl-entry, sl-pagination")].map((el) => el.updateComplete)));
         const defaults = ${JSON.stringify(defaults)};
         const attributes = { color: "data-palette", space: "data-space", type: "data-type", scheme: "data-scheme" };
         const root = document.documentElement;
@@ -1190,6 +1269,647 @@ describe("components", { timeout: 60_000 }, () => {
       }
     } finally {
       await page.close();
+    }
+  });
+
+  // In-page helper the artifact viewer's measures share, as source: each viewer in a section of
+  // its specimen page.
+  const VIEWERS = `(section) => [...document.querySelectorAll(section + " sl-artifact-viewer")]`;
+
+  test("the artifact viewer's specimen renders every state, at full size or held, within 20rem, in every profile", async () => {
+    // Every viewer but the no-header ones shows its header, and every one a region, a note, or a
+    // native view's element: a PDF's frame, an image, audio, or video. The viewer is as tall as
+    // its content, so no region scrolls down but run.log's, which the page holds to 16rem, and it
+    // does; at 20rem the states keep within the column, every part of each viewer inside its box,
+    // and a JSON line too long for the column scrolls its region sideways, never wrapping.
+    const measure = `() => {
+      const list = document.querySelector(".narrow .states");
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const shown = (${VIEWERS})("main").map((viewer) => {
+        const root = viewer.shadowRoot;
+        const box = viewer.getBoundingClientRect();
+        const parts = [...root.querySelectorAll(".header, .name, .type, .frame, .note, .body, .media")];
+        const region = root.querySelector(".body");
+        return {
+          name: viewer.name,
+          narrow: viewer.closest(".narrow") !== null,
+          header: root.querySelector(".header") !== null,
+          noHeader: viewer.noHeader,
+          shown: root.querySelector(".body, .note, .media") !== null,
+          held: viewer.classList.contains("held"),
+          height: box.height / rem,
+          outside: parts
+            .filter((part) => {
+              const rect = part.getBoundingClientRect();
+              return rect.left < box.left - 0.5 || rect.right > box.right + 0.5 ||
+                rect.top < box.top - 0.5 || rect.bottom > box.bottom + 0.5;
+            })
+            .map((part) => part.className),
+          sideways: region !== null && region.scrollWidth > region.clientWidth,
+          scrolls: region !== null && region.scrollHeight > region.clientHeight,
+        };
+      });
+      return { overflow: list.scrollWidth - list.clientWidth, shown };
+    }`;
+    for (const { profile, overflow, shown } of await measureSpecimen<
+      States<{
+        name: string;
+        narrow: boolean;
+        header: boolean;
+        noHeader: boolean;
+        shown: boolean;
+        held: boolean;
+        height: number;
+        outside: string[];
+        sideways: boolean;
+        scrolls: boolean;
+      }>
+    >("artifact-viewer", measure)) {
+      assert.ok(overflow <= 0, `${profile}: the states overflow the column by ${overflow}`);
+      assert.equal(
+        shown.length,
+        60,
+        `${profile}: twenty-eight states twice, the three fits, and the focus state`,
+      );
+      for (const {
+        name,
+        narrow,
+        header,
+        noHeader,
+        shown: content,
+        held,
+        height,
+        scrolls,
+        outside,
+      } of shown) {
+        const where = `${profile}, ${name}${narrow ? " at 20rem" : ""}`;
+        assert.equal(header, !noHeader, `${where}: a header unless no-header`);
+        assert.ok(content, `${where}: a region, a note, or a native element`);
+        assert.equal(held, name === "run.log", `${where}: only run.log is held`);
+        if (held) {
+          assert.ok(Math.abs(height - 16) < 0.01, `${where}: held to ${height}rem, not 16rem`);
+          assert.ok(scrolls, `${where}: held, its region scrolls down`);
+        } else {
+          assert.ok(!scrolls, `${where}: at full size, its region scrolls down`);
+        }
+        assert.deepEqual(outside, [], `${where}: parts outside the viewer`);
+      }
+      assert.equal(
+        shown.filter(({ name }) => name === "run.log").length,
+        3,
+        `${profile}: run.log twice in the states and once focused`,
+      );
+      const [json] = shown.filter(({ name, narrow }) => name === "run.json" && narrow);
+      assert.ok(json.sideways, `${profile}: run.json's id line scrolls sideways at 20rem`);
+      assert.equal(
+        shown.filter(({ noHeader }) => noHeader).length,
+        14,
+        `${profile}: the seven no-header states twice`,
+      );
+    }
+  });
+
+  test("in a parent that sizes it to its content, the artifact viewer takes its content's width, in every profile", async () => {
+    // The fit section's viewers: each is as wide as its widest line, so its region needs no
+    // sideways scroll, and no wider than the column.
+    const results = await measureSpecimen<Fits<Fit & { sideways: number }>>(
+      "artifact-viewer",
+      `() => {
+        const column = document.querySelector("#fit .fits").getBoundingClientRect().width;
+        return { fits: (${VIEWERS})("#fit").map((viewer) => {
+          const region = viewer.shadowRoot.querySelector(".body");
+          const width = viewer.getBoundingClientRect().width;
+          return {
+            parent: viewer.parentElement.className,
+            sideways: region.scrollWidth - region.clientWidth,
+            width,
+            column,
+          };
+        }) };
+      }`,
+    );
+    for (const { profile, fits } of results) {
+      assert.deepEqual(
+        fits.map(({ parent }) => parent),
+        ["fit-inline-block", "fit-flex", "fit-grid"],
+        `${profile}: the fit section's viewers`,
+      );
+      for (const { parent, sideways, width, column } of fits) {
+        const where = `${parent} under ${profile}`;
+        assert.ok(sideways <= 0, `${where}: the region scrolls sideways by ${sideways}`);
+        assert.ok(width < column / 2, `${where}: ${width} wide in a ${column} column`);
+      }
+    }
+  });
+
+  // In-page helper the event log's measures share, as source: each log in a section of its
+  // specimen page.
+  const LOGS = `(section) => [...document.querySelectorAll(section + " sl-event-log")]`;
+
+  test("the event log's specimen renders every state, at full size or held, within 20rem, its types, times, labels, and values on one line, its identifiers' text whole, in every profile", async () => {
+    // Every log shows its frame. The log is as tall as its events, so no frame scrolls down but
+    // the many events', which the page holds to 16rem, and it does. At 20rem the states keep
+    // within the column, every part of each log inside its box across, and each type, time,
+    // metadata label and value, and data toggle on one line. Whether an id fits its line whole
+    // depends on the monospace's width, so the test reads not its look but its text: each event's
+    // subject and id, in full, in its value and its title.
+    const measure = `() => {
+      const list = document.querySelector(".narrow .states");
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const lines = ${LINES};
+      const shown = (${LOGS})("main").map((log) => {
+        const root = log.shadowRoot;
+        const box = log.getBoundingClientRect();
+        const frame = root.querySelector(".frame");
+        const parts = [...root.querySelectorAll(
+          ".frame, ol, li, .head, .type, .when, .meta, .pair, dt, dd, details, summary, pre, .no-data, .empty")];
+        return {
+          narrow: log.closest(".narrow") !== null,
+          events: log.events.length,
+          frame: frame !== null,
+          held: log.classList.contains("held"),
+          height: box.height / rem,
+          outside: parts
+            .filter((part) => {
+              const rect = part.getBoundingClientRect();
+              return rect.left < box.left - 0.5 || rect.right > box.right + 0.5;
+            })
+            .map((part) => part.localName + "." + part.className),
+          broken: [...root.querySelectorAll(".type, .when, dt, dd, summary, .no-data")]
+            .filter((part) => lines(part) > 1)
+            .map((part) => part.textContent),
+          // Each event's identifiers as its values and titles hold them, and as its event has them.
+          identifiers: [...root.querySelectorAll(".event")].map((event, index) => ({
+            texts: [...event.querySelectorAll("dd.cut")].map((dd) => dd.textContent),
+            titles: [...event.querySelectorAll("dd.cut")].map((dd) => dd.title),
+            expected: [log.events[index].subject, log.events[index].id].filter(Boolean),
+          })),
+          scrolls: frame.scrollHeight > frame.clientHeight,
+        };
+      });
+      return { overflow: list.scrollWidth - list.clientWidth, shown };
+    }`;
+    for (const { profile, overflow, shown } of await measureSpecimen<
+      States<{
+        narrow: boolean;
+        events: number;
+        frame: boolean;
+        held: boolean;
+        height: number;
+        outside: string[];
+        broken: string[];
+        identifiers: { texts: string[]; titles: string[]; expected: string[] }[];
+        scrolls: boolean;
+      }>
+    >("event-log", measure)) {
+      assert.ok(overflow <= 0, `${profile}: the states overflow the column by ${overflow}`);
+      assert.equal(
+        shown.length,
+        16,
+        `${profile}: six states twice, the three fits, and the focus state`,
+      );
+      assert.equal(
+        shown.filter(({ held }) => held).length,
+        2,
+        `${profile}: the many events once in the states and once at 20rem`,
+      );
+      for (const [
+        index,
+        { narrow, frame, held, height, scrolls, outside, broken, identifiers },
+      ] of shown.entries()) {
+        const where = `${profile}, log ${index}${narrow ? " at 20rem" : ""}`;
+        assert.ok(frame, `${where}: a frame`);
+        if (held) {
+          assert.ok(Math.abs(height - 16) < 0.01, `${where}: held to ${height}rem, not 16rem`);
+          assert.ok(scrolls, `${where}: held, its frame scrolls down`);
+        } else {
+          assert.ok(!scrolls, `${where}: at full size, its frame scrolls down`);
+        }
+        assert.deepEqual(outside, [], `${where}: parts outside the log`);
+        assert.deepEqual(broken, [], `${where}: broken across lines`);
+        for (const [event, { texts, titles, expected }] of identifiers.entries()) {
+          assert.deepEqual(texts, expected, `${where}, event ${event}: its identifiers' text`);
+          assert.deepEqual(titles, expected, `${where}, event ${event}: its identifiers' titles`);
+        }
+      }
+    }
+  });
+
+  test("in a log narrower than its identifiers, each subject and id ends in an ellipsis on one line, its whole text kept, and the log never scrolls sideways, in every profile", async () => {
+    // A log 12rem wide, the many events' without their times, appended to the specimen page:
+    // narrower than a UUID in any monospace, so every subject and id is cut whatever the font, the
+    // test failing rather than passing if one is not. Each stays on one line, inside the log, its
+    // value clipped (its content wider than its box), its text and its title the whole identifier;
+    // the frame needs no sideways scroll. (A time keeps whole, so the times are left out: so
+    // narrow a log would scroll for them alone.)
+    const measure = `async () => {
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const lines = ${LINES};
+      let log = document.querySelector("#cut sl-event-log");
+      if (!log) {
+        const holder = document.createElement("div");
+        holder.id = "cut";
+        holder.style.inlineSize = "12rem";
+        log = document.createElement("sl-event-log");
+        log.events = document
+          .querySelector("sl-event-log.held")
+          .events.map(({ time, ...event }) => event);
+        holder.append(log);
+        document.querySelector("main").append(holder);
+        await log.updateComplete;
+      }
+      const root = log.shadowRoot;
+      const frame = root.querySelector(".frame");
+      const box = log.getBoundingClientRect();
+      return {
+        width: box.width / rem,
+        events: log.events.length,
+        values: [...root.querySelectorAll(".event")].flatMap((event, index) =>
+          [...event.querySelectorAll("dd.cut")].map((dd, at) => {
+            const rect = dd.getBoundingClientRect();
+            return {
+              expected: [log.events[index].subject, log.events[index].id].filter(Boolean)[at],
+              text: dd.textContent,
+              title: dd.title,
+              lines: lines(dd),
+              cut: dd.scrollWidth > dd.clientWidth,
+              ellipsis: getComputedStyle(dd).textOverflow,
+              inside: rect.left >= box.left - 0.5 && rect.right <= box.right + 0.5,
+            };
+          })),
+        sideways: frame.scrollWidth - frame.clientWidth,
+      };
+    }`;
+    for (const { profile, width, events, values, sideways } of await measureSpecimen<{
+      width: number;
+      events: number;
+      values: {
+        expected: string;
+        text: string;
+        title: string;
+        lines: number;
+        cut: boolean;
+        ellipsis: string;
+        inside: boolean;
+      }[];
+      sideways: number;
+    }>("event-log", measure)) {
+      assert.ok(Math.abs(width - 12) < 0.01, `${profile}: the log ${width}rem wide, not 12rem`);
+      assert.equal(values.length, events * 2, `${profile}: each event's subject and id`);
+      for (const { expected, text, title, lines, cut, ellipsis, inside } of values) {
+        const where = `${profile}, ${expected}`;
+        assert.equal(text, expected, `${where}: its text`);
+        assert.equal(title, expected, `${where}: its title`);
+        assert.equal(lines, 1, `${where}: on ${lines} lines`);
+        assert.ok(cut, `${where}: whole in a 12rem log`);
+        assert.equal(ellipsis, "ellipsis", `${where}: cut without an ellipsis`);
+        assert.ok(inside, `${where}: outside the log`);
+      }
+      assert.ok(sideways <= 0, `${profile}: the frame scrolls sideways by ${sideways}`);
+    }
+  });
+
+  test("in a parent that sizes it to its content, the event log takes its type's and time's width, in every profile", async () => {
+    // The fit section's logs, a run's first two events each: each takes its content's width, so
+    // each event's type and time share one line and its frame needs no sideways scroll, and is no
+    // wider than half the column; its metadata wraps within that width, every part inside it.
+    const results = await measureSpecimen<
+      Fits<
+        Fit & {
+          events: number;
+          metadata: number;
+          oneLine: boolean;
+          outside: number;
+          sideways: number;
+        }
+      >
+    >(
+      "event-log",
+      `() => {
+        const column = document.querySelector("#fit .fits").getBoundingClientRect().width;
+        return { fits: (${LOGS})("#fit").map((log) => {
+          const root = log.shadowRoot;
+          const frame = root.querySelector(".frame");
+          const box = log.getBoundingClientRect();
+          return {
+            parent: log.parentElement.className,
+            events: root.querySelectorAll(".event").length,
+            metadata: root.querySelectorAll("dt, dd").length,
+            oneLine: [...root.querySelectorAll(".event")].every((event) => {
+              const type = event.querySelector(".type").getBoundingClientRect();
+              const time = event.querySelector(".when").getBoundingClientRect();
+              return Math.abs(type.bottom - time.bottom) < 2;
+            }),
+            outside: [...root.querySelectorAll("dt, dd")].filter((part) => {
+              const rect = part.getBoundingClientRect();
+              return rect.left < box.left - 0.5 || rect.right > box.right + 0.5;
+            }).length,
+            sideways: frame.scrollWidth - frame.clientWidth,
+            width: box.width,
+            column,
+          };
+        }) };
+      }`,
+    );
+    for (const { profile, fits } of results) {
+      assert.deepEqual(
+        fits.map(({ parent }) => parent),
+        ["fit-inline-block", "fit-flex", "fit-grid"],
+        `${profile}: the fit section's logs`,
+      );
+      for (const { parent, events, metadata, oneLine, outside, sideways, width, column } of fits) {
+        const where = `${parent} under ${profile}`;
+        assert.equal(events, 2, `${where}: the run's first two events`);
+        assert.ok(metadata > 0, `${where}: metadata`);
+        assert.ok(oneLine, `${where}: a type and its time wrap`);
+        assert.equal(outside, 0, `${where}: metadata outside the log`);
+        assert.ok(sideways <= 0, `${where}: the frame scrolls sideways by ${sideways}`);
+        assert.ok(width > 0 && width < column / 2, `${where}: ${width} wide in a ${column} column`);
+      }
+    }
+  });
+
+  // In-page helper the search results' measures share, as source: each results element in a
+  // section of its specimen page.
+  const SEARCHES = `(section) => [...document.querySelectorAll(section + " sl-search-results")]`;
+
+  test("the search results' specimen renders every state within 20rem, their field labels whole, in every profile", async () => {
+    // Every results element shows its status line. At 20rem the states keep within the column,
+    // every part of each inside its box across, a long name and snippet wrapping inside their
+    // button; each field label keeps one line, and at full width sits on its name's line, at the
+    // line's end.
+    const measure = `() => {
+      const list = document.querySelector(".narrow .states");
+      const lines = ${LINES};
+      const shown = (${SEARCHES})("main").map((results) => {
+        const root = results.shadowRoot;
+        const box = results.getBoundingClientRect();
+        const parts = [...root.querySelectorAll(".status, ul, li, button, .head, .name, .field, .snippet, mark")];
+        return {
+          narrow: results.closest(".narrow") !== null,
+          fit: results.closest("#fit") !== null,
+          status: root.querySelector(".status[role=status]") !== null,
+          outside: parts
+            .filter((part) => {
+              const rect = part.getBoundingClientRect();
+              return rect.left < box.left - 0.5 || rect.right > box.right + 0.5;
+            })
+            .map((part) => part.localName + "." + part.className),
+          broken: [...root.querySelectorAll(".field")]
+            .filter((part) => lines(part) > 1)
+            .map((part) => part.textContent),
+          // Each short name's field label on its name's last line, ending the button's content.
+          beside: [...root.querySelectorAll(".match")]
+            .filter((button) => button.querySelector(".name").textContent.length < 24)
+            .map((button) => {
+              const name = button.querySelector(".name").getBoundingClientRect();
+              const field = button.querySelector(".field").getBoundingClientRect();
+              const head = button.querySelector(".head").getBoundingClientRect();
+              return Math.abs(name.bottom - field.bottom) < 3 && Math.abs(field.right - head.right) < 1;
+            }),
+        };
+      });
+      return { overflow: list.scrollWidth - list.clientWidth, shown };
+    }`;
+    for (const { profile, overflow, shown } of await measureSpecimen<
+      States<{
+        narrow: boolean;
+        fit: boolean;
+        status: boolean;
+        outside: string[];
+        broken: string[];
+        beside: boolean[];
+      }>
+    >("search-results", measure)) {
+      assert.ok(overflow <= 0, `${profile}: the states overflow the column by ${overflow}`);
+      assert.equal(
+        shown.length,
+        26,
+        `${profile}: eleven states twice, the three fits, and the focus state`,
+      );
+      for (const [index, { narrow, fit, status, outside, broken, beside }] of shown.entries()) {
+        const where = `${profile}, results ${index}${narrow ? " at 20rem" : ""}`;
+        assert.ok(status, `${where}: a status line`);
+        assert.deepEqual(outside, [], `${where}: parts outside the results`);
+        assert.deepEqual(broken, [], `${where}: a field label broken across lines`);
+        if (!narrow && !fit) {
+          assert.ok(beside.every(Boolean), `${where}: a short name's field label off its line`);
+        }
+      }
+      assert.ok(
+        shown.some(({ narrow, fit, beside }) => !narrow && !fit && beside.length > 0),
+        `${profile}: a short name at full width`,
+      );
+    }
+  });
+
+  test("in a parent that sizes them to their content, the search results take their content's width, in every profile", async () => {
+    // The fit section's results, two short matches each: each takes its content's width, so each
+    // name shares its line with its field label and each snippet keeps one line, every part
+    // inside, and is no wider than half the column.
+    const results = await measureSpecimen<
+      Fits<Fit & { matches: number; oneLine: boolean; outside: number }>
+    >(
+      "search-results",
+      `() => {
+        const column = document.querySelector("#fit .fits").getBoundingClientRect().width;
+        const lines = ${LINES};
+        return { fits: (${SEARCHES})("#fit").map((results) => {
+          const root = results.shadowRoot;
+          const box = results.getBoundingClientRect();
+          return {
+            parent: results.parentElement.className,
+            matches: root.querySelectorAll(".match").length,
+            oneLine: [...root.querySelectorAll(".match")].every((button) => {
+              const name = button.querySelector(".name").getBoundingClientRect();
+              const field = button.querySelector(".field").getBoundingClientRect();
+              const snippet = button.querySelector(".snippet");
+              return Math.abs(name.bottom - field.bottom) < 3 && (!snippet || lines(snippet) === 1);
+            }),
+            outside: [...root.querySelectorAll(".status, button, .name, .field, .snippet")].filter((part) => {
+              const rect = part.getBoundingClientRect();
+              return rect.left < box.left - 0.5 || rect.right > box.right + 0.5;
+            }).length,
+            width: box.width,
+            column,
+          };
+        }) };
+      }`,
+    );
+    for (const { profile, fits } of results) {
+      assert.deepEqual(
+        fits.map(({ parent }) => parent),
+        ["fit-inline-block", "fit-flex", "fit-grid"],
+        `${profile}: the fit section's results`,
+      );
+      for (const { parent, matches, oneLine, outside, width, column } of fits) {
+        const where = `${parent} under ${profile}`;
+        assert.equal(matches, 2, `${where}: the two short matches`);
+        assert.ok(oneLine, `${where}: a name and its label, or a snippet, wrap`);
+        assert.equal(outside, 0, `${where}: parts outside the results`);
+        assert.ok(width > 0 && width < column / 2, `${where}: ${width} wide in a ${column} column`);
+      }
+    }
+  });
+
+  // In-page helpers the document list's measures share, as source: each list in a section of its
+  // specimen page, and, for a list, its parts across its own and its parts' shadow roots, each by
+  // name with its box: its status line, its pagination and the controls' row, and each entry's
+  // button, name, status, meta, size, and clock.
+  const LISTS = `(section) => [...document.querySelectorAll(section + " sl-document-list")]`;
+  const LIST_PARTS = `(list) => {
+    const root = list.shadowRoot;
+    const pagination = root.querySelector("sl-pagination");
+    const parts = [
+      ["status", root.querySelector(".status")],
+      ["pagination", pagination],
+      ["controls", pagination.shadowRoot.querySelector(".pagination")],
+      ...[...root.querySelectorAll("sl-entry")].flatMap((entry) =>
+        ["button", ".name", ".status", ".meta", ".size", ".clock"].map((selector) => [
+          entry.item.name + " " + selector,
+          entry.shadowRoot.querySelector(selector),
+        ]),
+      ),
+    ];
+    return parts.filter(([, element]) => element !== null);
+  }`;
+
+  test("the document list's specimen renders every state within 20rem, its sizes and clocks whole, in every profile", async () => {
+    // Every list shows its status line and one pagination. At 20rem the states keep within the
+    // column, and every part of each list, its status line, its controls, and each entry's
+    // button and parts, inside the list's box across; each entry's parts inside its button; a
+    // size and a clock each on one line; and every entry of a list at the pagination's inline
+    // start, selected or not, no column held beside it.
+    const measure = `() => {
+      const list = document.querySelector(".narrow .states");
+      const lines = ${LINES};
+      const parts = ${LIST_PARTS};
+      const shown = (${LISTS})("main").map((element) => {
+        const root = element.shadowRoot;
+        const box = element.getBoundingClientRect();
+        const outside = (rect, within) => rect.left < within.left - 0.5 || rect.right > within.right + 0.5;
+        const entries = [...root.querySelectorAll("sl-entry")];
+        return {
+          narrow: element.closest(".narrow") !== null,
+          status: root.querySelector(".status[role=status]") !== null,
+          paginations: root.querySelectorAll("sl-pagination").length,
+          outside: parts(element)
+            .filter(([, part]) => outside(part.getBoundingClientRect(), box))
+            .map(([name]) => name),
+          spills: entries.flatMap((entry) => {
+            const button = entry.shadowRoot.querySelector("button").getBoundingClientRect();
+            return [".name", ".status", ".meta"]
+              .filter((selector) => outside(entry.shadowRoot.querySelector(selector).getBoundingClientRect(), button))
+              .map((selector) => entry.item.name + " " + selector);
+          }),
+          broken: entries.flatMap((entry) =>
+            [".size", ".clock"]
+              .map((selector) => entry.shadowRoot.querySelector(selector))
+              .filter((part) => part !== null && lines(part) > 1)
+              .map((part) => part.textContent),
+          ),
+          starts: [...new Set(entries.map((entry) => Math.round(entry.getBoundingClientRect().left)))],
+          edge: Math.round(root.querySelector("sl-pagination").getBoundingClientRect().left),
+        };
+      });
+      return { overflow: list.scrollWidth - list.clientWidth, shown };
+    }`;
+    for (const { profile, overflow, shown } of await measureSpecimen<
+      States<{
+        narrow: boolean;
+        status: boolean;
+        paginations: number;
+        outside: string[];
+        spills: string[];
+        broken: string[];
+        starts: number[];
+        edge: number;
+      }>
+    >("document-list", measure)) {
+      assert.ok(overflow <= 0, `${profile}: the states overflow the column by ${overflow}`);
+      assert.equal(
+        shown.length,
+        22,
+        `${profile}: nine states twice, the three fits, and the focus state`,
+      );
+      for (const [
+        index,
+        { narrow, status, paginations, outside, spills, broken, starts, edge },
+      ] of shown.entries()) {
+        const where = `${profile}, list ${index}${narrow ? " at 20rem" : ""}`;
+        assert.ok(status, `${where}: a status line`);
+        assert.equal(paginations, 1, `${where}: one pagination`);
+        assert.deepEqual(outside, [], `${where}: parts outside the list`);
+        assert.deepEqual(spills, [], `${where}: parts outside their entry`);
+        assert.deepEqual(broken, [], `${where}: a size or a clock broken across lines`);
+        assert.ok(
+          starts.every((start) => start === edge),
+          `${where}: entries start at ${starts}, the pagination at ${edge}`,
+        );
+      }
+      assert.ok(
+        shown.some(({ starts }) => starts.length > 0),
+        `${profile}: a list with entries`,
+      );
+    }
+  });
+
+  test("in a parent that sizes it to its content, the document list takes its content's width, in every profile", async () => {
+    // The fit section's lists, one short document each: each takes its content's width, so the
+    // entry's name shares its line with its status, its meta keeps one line, and the controls
+    // keep one row, every part inside, and is narrower than the column.
+    const results = await measureSpecimen<
+      Fits<
+        Fit & { head: boolean; meta: boolean; controls: boolean; entries: number; outside: number }
+      >
+    >(
+      "document-list",
+      `() => {
+        const column = document.querySelector("#fit .fits").getBoundingClientRect().width;
+        const parts = ${LIST_PARTS};
+        return { fits: (${LISTS})("#fit").map((element) => {
+          const box = element.getBoundingClientRect();
+          const entry = element.shadowRoot.querySelector("sl-entry").shadowRoot;
+          const rect = (root, selector) => root.querySelector(selector).getBoundingClientRect();
+          const controls = element.shadowRoot.querySelector("sl-pagination").shadowRoot;
+          return {
+            parent: element.parentElement.className,
+            head: Math.abs(rect(entry, ".name").bottom - rect(entry, ".status").bottom) < 3,
+            // The meta on one line: no taller than its tallest part. Its parts' text runs may sit a
+            // pixel apart, the time's date and clock in their own spans, so it is measured by box.
+            meta:
+              rect(entry, ".meta").height <=
+              Math.max(...[...entry.querySelector(".meta").children].map((part) => part.getBoundingClientRect().height)) + 0.5,
+            controls: Math.abs(rect(controls, "select").top - rect(controls, ".page-step:last-child").top) < 8,
+            entries: element.shadowRoot.querySelectorAll("sl-entry").length,
+            outside: parts(element).filter(([, part]) => {
+              const at = part.getBoundingClientRect();
+              return at.left < box.left - 0.5 || at.right > box.right + 0.5;
+            }).length,
+            width: box.width,
+            column,
+          };
+        }) };
+      }`,
+    );
+    for (const { profile, fits } of results) {
+      assert.deepEqual(
+        fits.map(({ parent }) => parent),
+        ["fit-inline-block", "fit-flex", "fit-grid"],
+        `${profile}: the fit section's lists`,
+      );
+      for (const { parent, head, meta, controls, entries, outside, width, column } of fits) {
+        const where = `${parent} under ${profile}`;
+        assert.equal(entries, 1, `${where}: the one short document`);
+        assert.ok(head, `${where}: the name and its status wrap`);
+        assert.ok(meta, `${where}: the meta wraps`);
+        assert.ok(controls, `${where}: the controls wrap`);
+        assert.equal(outside, 0, `${where}: parts outside the list`);
+        assert.ok(
+          width > 0 && width < column * 0.6,
+          `${where}: ${width} wide in a ${column} column`,
+        );
+      }
     }
   });
 });

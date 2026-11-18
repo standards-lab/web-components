@@ -6,7 +6,7 @@
 // foundation's registry; and the repository served as the browser tier serves it.
 // Adapted from spike-html-apps-components (10dde51): scripts/screenshots.config.ts, on
 // @standards-lab/web-tooling, web-foundation v0.2.0's themes and registry key, its pages the
-// controls'.
+// controls' and the inspection components'.
 
 import type {
   DescribedPage,
@@ -75,6 +75,10 @@ const pages: DescribedPage[] = (
     ["status-badge", "the status badge"],
     ["entry", "the entry"],
     ["pagination", "the pagination"],
+    ["artifact-viewer", "the artifact viewer"],
+    ["event-log", "the event log"],
+    ["search-results", "the search results"],
+    ["document-list", "the document list"],
   ] satisfies [name: string, caption: string][]
 )
   .map(([name, caption]): DescribedPage => ({ name, caption, path: `demo/${name}.html` }))
