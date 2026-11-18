@@ -1,14 +1,13 @@
 // Every component under every color profile the foundation registers, light and dark, and across
-// its space and type profiles, on the specimen pages under demo/, each showing every state of its
-// component: every piece of text a component's shadow tree renders, nested shadow trees included,
-// takes one of the active profile's color tokens, as the page resolves them outside every
-// component, and its foreground among them; and the focus ring the keyboard brings to each
-// component's control is the interaction color the profile resolves, the component with nothing
-// focusable, the stage timeline, aside. The profiles are the registry's, so a color the foundation
-// adds is covered here with no edit, and a component that paints a value of its own, or one an
-// old profile set alone, fails here in the profile that shows it.
+// its space and type profiles, on each specimen page under demo/: every text a shadow tree renders
+// takes one of the profile's color tokens, its foreground among them, and the focus ring the
+// keyboard brings to each component's control is the profile's interaction color. The profiles
+// and the pages are read, not listed, so a profile the foundation adds or a page a component adds
+// is covered with no edit.
 
 import assert from "node:assert/strict";
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
 import { after, before, describe, test } from "node:test";
 
 import { launch, SETTLED } from "@standards-lab/web-tooling/browser.js";
@@ -57,21 +56,12 @@ const choices: Choice[] = [
   ...types.map((type) => ({ type })),
 ].flatMap((profile) => schemes.map((scheme) => ({ ...DEFAULTS, ...profile, scheme })));
 
-/** Each specimen page, by its component's name. */
-const pages = [
-  "status-badge",
-  "entry",
-  "pagination",
-  "artifact-viewer",
-  "chat-thread",
-  "composer",
-  "upload-dropzone",
-  "stage-timeline",
-  "event-log",
-  "search-results",
-  "document-list",
-  "drawer",
-];
+/** Each specimen page under demo/, by its component's name: every page there but the index,
+ * components.html, which links the lean entry alone and so shows one profile. */
+const pages = readdirSync(join(import.meta.dirname, "../../demo"))
+  .filter((file) => file.endsWith(".html") && file !== "components.html")
+  .map((file) => file.slice(0, -".html".length))
+  .sort();
 
 /**
  * In-page: resolves once every component on the page, in light DOM or in another's shadow tree,

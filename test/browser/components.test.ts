@@ -72,11 +72,6 @@ describe("components", { timeout: 60_000 }, () => {
     await server?.stop();
   });
 
-  // The profiles the foundation's full entry carries, as its registry lists them: each color at
-  // the other facets' defaults, then each other space and type, compact and sans, at the rest's,
-  // and each of those light and dark.
-  const schemes = ["light", "dark"];
-
   // The components the package defines, each its element's tag.
   const tags = [
     "sl-drawer",
@@ -92,6 +87,11 @@ describe("components", { timeout: 60_000 }, () => {
     "sl-entry",
     "sl-status-badge",
   ];
+
+  // The profiles the foundation's full entry carries, as its registry lists them: each color at
+  // the other facets' defaults, then each other space and type, compact and sans, at the rest's,
+  // and each of those light and dark.
+  const schemes = ["light", "dark"];
   const profiles: Profile[] = [
     ...colors.map((color) => ({ color })),
     ...spaces.map((space) => ({ space })),
@@ -100,7 +100,7 @@ describe("components", { timeout: 60_000 }, () => {
 
   // Each case on the components page runs once on the lean entry, page.css, with no profile set,
   // and once in each profile combination on the full entry, page-full.css with register-full.js.
-  const defaults = { ...DEFAULTS };
+  const defaults = DEFAULTS;
   const runs: Run[] = [
     { name: "on the lean page.css", query: "", dataset: {} },
     ...profiles.map((profile) => {
@@ -563,8 +563,8 @@ describe("components", { timeout: 60_000 }, () => {
         assert.ok(width > 0 && height > 0, `${tag} under ${profile}: a ${width} × ${height} box`);
       }
       assert.deepEqual(errors, []);
-      // Each facet reaches every shadow root: the four colors light and dark are eight looks, sans
-      // sets another font than mono, and compact pads tighter than regular.
+      // Each facet reaches every shadow root: each color, light and dark, is a look of its own,
+      // sans sets another font than mono, and compact pads tighter than regular.
       const looks = (tag: string, where: (shown: Rendered) => boolean) =>
         rendered.filter((shown) => shown.tag === tag && where(shown)).map((shown) => shown.look);
       for (const tag of tags) {
@@ -583,8 +583,8 @@ describe("components", { timeout: 60_000 }, () => {
             (shown) =>
               shown.scheme === scheme &&
               shown.color === defaults.color &&
-              shown.type === "mono" &&
-              shown.space === "regular",
+              shown.type === defaults.type &&
+              shown.space === defaults.space,
           );
           const [sans] = looks(tag, (shown) => shown.scheme === scheme && shown.type === "sans");
           const [compact] = looks(
