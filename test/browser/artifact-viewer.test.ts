@@ -1,18 +1,4 @@
-// The artifact viewer from this repository's dist/, on test/fixtures/components.html: the view each
-// content type takes, its parameters and case aside; JSON formatted from its own tokens, its keys,
-// their order, duplicates, numbers, and strings as written, and invalid JSON's raw text under its
-// note; text/html as text, never a page; the textual application types, SVG's and XHTML's source,
-// and malformed text/ types as text from no URL; an unknown type's Blob as text when its first MiB
-// is UTF-8 with no control character text never holds, and else a note and its download, typed
-// application/octet-stream; a PDF, an image, audio, and video from a Blob in their
-// native elements, named and sized, each object URL the viewer's own, revoked as the content
-// changes and as it disconnects, and made again as it reconnects; a type it can't show as a note,
-// never its bytes, with a link that downloads a Blob given; viewOf's view and content for each
-// type; the loading and error states; long content scrolling inside the viewer, by the keyboard once Tab reaches its region;
-// with noHeader, no header, the region's name kept, and no gap where the header was; every state's
-// container named for the artifact, with noHeader or without; and no event sent.
-// Adapted from spike-html-apps-components (10dde51): test/browser/artifact-viewer.test.ts, on
-// @standards-lab/web-tooling.
+// Adapted from spike-html-apps-components (10dde51): test/browser/artifact-viewer.test.ts, on @standards-lab/web-tooling.
 
 import assert from "node:assert/strict";
 import { after, before, describe, test } from "node:test";
@@ -25,7 +11,6 @@ import type { Server } from "@standards-lab/web-tooling/server.js";
 import { deepFormatted } from "./support/deep.ts";
 import { served } from "./support/served.ts";
 
-/** What window.shown reads from a viewer's shadow root. */
 interface View {
   name: string | null;
   type: string | null;
@@ -40,7 +25,6 @@ interface View {
   rendered: string[];
 }
 
-/** A node of the page's accessibility tree, as Accessibility.getFullAXTree gives it. */
 interface AXNode {
   nodeId: string;
   ignored: boolean;
@@ -58,14 +42,9 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
     server = await serve(served);
     browser = await launch();
     page = await browser.open(`${server.origin}/test/fixtures/components.html`);
-    // window.shown(fields) renders a viewer of the fields into main, resolving to what its shadow
-    // root shows: the header's name and type, each note's label and detail, the region's element,
-    // text, and tabindex, and whether a heading, list, or table rendered.
     await page.evaluate(`window.verdict.then(async () => {
       await import("/dist/artifact-viewer.js");
       window.media = await import("/test/fixtures/media.js");
-      // Every object URL the page makes, with the type and size of its Blob, and every URL it
-      // revokes, in order.
       window.urls = { created: [], revoked: [] };
       const create = URL.createObjectURL;
       URL.createObjectURL = (blob) => {
@@ -151,8 +130,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
   }
 
   test("JSON shows its own keys in their order, duplicates, numbers, and strings as written", async () => {
-    // Parsed and printed again, "2" and "10" would move first, the numbers would be rewritten,
-    // 9007199254740993 rounded, and the first "dup" dropped.
     const content = String.raw`{"b":1,"10":[1.0,-0,1e3,1E-7,9007199254740993],"2":{},"dup":"a","dup":"say \"hi\", caf\u00e9 é\n\\"}`;
     const view = await shown({ name: "run.json", contentType: "application/json", content });
     assert.equal(
@@ -212,9 +189,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
     });
   }
 
-  /** What window.read reads of a viewer whose content is made in the page: its pre's text, its
-   * notes, its download link's href, any element that renders a document or media, and the
-   * object URLs made while it showed. */
   interface Read {
     pre: string | null;
     notes: string[];
@@ -223,8 +197,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
     made: { url: string; type: string; size: number }[];
   }
 
-  // Renders a viewer of the content type and the content the expression makes in the page, a
-  // string or a Blob, awaits its update, its Blob read, and reads it.
   const read = (contentType: string, content: string): Promise<Read> =>
     page.evaluate(`(async () => {
       const before = window.urls.created.length;
@@ -243,7 +215,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
       };
     })()`);
 
-  /** A shown text: in the pre, as given, with no note, no rendering element, and no URL. */
   const asText = (view: Read, text: string, where: string) =>
     assert.deepEqual(
       view,
@@ -287,7 +258,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
       const view = await read(contentType, `new Blob([${JSON.stringify(text)}])`);
       asText(view, text, JSON.stringify(contentType));
     }
-    // A string given for one shows the same way.
     asText(await read("application/x-unknown", '"plain words"'), "plain words", "a string");
   });
 
@@ -307,7 +277,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
   }
 
   test("an unknown type's Blob is judged by its first MiB", async () => {
-    // A NUL past the first MiB, and a two-byte character cut by the MiB's end, leave it text.
     const view: { pre: number | null; notes: string[]; made: number } =
       await page.evaluate(`(async () => {
       const head = new Uint8Array(1024 * 1024 + 1).fill(0x61);
@@ -323,11 +292,13 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
         notes: [...root.querySelectorAll(".note")].map((note) => note.classList[1]),
         made: window.urls.created.length - before };
     })()`);
-    assert.deepEqual(view, { pre: 1024 * 1024 + 2, notes: [], made: 0 });
+    assert.deepEqual(
+      view,
+      { pre: 1024 * 1024 + 2, notes: [], made: 0 },
+      "a NUL past the first MiB, and a two-byte character cut at its end, leave it text",
+    );
   });
 
-  // In the page, a Blob of the parts whose bytes, read by any of a Blob's reads or a slice's, are
-  // held until release() lets them go, as `const { blob, release } = held(parts)`.
   const held = `(parts) => {
     let release;
     const gate = new Promise((resolve) => { release = resolve; });
@@ -344,7 +315,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
   test("an unknown type's Blob shows loading until read, and its download URL goes when text replaces it", async () => {
     const steps: { notes: string[]; pre: string | null; href: string | null; revoked: string[] }[] =
       await page.evaluate(`(async () => {
-      // A PNG whose bytes are held until the test lets them be read.
       const { blob, release } = (${held})([window.media.png()]);
       const viewer = Object.assign(document.createElement("sl-artifact-viewer"),
         { name: "x", contentType: "application/x-unknown", content: blob });
@@ -357,7 +327,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
           revoked: [...window.urls.revoked] });
       };
       document.querySelector("main").replaceChildren(viewer);
-      // Rendered, the bytes not yet read.
       await new Promise((resolve) => setTimeout(resolve, 50));
       step();
       release();
@@ -379,8 +348,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
   test("an unknown type's Blob read after its content changed never shows over the new content", async () => {
     const shown: { notes: string[]; pre: string | null; href: string | null }[] =
       await page.evaluate(`(async () => {
-      // A binary Blob and a text one, each held; the first given, then replaced by the second,
-      // and the first's read let go only after the second's has shown.
       const binary = (${held})([window.media.png()]);
       const text = (${held})(["the new text"]);
       const viewer = Object.assign(document.createElement("sl-artifact-viewer"),
@@ -411,7 +378,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
   });
 
   test("valid JSON nested 20,000 deep shows its outer 64 levels formatted, the rest as written", async () => {
-    // Every level indented, their indents alone would be some 800 million spaces.
     const content = "[".repeat(20_000) + "1" + "]".repeat(20_000);
     const view = await shown({ name: "deep.json", contentType: "application/json", content });
     assert.equal(view.region?.text, deepFormatted(20_000));
@@ -436,7 +402,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
     ["text", "text isn't text."],
   ]) {
     test(`${JSON.stringify(contentType)} with content that isn't text shows a labelled note in place of it`, async () => {
-      // PNG's signature holds a substitute, U+001A, a control character text never holds.
       const content = "\u0089PNG\r\n\u001a\n-the-bytes-";
       const view = await shown({ name: "chart.zip", contentType, content });
       assert.equal(view.region, null);
@@ -505,13 +470,11 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
       "text/plain,x": { view: "text", content: "text" },
       "application/xhtml+xml": { view: "text", content: "text" },
       "Application/YAML": { view: "text", content: "text" },
-      // Lenient on text/ alone: a malformed JSON or Markdown type is no JSON or Markdown.
       "application/json,x": { view: "unknown", content: "blob" },
       "text/markdown,x": { view: "text", content: "text" },
     });
   });
 
-  /** What window.native reads of a viewer given a Blob from test/fixtures/media.js. */
   interface Native {
     element: string | null;
     src: string | null;
@@ -526,9 +489,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
     rem: number;
   }
 
-  // Renders a viewer of the fields with media[fixture]() as its content, and reads its native
-  // element: its src and the object URL made for it, its names, and its box and the frame's. The
-  // style is the host's.
   const native = async (
     fields: Record<string, unknown>,
     fixture: string,
@@ -568,8 +528,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
       };
     })()`);
 
-  // The object URL shown is the one the viewer made, from a Blob of the given one's bytes, typed by
-  // the content type, which decides the view.
   const madeFor = (view: Native, type: string) => {
     assert.match(view.src ?? "", /^blob:/);
     assert.equal(view.src, view.created?.url, "the src is the URL the viewer made");
@@ -582,8 +540,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
   };
 
   test("application/pdf shows in an iframe, titled, the frame's width, tall, the viewer's frame unscrolled", async () => {
-    // chrome-headless-shell has no PDF viewer plugin, so the frame's pages never render here: the
-    // test holds the iframe, its blob: src, its title, and its box, not the PDF's pages.
     const view = await native({ name: "summary.pdf", contentType: "application/pdf" }, "pdf");
     assert.equal(view.element, "iframe");
     madeFor(view, "application/pdf");
@@ -594,7 +550,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
     assert.deepEqual(await regions().then((named) => named.map(({ name }) => name)), [
       "summary.pdf content",
     ]);
-    // Held to 12rem, the viewer shrinks the iframe into its frame, still unscrolled.
     const held = await native(
       { name: "summary.pdf", contentType: "application/pdf" },
       "pdf",
@@ -605,12 +560,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
   });
 
   test("no view's object URL, opened as a document of its own, loads a Blob as a page", async () => {
-    // Each Blob is a page typed text/html, which, loaded in the app's origin, would set ran on the
-    // frame's parent. Each view's URL, a native element's src or the download link's href, is
-    // opened in a frame, as "Open image in new tab" or the link opened rather than downloaded
-    // would; a URL the test makes of the Blob itself first shows that such a page would run. A
-    // text view, SVG's and XHTML's source among them, and an unknown type's text bytes, has no URL
-    // to open: the page shows as text. Its binary twin, the page after a NUL, is a download.
     const opened: Record<string, { url: string | null; ran: boolean; type: string | null }> =
       await page.evaluate(`(async () => {
       const markup = "<script>parent.ran = true</script>";
@@ -746,7 +695,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
       const viewer = Object.assign(document.createElement("sl-artifact-viewer"),
         { name: "chart.png", contentType: "image/png", content: window.media.png() });
       const main = document.querySelector("main");
-      // The viewer a test before left, removed first, revokes its own URL before the count.
       main.replaceChildren();
       const steps = [];
       let created = window.urls.created.length;
@@ -768,7 +716,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
       await step(() => main.append(viewer));
       await step(() => { viewer.contentType = "image/webp"; });
       await step(() => { viewer.content = ""; });
-      // Each URL revoked is gone: the browser no longer serves it.
       const served = await Promise.all(steps.flatMap(({ revoked }) => revoked).map((url) =>
         fetch(url).then(() => url, () => null)));
       return { steps, served: served.filter(Boolean) };
@@ -846,7 +793,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
     })()`);
     assert.deepEqual(view, [
       { pre: "<h1>Hi</h1><script>window.pwned = 1</script>", iframe: false, notes: [], made: 0 },
-      // A Blob is no text type's content: it shows as none, and no URL is made of it.
       { pre: null, iframe: false, notes: ["empty"], made: 0 },
     ]);
   });
@@ -872,7 +818,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
     })()`);
     assert.match(view.href ?? "", /^blob:/);
     assert.equal(view.href, view.created.url);
-    // Typed application/octet-stream, so the link opened rather than downloaded renders nothing.
     assert.deepEqual([view.created.type, view.created.size], ["application/octet-stream", 167]);
     assert.equal(view.download, "bundle.zip");
     assert.equal(view.text, "Download bundle.zip");
@@ -895,7 +840,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
   });
 
   test("the scrolling region is reached by Tab and named for the artifact, and keys scroll it", async () => {
-    // A block-size of 16rem on the host holds 200 lines' region to it, so the region scrolls.
     await page.cdp("Emulation.setFocusEmulationEnabled", { enabled: true });
     const content = Array.from({ length: 200 }, (_, i) => `line ${i + 1}`).join("\n");
     const view = await shown({ name: "run.log", contentType: "text/plain", content });
@@ -937,9 +881,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
   });
 
   test("scrolled to its end, the region shows its padding past the content, in each view", async () => {
-    // A viewer 12rem wide and 10rem tall, of lines too long and too many for it: scrolled to the
-    // end of both axes, the text's widest line and last line, and the Markdown code block's
-    // border, stop short of the region's edges by the padding, never cut at the frame.
     const long = Array.from({ length: 40 }, (_, i) => `line ${i + 1} ${"x".repeat(60)}end`).join(
       "\n",
     );
@@ -958,7 +899,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
         const region = viewer.shadowRoot.querySelector(".body");
         region.scrollLeft = region.scrollWidth;
         region.scrollTop = region.scrollHeight;
-        // The region's edges inside its scrollbars, where its content stops showing.
         const box = region.getBoundingClientRect();
         const edge = {
           right: box.left + region.clientLeft + region.clientWidth,
@@ -969,7 +909,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
         if (code) {
           end = code.getBoundingClientRect();
         } else {
-          // The text's box: its widest line's end, and its last line's foot.
           const range = document.createRange();
           range.selectNodeContents(region.querySelector(".content"));
           end = range.getBoundingClientRect();
@@ -988,9 +927,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
     }
   });
 
-  // The viewer's layout and its region's names in the accessibility tree, for the fields: whether
-  // a header renders and shows, the header's and the frame's tops from the host's, and the names of
-  // the regions exposed.
   const laidOut = async (
     fields: Record<string, unknown>,
   ): Promise<{
@@ -1037,8 +973,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
     });
   }
 
-  // The regions the accessibility tree exposes, each with its name, its description, and the text
-  // of the static text nodes beneath it, joined by spaces.
   const regions = async (): Promise<{ name: string; description: string; text: string }[]> => {
     const { nodes }: { nodes: AXNode[] } = await page.cdp("Accessibility.getFullAXTree", {});
     const byId = new Map(nodes.map((node) => [node.nodeId, node]));
@@ -1058,8 +992,6 @@ describe("artifact viewer", { timeout: 60_000 }, () => {
       }));
   };
 
-  // Each state that isn't a region's content alone, with what its named container holds: its
-  // text, and the invalid JSON's note as the description of the raw text's region.
   const states: {
     state: string;
     fields: Record<string, unknown>;

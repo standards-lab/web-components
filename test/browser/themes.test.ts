@@ -1,10 +1,3 @@
-// Every component under every color profile the foundation registers, light and dark, and across
-// its space and type profiles, on each specimen page under demo/: every text a shadow tree renders
-// takes one of the profile's color tokens, its foreground among them, and the focus ring the
-// keyboard brings to each component's control is the profile's interaction color. The profiles
-// and the pages are read, not listed, so a profile the foundation adds or a page a component adds
-// is covered with no edit.
-
 import assert from "node:assert/strict";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
@@ -18,7 +11,6 @@ import type { Server } from "@standards-lab/web-tooling/server.js";
 import { DEFAULTS, colors, spaces, types } from "./support/profiles.ts";
 import { served } from "./support/served.ts";
 
-/** A profile combination, every facet named, and its scheme. */
 interface Choice {
   color: string;
   space: string;
@@ -26,7 +18,6 @@ interface Choice {
   scheme: string;
 }
 
-/** The foundation's sixteen color tokens: surfaces, borders, the foreground's tiers, the hues. */
 const TOKENS = [
   "--bg",
   "--bg-1",
@@ -48,25 +39,17 @@ const TOKENS = [
 
 const schemes = ["light", "dark"];
 
-// Each registered color at the other facets' defaults, then each other space and type at the
-// rest's, each light and dark: the browser tier's profile combinations.
 const choices: Choice[] = [
   ...colors.map((color) => ({ color })),
   ...spaces.map((space) => ({ space })),
   ...types.map((type) => ({ type })),
 ].flatMap((profile) => schemes.map((scheme) => ({ ...DEFAULTS, ...profile, scheme })));
 
-/** Each specimen page under demo/, by its component's name: every page there but the index,
- * components.html, which links the lean entry alone and so shows one profile. */
 const pages = readdirSync(join(import.meta.dirname, "../../demo"))
   .filter((file) => file.endsWith(".html") && file !== "components.html")
   .map((file) => file.slice(0, -".html".length))
   .sort();
 
-/**
- * In-page: resolves once every component on the page, in light DOM or in another's shadow tree,
- * has rendered, its fonts are ready, and two frames have painted.
- */
 const RENDERED = `(async () => {
   const hosts = () => {
     const found = [];
@@ -89,11 +72,6 @@ const RENDERED = `(async () => {
   await ${SETTLED};
 })()`;
 
-/**
- * In-page, a function of a choice: applies it by attribute on the root, then reads the tokens and
- * the hooks as a probe in light DOM resolves them, outside every component, and every text the
- * components' shadow trees render, as its color and where it is.
- */
 const READ = `async (choice) => {
   const attributes = { color: "data-palette", space: "data-space", type: "data-type", scheme: "data-scheme" };
   for (const [facet, name] of Object.entries(choice)) {
@@ -126,14 +104,12 @@ const READ = `async (choice) => {
   return { tokens, interaction, texts };
 }`;
 
-/** What READ resolves to in one choice. */
 interface Read {
   tokens: Record<string, string>;
   interaction: string;
   texts: { where: string; color: string }[];
 }
 
-/** A color with no alpha left: a text drawn in it shows nothing, as a hidden mark's does. */
 const TRANSPARENT = /^rgba\(.*, 0\)$/;
 
 describe("themes", { timeout: 120_000 }, () => {
@@ -148,7 +124,6 @@ describe("themes", { timeout: 120_000 }, () => {
     await server?.stop();
   });
 
-  /** Opens a specimen page, resolving once its components have rendered. */
   async function open(name: string): Promise<Page> {
     const page = await browser.open(`${server.origin}/demo/${name}.html`);
     await page.evaluate(RENDERED);
@@ -156,8 +131,6 @@ describe("themes", { timeout: 120_000 }, () => {
   }
 
   test("the registry lists the four built-in colors, the default first, and a space and a type besides the defaults", () => {
-    // The cases below run over whatever the registry lists; this pins that it lists at least the
-    // foundation's four, so a registry read gone empty can't pass them vacuously.
     for (const color of ["zen", "github", "catppuccin", "everforest"]) {
       assert.ok(colors.includes(color), `${color} in ${colors}`);
     }
@@ -187,16 +160,17 @@ describe("themes", { timeout: 120_000 }, () => {
             `${where}: no text in the foreground, ${tokens["--fg"]}`,
           );
         }
-        // Each color, light and dark, sets its own foreground, so each choice above read the
-        // profile it named and not the default's.
-        assert.equal(foregrounds.size, colors.length * schemes.length, [...foregrounds].join(", "));
+        assert.equal(
+          foregrounds.size,
+          colors.length * schemes.length,
+          `each color, light and dark, sets its own foreground: ${[...foregrounds].join(", ")}`,
+        );
       } finally {
         await page.close();
       }
     });
   }
 
-  /** The focus ring, as the deepest active element shows it. */
   interface Ring {
     where: string;
     visible: boolean;
@@ -205,7 +179,6 @@ describe("themes", { timeout: 120_000 }, () => {
     color: string;
   }
 
-  /** In-page: the deepest active element's focus ring. */
   const RING = `(() => {
     let active = document.activeElement;
     const path = [active.localName];
@@ -223,18 +196,12 @@ describe("themes", { timeout: 120_000 }, () => {
     };
   })()`;
 
-  /** Presses Tab, as a keyboard does, so the browser moves focus and marks it focus-visible. */
   async function tab(page: Page): Promise<void> {
     const key = { key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 };
     await page.cdp("Input.dispatchKeyEvent", { type: "keyDown", ...key });
     await page.cdp("Input.dispatchKeyEvent", { type: "keyUp", ...key });
   }
 
-  /**
-   * Brings the keyboard to the page's focus state: on a specimen page, Tab from its focus-start
-   * mark as many times as the mark says; on the drawer's, the drawer undocked and opened, Tab from
-   * its heading to its Close button.
-   */
   async function focus(page: Page, name: string): Promise<void> {
     await page.cdp("Emulation.setFocusEmulationEnabled", { enabled: true });
     const presses: number = await page.evaluate(
@@ -283,9 +250,7 @@ describe("themes", { timeout: 120_000 }, () => {
     });
   }
 
-  test("the stage timeline renders nothing the keyboard can focus", async () => {
-    // The one component the focus ring cases skip: its page has no focus state because the
-    // timeline holds no control, which this pins, so a control it gains must earn a ring case.
+  test("the stage timeline, which the focus ring cases skip, renders nothing the keyboard can focus", async () => {
     const page = await open("stage-timeline");
     try {
       const focusable: string[] =

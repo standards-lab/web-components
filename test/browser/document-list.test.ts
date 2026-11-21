@@ -1,15 +1,4 @@
-// The document list from this repository's dist/, on test/fixtures/components.html: its
-// composition, one sl-pagination around one sl-entry per document, the pagination's properties
-// handed through and its attributes converted as the pagination's are, each entry's item mapped
-// from its document; the selected document marked, for assistive technology and to the eye by its
-// entry's frame, moving no entry; a document's status tone handed to its entry; the status line,
-// one polite region, in every state, empty, loading, error, and ready, on the summary's line when
-// there is one and a line of its own when not, the state reflected, a page kept busy while loading
-// and moving nowhere; the entry's open and the pagination's page-change and page-size-change
-// reaching a listener on the list once each, the very events their parts sent, bubbling and
-// composed; and no event as the properties change.
-// Adapted from spike-html-apps-components (10dde51): test/browser/document-list.test.ts, on
-// @standards-lab/web-tooling.
+// Adapted from spike-html-apps-components (10dde51): test/browser/document-list.test.ts, on @standards-lab/web-tooling.
 
 import assert from "node:assert/strict";
 import { after, before, describe, test } from "node:test";
@@ -21,7 +10,6 @@ import type { Server } from "@standards-lab/web-tooling/server.js";
 
 import { served } from "./support/served.ts";
 
-/** An event the list's listener heard, and whether it is the one its part sent. */
 interface Heard {
   type: string;
   detail: unknown;
@@ -31,8 +19,6 @@ interface Heard {
   same: boolean;
 }
 
-/** What window.read resolves to: the list's state, status line, pagination, entries, and events.
- * The list's own measures are null when it shows no list or no summary. */
 interface Read {
   state: string | null;
   disabled: boolean;
@@ -73,15 +59,7 @@ describe("document list", { timeout: 60_000 }, () => {
     server = await serve(served);
     browser = await launch();
     page = await browser.open(`${server.origin}/test/fixtures/components.html`);
-    // Keys go to the focused element as a user's would, though a headless page never has the
-    // window's focus.
     await page.cdp("Emulation.setFocusEmulationEnabled", { enabled: true });
-    // window.mount(fields) renders a list of the fields into main. A listener on the list's shadow
-    // root keeps each event its parts send, as they send it, before it leaves the root; a listener
-    // on the list records each one it hears, and whether it is one the root kept, the same event,
-    // so a re-dispatch would show as a second, unkept one; and a listener on the document counts
-    // what reaches it. window.read() resolves to what the list shows: the status line, the list,
-    // each entry and its item, the selected mark, the pagination's properties, and the events.
     await page.evaluate(`window.verdict.then(async () => {
       await import("/dist/document-list.js");
       const types = ["open", "page-change", "page-size-change"];
@@ -109,7 +87,6 @@ describe("document list", { timeout: 60_000 }, () => {
         await window.settled(list);
         return list;
       };
-      // The list and every entry it holds rendered.
       window.settled = async (list) => {
         await list.updateComplete;
         const pagination = list.shadowRoot.querySelector("sl-pagination");
@@ -128,12 +105,9 @@ describe("document list", { timeout: 60_000 }, () => {
           state: list.getAttribute("state"),
           disabled: list.hasAttribute("disabled"),
           paginations: paginations.length,
-          // The status line and the list are the pagination's slotted children, between its
-          // summary and its controls.
           slotted: [...pagination.children].map((child) => child.localName),
           status: [status.getAttribute("role"), status.textContent.replace(/\\s+/g, " ").trim(), status.className],
           statusHeight: status.getBoundingClientRect().height,
-          // The slot the status line is in: the summary's, "status", or the default, "".
           statusSlot: status.assignedSlot?.name ?? null,
           list: ul && [ul.getAttribute("aria-label"), ul.getAttribute("aria-busy")],
           paging: {
@@ -146,8 +120,6 @@ describe("document list", { timeout: 60_000 }, () => {
           },
           summary: pagination.shadowRoot.querySelector(".summary")?.textContent ?? null,
           summaryHeight: pagination.shadowRoot.querySelector(".summary")?.getBoundingClientRect().height ?? null,
-          // The space from the summary's line, or the pagination's top, to the first entry, and a
-          // line's height in the status line's type.
           above: ul && ul.getBoundingClientRect().top -
             (pagination.shadowRoot.querySelector(".summary")?.getBoundingClientRect().bottom ??
               pagination.getBoundingClientRect().top),
@@ -159,7 +131,6 @@ describe("document list", { timeout: 60_000 }, () => {
             return {
               item: entry.item,
               current: li.getAttribute("aria-current"),
-              // The entry's selected frame: its property, reflected, and the inset shadow it draws.
               mark: entry.selected && entry.hasAttribute("selected") && frame.includes("inset"),
               text: entry.shadowRoot.querySelector("button").textContent.replace(/\\s+/g, " ").trim(),
               box: [rect.left, rect.top, rect.width, rect.height],
@@ -180,14 +151,12 @@ describe("document list", { timeout: 60_000 }, () => {
   const mount = (fields: Record<string, unknown> = {}) =>
     page.evaluate(`window.mount(${JSON.stringify(fields)}).then(() => {})`);
   const read = (): Promise<Read> => page.evaluate("window.read()");
-  // Sets the fields on the mounted list and waits for it and its parts to render.
   const update = (fields: Record<string, unknown>) =>
     page.evaluate(`(async () => {
       const list = document.querySelector("sl-document-list");
       Object.assign(list, ${JSON.stringify(fields)});
       await window.settled(list);
     })()`);
-  // A key pressed and released on the focused element, with the text it types, if any.
   const press = async (key: string, keyCode: number, text?: string) => {
     const event = { key, code: key, windowsVirtualKeyCode: keyCode };
     await page.cdp("Input.dispatchKeyEvent", {
@@ -198,8 +167,6 @@ describe("document list", { timeout: 60_000 }, () => {
     await page.cdp("Input.dispatchKeyEvent", { type: "keyUp", ...event });
   };
 
-  // The emulator's documents, as its listing sends them, each with its run's status beside it:
-  // the first page of eight by three.
   const documents = [
     {
       id: "doc-1",
@@ -239,8 +206,6 @@ describe("document list", { timeout: 60_000 }, () => {
     assert.equal(statusSlot, "status", "the status line in the summary's slot");
     assert.deepEqual(list, ["Documents", null]);
     assert.equal(summary, "Showing 1–3 of 8");
-    // The entry's file: the document's fields, its acceptance time as the entry's time, and
-    // nothing else, the run's id left out.
     assert.deepEqual(
       entries.map(({ item }) => item),
       documents.map(({ id, name, content_type, size, created_at, status }) => ({
@@ -259,10 +224,6 @@ describe("document list", { timeout: 60_000 }, () => {
   });
 
   test("a document's status tone passes through to its entry, which shows its status in the tone's hue; none leaves it muted", async () => {
-    // The first document's run failed, the second's completed, the third's runs on with no tone
-    // given; then the page's documents are replaced, the failed one now complete, and its entry
-    // follows. Each entry's statusTone, and its status's text and hue, named against the hues
-    // resolved in its root.
     const toned = [
       { ...documents[0], status: "failed 3/5", status_tone: "failed" },
       { ...documents[1], status_tone: "complete" },
@@ -387,7 +348,6 @@ describe("document list", { timeout: 60_000 }, () => {
     const { status, statusSlot, summaryHeight, above, line } = await read();
     assert.deepEqual(status, ["status", "", "status ready"]);
     assert.equal(statusSlot, "status");
-    // Less than a line between the summary and the first entry: no blank line held there.
     assert.ok(
       above !== null && above < line,
       `the first entry ${above} below the summary, a line ${line}`,
@@ -413,8 +373,6 @@ describe("document list", { timeout: 60_000 }, () => {
     assert.deepEqual(shown.status, ["status", "Loading documents…", "status loading"]);
     assert.equal(shown.statusSlot, "status");
     assert.deepEqual(shown.list, ["Documents", "true"]);
-    // The status line's text comes and goes on the summary's line: the summary keeps its height,
-    // and the entries stay where they were.
     assert.equal(shown.summaryHeight, ready.summaryHeight);
     assert.deepEqual(
       shown.entries.map(({ box }) => box),

@@ -1,11 +1,4 @@
-// The JSON formatter from this repository's dist/, through its export, formatJson(text), on
-// test/fixtures/components.html: keys in their order, integer-like keys and duplicates included;
-// number literals and strings with their escapes as written; minified and oddly spaced text
-// re-indented; empty, nested, scalar, and array documents; whitespace between tokens the only
-// difference from the text; a document of about 1 MB formatted without a stall; and containers
-// past MAX_DEPTH kept as written, so 20,000 levels format in output linear in the text.
-// Adapted from spike-html-apps-components (10dde51): test/browser/json.test.ts, on
-// @standards-lab/web-tooling.
+// Adapted from spike-html-apps-components (10dde51): test/browser/json.test.ts, on @standards-lab/web-tooling.
 
 import assert from "node:assert/strict";
 import { after, before, describe, test } from "node:test";
@@ -17,7 +10,6 @@ import type { Server } from "@standards-lab/web-tooling/server.js";
 
 import { served } from "./support/served.ts";
 
-/** The text with the whitespace between its tokens removed, its strings' whitespace kept. */
 const tokensOf = (text: string): string =>
   text.replace(/("(?:[^"\\]|\\.)*")|[ \t\n\r]+/g, (_, string?: string) => string ?? "");
 
@@ -39,7 +31,6 @@ describe("json", { timeout: 60_000 }, () => {
     await server?.stop();
   });
 
-  /** The text, formatted. */
   const formatted = (text: string): Promise<string> =>
     page.evaluate(`window.formatJson(${JSON.stringify(text)})`);
 
@@ -104,7 +95,6 @@ describe("json", { timeout: 60_000 }, () => {
   });
 
   test("formats about 1 MB of JSON without a stall", async (t) => {
-    // 6,000 records of nested objects, arrays, strings with escapes, and numbers, minified.
     const timing: { bytes: number; lines: number; ms: number; same: boolean } =
       await page.evaluate(`(() => {
       const record = (i) => ({
@@ -130,7 +120,6 @@ describe("json", { timeout: 60_000 }, () => {
     assert.ok(timing.ms < 250, `formatting took ${timing.ms} ms`);
   });
 
-  /** Two spaces a level, as formatJson indents. */
   const indent = (depth: number): string => "  ".repeat(depth);
 
   test("formats every level of text nested 64 deep", async () => {
@@ -144,8 +133,6 @@ describe("json", { timeout: 60_000 }, () => {
   });
 
   test("keeps a container that would open at depth 65 as written, on its line", async () => {
-    // 63 arrays, an object at depth 64, and in it an array at 65, spaced oddly, a string with
-    // brackets in it, and a member after it, where the formatting resumes.
     const inner = '[ 1 ,{"b" : "] }"} ,\t[ ] ]';
     const text = "[".repeat(63) + `{"a":${inner} , "c":3}` + "]".repeat(63);
     const opening = Array.from({ length: 63 }, (_, depth) => `${indent(depth)}[`);
@@ -158,10 +145,6 @@ describe("json", { timeout: 60_000 }, () => {
   });
 
   test("keeps a container at depth 65 whole when its strings hold quotes and brackets", async () => {
-    // At depth 65, an object whose key holds an opening brace, an escaped quote before closing
-    // brackets, and an escaped backslash before a string's real end; then, back at 64, a string
-    // holding the brackets that would close it. A count fooled by any of them ends the kept
-    // container early or late, and the text after it shows indented differently or not at all.
     const kept = String.raw`{"{k\"": [ "\"]}", "\\", {"[" :"}]"} ] }`;
     const after = String.raw`"]]}\"["`;
     const text = "[".repeat(64) + `${kept},${after}` + "]".repeat(64);
@@ -174,8 +157,6 @@ describe("json", { timeout: 60_000 }, () => {
   });
 
   test("formats text nested 20,000 deep in output linear in its length, without a stall", async (t) => {
-    // The 64 levels formatted add a line break and at most 128 spaces of indent at each of their
-    // opening and closing brackets; the 19,936 below them are kept as written.
     const result: { text: number; output: number; ms: number; same: boolean; tail: boolean } =
       await page.evaluate(`(() => {
       const text = "[".repeat(20000) + ' 1 ' + "]".repeat(20000);

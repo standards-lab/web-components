@@ -4,8 +4,8 @@
 // over a body holding the slot. The mode is the viewport's, by a media query on `dock`; a switch
 // swaps only the shadow root's wrapper and its slot, so the slotted content, the host's own
 // children, is never moved, disconnected, or re-created.
-// Adapted from spike-html-apps-components (10dde51): src/drawer.ts, on
-// @standards-lab/web-foundation.
+// Adapted from spike-html-apps-components (10dde51): src/drawer.ts, on @standards-lab/web-foundation.
+// See docs/internals.md
 
 import { html, LitElement, type PropertyDeclarations, type PropertyValues } from "lit";
 
@@ -54,7 +54,8 @@ export type CloseDetail = Record<string, never>;
  * unless `open` is set again before. `dock` is read in a media query, `(width < <dock>)`, where
  * rem and em are the initial font size's, so a viewport of exactly `dock` docks; a length the
  * query can't read never matches, so the drawer stays docked.
- * Each mode renders only its own header, so the shadow tree holds one heading at a time.
+ * Each mode renders only its own header, so the shadow tree holds one heading at a time. The mode
+ * is the custom state `docked` or `drawer`, which a page may style.
  */
 export class Drawer extends LitElement {
   static styles = [reset, elements, styles];
@@ -72,14 +73,9 @@ export class Drawer extends LitElement {
   /** The visible heading of the docked aside and of the drawer, which names each. */
   declare label: string;
 
-  // The mode is a custom state, drawer or docked, which a host's page may style.
   readonly #internals = this.attachInternals();
   #query: MediaQueryList | null = null;
-  // The mode, which picks the wrapper rendered: null until the element is connected, and again
-  // once it is removed, so a reconnected element reapplies its mode.
   #narrow: boolean | null = null;
-  // Whether the dialog is open modally as far as the element has handled it, so a close event
-  // the element caused itself, or one queued before a later open, is never reported again.
   #modal = false;
 
   constructor() {
@@ -98,8 +94,6 @@ export class Drawer extends LitElement {
     this.#watch();
   }
 
-  // Removed, the element closes silently: a removed modal dialog leaves the top layer but keeps
-  // its open attribute, which a reconnect would show non-modally.
   override disconnectedCallback(): void {
     super.disconnectedCallback();
     this.#query?.removeEventListener("change", this.#change);
@@ -112,9 +106,6 @@ export class Drawer extends LitElement {
 
   /** Opens the modal drawer; below `dock` only. */
   show(): void {
-    // The query's change event lags a resize by a frame; its matches is current, so the mode is
-    // read from it first, and a show() just after a resize opens the drawer the viewport calls for,
-    // the update run at once so the dialog is rendered and shown before show() returns.
     if (this.#query) this.#change();
     if (!this.#narrow || this.open) return;
     this.open = true;
@@ -134,7 +125,6 @@ export class Drawer extends LitElement {
     else this.show();
   }
 
-  /** Reads the mode from a new query on `dock`, listening for its changes. */
   #watch(): void {
     this.#query?.removeEventListener("change", this.#change);
     this.#query = matchMedia(`(width < ${this.dock})`);
@@ -142,13 +132,6 @@ export class Drawer extends LitElement {
     this.#change();
   }
 
-  /**
-   * Sets the mode from the query. A switch renders the other wrapper around the same slotted
-   * children: an open dialog leaves the top layer as it is removed, with no close event and no
-   * focus moved, and the new dialog is created closed, so nothing slides. The first mode, on
-   * connecting, is no switch: `open` stands, from the markup or set before, and opens the drawer
-   * by the ordinary update, or is undone there if the drawer is docked.
-   */
   #change = (): void => {
     const narrow = this.#query?.matches ?? false;
     if (narrow === this.#narrow) return;
@@ -173,7 +156,6 @@ export class Drawer extends LitElement {
     this.#sync();
   }
 
-  /** Brings the dialog to `open`, reporting a modal open or close. */
   #sync(): void {
     const dialog = this.#dialog;
     if (!dialog) return;
@@ -188,9 +170,6 @@ export class Drawer extends LitElement {
     }
   }
 
-  // The dialog closed itself, by Escape: the element follows. A close it caused, one queued
-  // before a later open, or one from a dialog a switch has since replaced finds the modal flag
-  // clear, the dialog open, or another dialog rendered.
   #closed(e: Event): void {
     const dialog = this.#dialog;
     if (!this.#modal || !dialog || e.currentTarget !== dialog || dialog.open) return;
@@ -200,19 +179,12 @@ export class Drawer extends LitElement {
   }
 
   render() {
-    // The docked aside's header is the dialog's without its Close button: one heading, the
-    // label, naming the wrapper in either mode.
     if (!this.#narrow) {
       return html`<aside aria-labelledby="title">
         <header><h2 id="title">${this.label}</h2></header>
         <div class="body"><slot></slot></div>
       </aside>`;
     }
-    // The label is in the Close button's name, visually hidden, so a translated text in the close
-    // slot still names what the button closes. The heading takes focus as the dialog opens, by its
-    // tabindex="-1" and autofocus, rather than the first control, the Close button: autofocus on
-    // the dialog itself does nothing in Chromium 155 and 157. Out of the Tab order, it is never
-    // reached again, and the first Tab from it reaches the Close button.
     return html`<dialog aria-labelledby="title" @close=${this.#closed}>
       <header>
         <h2 id="title" tabindex="-1" autofocus>${this.label}</h2>

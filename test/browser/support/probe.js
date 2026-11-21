@@ -8,8 +8,6 @@ import { continued, directories, files, pageSizes } from "../../../demo/document
 /** @import { Page } from "../../../demo/documents.js" */
 
 /**
- * The pagination's contract, as the probe reaches it.
- *
  * @typedef {HTMLElement & {
  *   page: number | null;
  *   size: number | null;
@@ -25,9 +23,6 @@ import { continued, directories, files, pageSizes } from "../../../demo/document
 /** @typedef {HTMLButtonElement | HTMLInputElement | HTMLSelectElement} FormControl */
 
 /**
- * The three compositions every case reads: the directories, page 2 of 3; the files, with a pending
- * one and a slotted label; and the files continued by cursor, with no page and no total.
- *
  * @typedef {{
  *   listing: PaginationElement;
  *   filed: PaginationElement;
@@ -43,7 +38,6 @@ export const version = {
     Promise.all([import("../../../dist/pagination.js"), import("../../../dist/entry.js")]),
 };
 
-/** The events the probe hears, as they bubble to the document. */
 const eventTypes = ["page-change", "page-size-change", "open"];
 
 /** Lets pending updates land: Lit renders in a microtask queued when a property changes. */
@@ -53,10 +47,6 @@ export const settle = () => Promise.resolve();
 const renderRoot = (element) => element.shadowRoot ?? element;
 
 /**
- * The text a reader sees: text nodes in rendered order, through shadow roots and slots, with
- * whitespace collapsed. Each element's text stands apart from its neighbors' but a wbr's, a break
- * opportunity inside a word, which adds no space.
- *
  * @param {Node} node
  * @returns {string}
  */
@@ -74,8 +64,6 @@ function renderedText(node) {
 }
 
 /**
- * The element, or an error naming what didn't render.
- *
  * @template T
  * @param {T | null} element
  * @param {string} what
@@ -87,8 +75,6 @@ function found(element, what) {
 }
 
 /**
- * The pagination's control with the aria-label.
- *
  * @template {HTMLElement} T
  * @param {Element} pagination
  * @param {string} label
@@ -99,7 +85,6 @@ function labelled(pagination, label) {
   return found(/** @type {T | null} */ (renderRoot(pagination).querySelector(selector)), selector);
 }
 
-/** The pagination's own controls and entries. */
 const parts = {
   /** @param {Element} pagination @returns {FormControl[]} */
   controls: (pagination) =>
@@ -117,7 +102,6 @@ const parts = {
   /** @param {Element} pagination */
   sizeSelect: (pagination) =>
     found(renderRoot(pagination).querySelector("select"), "the page size select"),
-  /** The label around the page size select, as a reader sees it, without the options. */
   sizeLabel: (/** @type {Element} */ pagination) => {
     const select = parts.sizeSelect(pagination);
     const label = found(select.closest("label"), "the size label");
@@ -130,8 +114,6 @@ const parts = {
 };
 
 /**
- * Builds a composition from a page of the fixture, setting every property before the definition.
- *
  * @param {Page<EntryItem>} page
  * @param {string} [label]
  */
@@ -156,14 +138,11 @@ function compose(page, label) {
   return pagination;
 }
 
-/** Collects the cases, each compared with what it must be. */
 class Report {
   /** @type {Case[]} */
   cases = [];
 
   /**
-   * A case whose actual value must equal `expected`.
-   *
    * @param {string} name
    * @param {string} actual
    * @param {string} expected
@@ -173,8 +152,6 @@ class Report {
   }
 
   /**
-   * A case on rendered text, which must hold every one of `has` and none of `lacks`.
-   *
    * @param {string} name
    * @param {Element} element
    * @param {string[]} has
@@ -187,8 +164,6 @@ class Report {
   }
 
   /**
-   * A case on the events an action sends, as they reach the document, or "none".
-   *
    * @param {string} name
    * @param {string} expected
    * @param {() => void} act
@@ -208,8 +183,6 @@ class Report {
 }
 
 /**
- * Sets a control's value as a reader would, and sends the change it makes.
- *
  * @param {HTMLInputElement | HTMLSelectElement} control
  * @param {string} value
  */
@@ -219,16 +192,12 @@ function change(control, value) {
 }
 
 /**
- * An event as the report writes it.
- *
  * @param {string} type
  * @param {unknown} detail
  */
 const heard = (type, detail) => `${type} ${JSON.stringify(detail)}`;
 
 /**
- * What each composition renders: the entries, the summary, and the label.
- *
  * @param {Report} report
  * @param {Compositions} compositions
  */
@@ -278,11 +247,7 @@ function renderCases(report, { listing, filed, cursor }) {
   report.equal("label slotted", parts.sizeLabel(filed), "Files per page");
 }
 
-/**
- * A control's painted look, from its computed style.
- *
- * @param {Element} element
- */
+/** @param {Element} element */
 function look(element) {
   const style = getComputedStyle(element);
   const border = `${style.borderTopWidth} ${style.borderTopStyle} ${style.borderTopColor}`;
@@ -296,12 +261,7 @@ function look(element) {
   ].join(", ");
 }
 
-/**
- * The look the page's baseline gives a bare control of the same tag and type, at the font size
- * the control's parent computes, which its reset's `font: inherit` reads.
- *
- * @param {FormControl} control
- */
+/** @param {FormControl} control */
 function baselineLook(control) {
   const parent = control.parentElement ?? /** @type {ShadowRoot} */ (control.getRootNode()).host;
   const holder = document.createElement("div");
@@ -316,8 +276,6 @@ function baselineLook(control) {
 }
 
 /**
- * The controls are bare, painted by the adopted baseline alone.
- *
  * @param {Report} report
  * @param {Compositions} compositions
  */
@@ -335,8 +293,6 @@ function lookCase(report, { listing }) {
 }
 
 /**
- * The entry with the longest content type stays inside its box.
- *
  * @param {Report} report
  * @param {Compositions} compositions
  */
@@ -356,15 +312,14 @@ function overflowCase(report, { cursor }) {
   };
   /** @param {Element} element */
   const fits = (element) => element.scrollWidth <= element.clientWidth;
+  const visibleParts = ":not(.kind)";
   const overflowing = [
     ...(within(entry, cursor) ? [] : ["the entry past the pagination"]),
     ...(within(button, entry) ? [] : ["the button past the entry"]),
     ...(fits(button)
       ? []
       : [`the button's content, ${button.scrollWidth} > ${button.clientWidth}`]),
-    // Every part the eye sees: the kind, visually hidden, is a pixel clipped to nothing, so its
-    // text overflows its box by design.
-    ...Array.from(button.querySelectorAll(":not(.kind)"))
+    ...Array.from(button.querySelectorAll(visibleParts))
       .filter((part) => !within(part, button) || !fits(part))
       .map((part) => `its ${part.localName} "${renderedText(part)}"`),
   ];
@@ -377,8 +332,6 @@ function overflowCase(report, { cursor }) {
 }
 
 /**
- * The events each control sends; the element never changes its own page.
- *
  * @param {Report} report
  * @param {Compositions} compositions
  */
@@ -411,8 +364,6 @@ async function eventCases(report, { listing, filed, cursor }) {
 }
 
 /**
- * Lit's attribute conversion, and the properties set before the definition.
- *
  * @param {Report} report
  * @param {Compositions} compositions
  */
@@ -432,7 +383,6 @@ function contractCases(report, { listing }) {
     "[5,10] -> null",
   );
 
-  // Read from what renders: a value the element never took in still reads back from its field.
   const sizes = Array.from(parts.sizeSelect(listing).options, (option) => option.value);
   const name = /^(\S+)/.exec(renderedText(parts.entries(listing)[0]))?.[1];
   report.equal(
@@ -443,8 +393,6 @@ function contractCases(report, { listing }) {
 }
 
 /**
- * `disabled` reflected both ways, and the cursor page's controls.
- *
  * @param {Report} report
  * @param {Compositions} compositions
  */
@@ -489,11 +437,7 @@ async function stateCases(report, { listing, cursor }) {
   );
 }
 
-/**
- * Runs every case, rendered into the host.
- *
- * @param {HTMLElement} host
- */
+/** @param {HTMLElement} host */
 async function probe(host) {
   if (customElements.get(version.pagination) || customElements.get(version.entry)) {
     throw new Error("the elements are defined before the compositions are built");
@@ -504,8 +448,8 @@ async function probe(host) {
     filed: compose(files, "Files per page"),
     cursor: compose(continued),
   };
-  // Narrowed to a preview column's width, it shows whether the longest content type wraps.
-  compositions.cursor.style.maxInlineSize = "22rem";
+  const previewColumn = "22rem";
+  compositions.cursor.style.maxInlineSize = previewColumn;
   host.append(compositions.listing, compositions.filed, compositions.cursor);
   await version.load();
   await settle();

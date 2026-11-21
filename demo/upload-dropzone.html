@@ -4,22 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>upload dropzone specimen</title>
-    <!-- The upload dropzone's specimen page, from dist/: idle, files dragged over it, uploads in
-         progress at different points, done, failed with its message, cancelled, every state
-         together, a long name, twelve files, disabled, and disabled with uploads listed. The
-         drag-over state is reached as a user's drag reaches it: the page dispatches a dragenter
-         carrying a file on the zone once it renders, and no dragleave follows. Every state is
-         labelled, then shown again in a section 20rem wide; the fit section holds one short
-         upload's dropzone in three parents that size it to their content, an inline-block, a
-         content-sized flex item, and a grid's auto track; and the focus section holds one
-         instance, an upload in progress above a finished one, whose Cancel button the screenshot
-         script reaches with two Tab presses, past the picker button, its focus outline clear of
-         the bar and the bytes below it. The zone draws the component's one frame, so main is
-         unframed: no specimen frame around it. The page links the installed foundation's full entry, page-full.css, and imports
-         register-full.js, so a profile applies by attribute on the root; its import map is
-         components.html's, so it runs served only: mise run demo, or mise run screenshots.
-         Adapted from spike-html-apps-components (10dde51): demo/upload-dropzone.html, on
-         @standards-lab/web-foundation. -->
+    <!-- Adapted from spike-html-apps-components (10dde51): demo/upload-dropzone.html, on @standards-lab/web-foundation. -->
     <link rel="stylesheet" href="/deps/@standards-lab/web-foundation/dist/page-full.css" />
     <link rel="stylesheet" href="demo.css" />
     <script type="importmap">
@@ -93,8 +78,6 @@
       });
 
       const dropzone = (fields) => () => make("sl-upload-dropzone", fields);
-      // A drag carrying a file, entered on the zone once it renders, and never left: the zone
-      // shows the drag-over state, as it does under a user's drag.
       const dragged = (fields) => () => {
         const element = dropzone(fields)();
         element.updateComplete.then(() => {
@@ -128,8 +111,6 @@
           build: dropzone({ uploads: [uploading[2], ...done] }),
         },
       );
-      // One short upload's dropzone in each parent that sizes it to its content, by the parent's
-      // class in demo.css.
       const fit = (label, parent) => ({
         label,
         build: () => make("div", { className: parent }, [dropzone({ uploads: done })()]),

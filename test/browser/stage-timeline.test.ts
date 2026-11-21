@@ -1,11 +1,4 @@
-// The stage timeline from this repository's dist/, on test/fixtures/components.html: each stage's
-// name, its state's label and marker, and its completion time, formatted by the foundation in the
-// page's locale and time zone; a failed stage's failure time and reason, part of its step for
-// assistive technology, a long reason wrapping in the step's text column; the stages in their
-// positions' order; the active stage the list's current step; a stage that advances changing in
-// its own nodes, nothing moving; nothing focusable; and no event.
-// Adapted from spike-html-apps-components (10dde51): test/browser/stage-timeline.test.ts, on
-// @standards-lab/web-tooling.
+// Adapted from spike-html-apps-components (10dde51): test/browser/stage-timeline.test.ts, on @standards-lab/web-tooling.
 
 import assert from "node:assert/strict";
 import { after, before, describe, test } from "node:test";
@@ -17,7 +10,6 @@ import type { Server } from "@standards-lab/web-tooling/server.js";
 
 import { served } from "./support/served.ts";
 
-/** A stage as the cases give the timeline one, in the emulator's shape. */
 interface Stage {
   name: string;
   position: number;
@@ -27,8 +19,6 @@ interface Stage {
   reason?: string | null;
 }
 
-/** What window.read resolves to: the list's element and label, each step as it shows, and the
- * events the host sent. */
 interface Shown {
   list: [string, string | null];
   stages: {
@@ -52,11 +42,7 @@ describe("stage timeline", { timeout: 60_000 }, () => {
     server = await serve(served);
     browser = await launch();
     page = await browser.open(`${server.origin}/test/fixtures/components.html`);
-    // Keys go to the focused element as a user's would, though a headless page never has the
-    // window's focus.
     await page.cdp("Emulation.setFocusEmulationEnabled", { enabled: true });
-    // window.mount(stages) renders a timeline of the stages into main, recording every event its
-    // host dispatches; window.read() resolves to what each step shows, in the list's order.
     await page.evaluate(`window.verdict.then(async () => {
       await import("/dist/stage-timeline.js");
       window.mount = async (stages) => {
@@ -106,7 +92,6 @@ describe("stage timeline", { timeout: 60_000 }, () => {
   const read = (): Promise<Shown> => page.evaluate("window.read()");
 
   const names = ["upload", "metadata", "extraction", "chunks", "embeddings"];
-  // The emulator's five stages in the states given, by position; a complete one with its time.
   const run = (...states: Stage["state"][]): Stage[] =>
     names.map((name, index) => ({
       name,
@@ -119,59 +104,62 @@ describe("stage timeline", { timeout: 60_000 }, () => {
     await mount(run("complete", "complete", "active", "pending", "pending"));
     const { list, stages } = await read();
     assert.deepEqual(list, ["ol", "Stages"]);
-    // The browser runs in en-US at UTC, as the tooling's launch() starts it.
-    assert.deepEqual(stages, [
-      {
-        name: "upload",
-        label: "Complete",
-        time: "Oct 29, 2026, 3:42:00 PM",
-        datetime: "2026-10-29T15:42:00.000Z",
-        reason: null,
-        marker: "glyph",
-        markerHidden: "true",
-        current: null,
-      },
-      {
-        name: "metadata",
-        label: "Complete",
-        time: "Oct 29, 2026, 3:42:01 PM",
-        datetime: "2026-10-29T15:42:01.000Z",
-        reason: null,
-        marker: "glyph",
-        markerHidden: "true",
-        current: null,
-      },
-      {
-        name: "extraction",
-        label: "In progress",
-        time: null,
-        datetime: null,
-        reason: null,
-        marker: "3",
-        markerHidden: "true",
-        current: "step",
-      },
-      {
-        name: "chunks",
-        label: "Pending",
-        time: null,
-        datetime: null,
-        reason: null,
-        marker: "4",
-        markerHidden: "true",
-        current: null,
-      },
-      {
-        name: "embeddings",
-        label: "Pending",
-        time: null,
-        datetime: null,
-        reason: null,
-        marker: "5",
-        markerHidden: "true",
-        current: null,
-      },
-    ]);
+    assert.deepEqual(
+      stages,
+      [
+        {
+          name: "upload",
+          label: "Complete",
+          time: "Oct 29, 2026, 3:42:00 PM",
+          datetime: "2026-10-29T15:42:00.000Z",
+          reason: null,
+          marker: "glyph",
+          markerHidden: "true",
+          current: null,
+        },
+        {
+          name: "metadata",
+          label: "Complete",
+          time: "Oct 29, 2026, 3:42:01 PM",
+          datetime: "2026-10-29T15:42:01.000Z",
+          reason: null,
+          marker: "glyph",
+          markerHidden: "true",
+          current: null,
+        },
+        {
+          name: "extraction",
+          label: "In progress",
+          time: null,
+          datetime: null,
+          reason: null,
+          marker: "3",
+          markerHidden: "true",
+          current: "step",
+        },
+        {
+          name: "chunks",
+          label: "Pending",
+          time: null,
+          datetime: null,
+          reason: null,
+          marker: "4",
+          markerHidden: "true",
+          current: null,
+        },
+        {
+          name: "embeddings",
+          label: "Pending",
+          time: null,
+          datetime: null,
+          reason: null,
+          marker: "5",
+          markerHidden: "true",
+          current: null,
+        },
+      ],
+      "times in en-US at UTC, as launch() starts the browser",
+    );
   });
 
   test("a failed stage is labelled Failed, its marker a glyph, and no stage is current", async () => {
@@ -189,9 +177,7 @@ describe("stage timeline", { timeout: 60_000 }, () => {
     );
   });
 
-  // The emulator's reason for a run its fail rule fails, as a run's JSON carries it.
   const reason = `emulated failure: the document's name matches the fail rule "fail-at-*:extraction"`;
-  // The run failed at extraction, at its failure time and with the reason given.
   const failedRun = (why: string): Stage[] =>
     run("complete", "complete", "failed", "pending", "pending").map((stage) =>
       stage.state === "failed"
@@ -218,8 +204,6 @@ describe("stage timeline", { timeout: 60_000 }, () => {
         ["embeddings", "Pending", null, null, null],
       ],
     );
-    // The reason sits under the detail line, at the name's start, in the muted text: the label
-    // carries the failure's hue.
     const placed: {
       below: boolean;
       start: boolean;
@@ -252,7 +236,6 @@ describe("stage timeline", { timeout: 60_000 }, () => {
 
   test("a failed stage's reason and time are part of its list item for assistive technology", async () => {
     await mount(failedRun(reason));
-    /** A node of the page's accessibility tree, as Accessibility.getFullAXTree gives it. */
     interface AXNode {
       nodeId: string;
       ignored?: boolean;
@@ -262,8 +245,6 @@ describe("stage timeline", { timeout: 60_000 }, () => {
     }
     const { nodes }: { nodes: AXNode[] } = await page.cdp("Accessibility.getFullAXTree", {});
     const byId = new Map(nodes.map((node) => [node.nodeId, node]));
-    // A node's text as assistive technology reads it: its descendants' static text, in order,
-    // ignored text, the aria-hidden marker's and the slots' holds', left out.
     const text = (node: AXNode): string[] =>
       node.role?.value === "StaticText"
         ? node.ignored
@@ -295,8 +276,6 @@ describe("stage timeline", { timeout: 60_000 }, () => {
         completedAt: "2026-10-29T15:42:07Z",
         failedAt: "2026-10-29T15:42:09Z",
       },
-      // A time or a reason the stage's state doesn't take shows none: a complete stage's failedAt
-      // and reason; and a failed stage's empty reason shows none either.
       {
         name: "extraction",
         position: 3,
@@ -326,10 +305,6 @@ describe("stage timeline", { timeout: 60_000 }, () => {
   });
 
   test("at 20rem, a long reason wraps inside the step's text column, the markers and text aligned", async () => {
-    // A reason of many words and one unbroken run longer than the column: it wraps onto lines of
-    // its own at the name's start, filling the column to the step's end, inside the timeline's box,
-    // the list never scrolling sideways; every marker keeps its column, and every name its start;
-    // the step below starts after the reason's last line and its gap.
     const long = `${reason}; the extractor gave up after reading /var/lib/pipeline/uploads/0193a5d2-7c10-7e4f-9a1b-2c3d4e5f6071/fail-at-extraction.txt and three retries`;
     await mount(failedRun(long));
     const measured: {
@@ -397,9 +372,6 @@ describe("stage timeline", { timeout: 60_000 }, () => {
   });
 
   test("a stage that advances changes in its own nodes, and no step moves or resizes", async () => {
-    // The run advanced one step at a time, then failed, at 20rem and at 40rem: after each step
-    // the list holds the same element per stage, and every step's box, and its name's, label's,
-    // and time slot's, is where and as large as it was.
     const steps = [
       run("pending", "pending", "pending", "pending", "pending"),
       run("active", "pending", "pending", "pending", "pending"),
@@ -443,10 +415,6 @@ describe("stage timeline", { timeout: 60_000 }, () => {
   });
 
   test("in a parent that sizes it to its content, the timeline keeps its width as stages advance, a failure's reason too", async () => {
-    // In each parent that sizes it to its content, an inline-block, a content-sized flex item, and
-    // a grid's auto track: the reason wraps to the width the names and detail lines give the
-    // timeline, never widening it, so a failure moves nothing sideways; and it fills the step's
-    // text column, from the name's start to the step's end, its containment collapsing it in none.
     await mount(run("pending", "pending", "pending", "pending", "pending"));
     const measured: { parent: string; widths: number[]; reason: number; column: number }[] =
       await page.evaluate(`(async () => {

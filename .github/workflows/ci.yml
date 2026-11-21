@@ -1,6 +1,6 @@
+# The check on each pull request to main and each push to it, every pin installed first.
+# See docs/release.md
 # Adapted from web-foundation (ceaab61): .github/workflows/ci.yml, its mise-action at its latest.
-# mise run install installs every pin mise.toml names, the chrome-headless-shell the browser tier
-# runs in included, and node_modules, the foundation and the tooling at their release tags.
 
 name: CI
 

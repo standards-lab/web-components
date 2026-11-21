@@ -1,6 +1,6 @@
 // Entry, Lit with a shadow root: one directory or file of a document hierarchy, as a button.
-// Adapted from spike-html-apps-components (10dde51): src/entry.ts, on
-// @standards-lab/web-foundation.
+// Adapted from spike-html-apps-components (10dde51): src/entry.ts, on @standards-lab/web-foundation.
+// See docs/internals.md
 
 import { html, LitElement, nothing, type PropertyDeclarations } from "lit";
 
@@ -47,30 +47,15 @@ export interface OpenDetail {
   kind: "directory" | "file";
 }
 
-/** Whether the item is a directory or a file: only a file has a content type. */
 function kindOf(item: EntryItem): OpenDetail["kind"] {
   return "content_type" in item ? "file" : "directory";
 }
 
-/**
- * A content type with a break opportunity, a wbr, after each slash, dot, hyphen, and plus, so a
- * type too long for its line, "application/vnd.openxmlformats-officedocument…", breaks between its
- * parts, never inside one, unless a part alone is wider than the line. Each wbr is aria-hidden:
- * Chrome's accessibility tree reads a wbr as a space, so the button's accessible name would say
- * "text/ plain"; hidden, it adds nothing to the name, which carries the type whole, and the break
- * it offers the eye stays.
- */
 function renderType(contentType: string) {
   const parts = contentType.split(/(?<=[/.+-])/);
   return parts.map((part, i) => (i === 0 ? part : html`<wbr aria-hidden="true" />${part}`));
 }
 
-/**
- * The entry's time, formatDateTime's text, as its date and its clock with the locale's text
- * between, each in a span: entry.css keeps the clock whole and breaks the date only at its spaces,
- * so a narrow line breaks between them and never inside "4:41 PM". A locale that doesn't write the
- * date first and the clock last gets the whole text, unsplit.
- */
 function renderTime(updatedAt: string) {
   const date = new Date(updatedAt);
   const whole = formatDateTime(date);

@@ -4,8 +4,8 @@
 // loading, error, and empty states. Its document is a structural shape of its own, which a document
 // API's document fits once its run's status is beside it; it knows no SDK and no domain, and binds
 // no key.
-// Adapted from spike-html-apps-components (10dde51): src/document-list.ts, on
-// @standards-lab/web-foundation.
+// Adapted from spike-html-apps-components (10dde51): src/document-list.ts, on @standards-lab/web-foundation.
+// See docs/internals.md
 
 import { html, LitElement, nothing, type PropertyDeclarations } from "lit";
 import { repeat } from "lit/directives/repeat.js";
@@ -44,11 +44,6 @@ export interface DocumentItem {
   status_tone?: StatusTone | null;
 }
 
-/**
- * The entry's file for a document: the same fields, its acceptance time as the time the entry
- * shows. Each document maps once, while the app holds it, so an entry is handed the same item
- * across renders and updates only when its document changes.
- */
 const entryItems = new WeakMap<DocumentItem, FileItem>();
 function entryItem(item: DocumentItem): FileItem {
   let file = entryItems.get(item);
@@ -80,8 +75,6 @@ function entryItem(item: DocumentItem): FileItem {
 export class DocumentList extends LitElement {
   static styles = [reset, elements, styles];
 
-  // The paging properties are the pagination's declarations, so each attribute converts as the
-  // pagination's does.
   static properties = {
     items: { attribute: false },
     selected: { type: String },
@@ -117,7 +110,6 @@ export class DocumentList extends LitElement {
     this.selected = null;
     this.state = "ready";
     this.message = "";
-    // The pagination's defaults.
     this.page = 1;
     this.size = 12;
     this.total = null;
@@ -126,7 +118,6 @@ export class DocumentList extends LitElement {
     this.disabled = false;
   }
 
-  // The status line's content, by the state and whether any documents are listed.
   #status(documents: readonly DocumentItem[]) {
     switch (this.state) {
       case "loading":
@@ -138,10 +129,6 @@ export class DocumentList extends LitElement {
     return documents.length ? nothing : html`<span class="label empty">No documents.</span>`;
   }
 
-  // An entry per document, in a list item, its status's tone handed to the entry beside its file.
-  // The selected document's entry draws its own frame in the accent color, by its selected
-  // property, and its item holds aria-current, which says it to assistive technology: the entry's
-  // button is inside its own shadow root, out of the list's reach.
   #entry(item: DocumentItem) {
     const selected = item.id === this.selected;
     return html`<li aria-current=${selected ? "true" : nothing}>
@@ -155,20 +142,7 @@ export class DocumentList extends LitElement {
 
   render() {
     const documents = this.state === "error" ? [] : (this.items ?? []);
-    // The status joins the summary's line while the pagination shows one, but for an error, which
-    // reads as a line of its own. The same element moves between the slots, so the live region is
-    // never replaced.
     const joins = this.state !== "error" && summaryRange(this.page, this.size, this.total) !== null;
-    // The pagination takes its properties as the list was given them, and holds the status line,
-    // in its summary's status slot or its default slot, and the entries, in its default slot. Each
-    // entry is keyed by its document's id, so a focused entry stays with its document as the page
-    // changes around it.
-    //
-    // The composed parts send their own events: an entry's `open`, and the pagination's
-    // `page-change` and `page-size-change`, each dispatched bubbling and composed by the
-    // foundation's emit, so each crosses the part's shadow root and this one and reaches the list's
-    // listener as it was sent, its detail the part's own. The list re-dispatches none of them,
-    // which would send each twice.
     return html`<sl-pagination
       .page=${this.page}
       .size=${this.size}

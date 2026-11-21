@@ -1,24 +1,15 @@
 /* From spike-html-apps-components (10dde51): src/composer.css. */
 
 /*
- * The composer's layout in a shadow root: composer.ts adopts this sheet into its root after the
- * foundation's reset and elements sheets (baseline/reset.css and elements.css), which give the
- * native textarea and button their look and the focus outline. It holds the row's layout, the
- * field's growth, the control's one footprint, and the label's hiding. It reads only the
- * foundation's baseline tokens, which a shadow root takes by inheritance from the page's entry.
- * Unlayered, it sits above the adopted layers in the root.
- *
- * The field and the control are siblings in a row, each its own native frame, never one inside
- * another. The field takes the row's free space and grows with its text by field-sizing, from one
- * line, as tall as the control, to eight, then scrolls with the browser's own scrollbar. The
- * control sits at the row's block end, beside the field's last line. In a shrink-to-fit parent the
- * composer is as wide as its text, from 12ch, up to the parent's width.
+ * The composer's shadow-root sheet: the row of the growing field and its send or stop control,
+ * and the visually hidden label.
+ * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
+ * See docs/layout.md
  */
 
 :host {
   display: block;
 }
-/* The label names the field for assistive technology and takes no space. */
 .label {
   position: absolute;
   inline-size: 1px;
@@ -32,9 +23,6 @@
   align-items: end;
   gap: var(--space-2xs);
 }
-/* field-sizing is Baseline newly available, as the foundation's .field-grow notes; without it the
-   field keeps its one row and the native resize. The bound is eight lines inside the field's
-   padding and border; past it the field scrolls, its padding scrolling with the text. */
 textarea {
   flex: 1 1 0;
   min-inline-size: 12ch;
@@ -43,15 +31,11 @@ textarea {
   resize: none;
   overflow-wrap: anywhere;
 }
-/* A disabled field reads as one: on the first elevated surface, inside a divider's boundary, its
-   text a tier quieter, so a disabled draft still reads apart from the placeholder's --fg-3. The
-   elements sheet styles a disabled button but not a disabled field. */
 textarea:disabled {
   border-color: var(--border);
   background-color: var(--bg-1);
   color: var(--fg-2);
 }
-/* One cell holds both labels; the one not shown keeps its width. */
 .action {
   flex: none;
   display: grid;

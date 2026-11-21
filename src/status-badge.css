@@ -1,7 +1,10 @@
 /* From spike-html-apps-components (10dde51): src/status-badge.css. */
 
-/* The badge's host, an inline box; Lit adopts this sheet into its shadow root after the
- * foundation's reset and elements sheets, unlayered and so above both. */
+/*
+ * The status badge's shadow-root sheet: an inline-block host.
+ * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
+ * See docs/layout.md
+ */
 
 :host {
   display: inline-block;

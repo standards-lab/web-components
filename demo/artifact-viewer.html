@@ -4,26 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>artifact viewer specimen</title>
-    <!-- The artifact viewer's specimen page, from dist/: a Markdown document, JSON, JSON whose
-         keys, numbers, and duplicates a parse would change, invalid JSON,
-         plain text, text/html shown as text, content long enough to scroll, the native views of
-         test/fixtures/media.js's Blobs, a PDF, an image, audio, and video, XML, YAML, and SVG
-         shown as their source, an unknown type whose bytes are text, an unknown type whose bytes
-         are binary, as a note and with a Blob's download link, loading, an error, and empty content; then with no-header, so the content or the note shows alone, the
-         Markdown document, loading, the error, invalid JSON, the bytes that aren't text, and the
-         empty content.
-         The viewer is as tall as its content, so each shows at full size but the long content,
-         which the page holds to 16rem by demo.css's held class, so it scrolls.
-         Every state is labelled, then shown again in a section 20rem wide; the fit section holds
-         the JSON viewer in three parents that size it to its content, an inline-block, a
-         content-sized flex item, and a grid's auto track; and the focus section holds one
-         instance whose scrolling region the screenshot script reaches with a Tab press. The viewer
-         draws its own frame, so main is unframed: no specimen frame around it. The page
-         links the installed foundation's full entry, page-full.css, and imports
-         register-full.js, so a profile applies by attribute on the root; its import map is
-         components.html's, so it runs served only: mise run demo, or mise run screenshots.
-         Adapted from spike-html-apps-components (10dde51): demo/artifact-viewer.html, on
-         @standards-lab/web-foundation. -->
+    <!-- Adapted from spike-html-apps-components (10dde51): demo/artifact-viewer.html, on @standards-lab/web-foundation. -->
     <link rel="stylesheet" href="/deps/@standards-lab/web-foundation/dist/page-full.css" />
     <link rel="stylesheet" href="demo.css" />
     <script type="importmap">
@@ -248,7 +229,6 @@
           build: viewer({ name: "run.log", contentType: "text/plain", content: long, className: "held" }),
         },
       );
-      // The JSON viewer in each parent that sizes it to its content, by the parent's class in demo.css.
       const fit = (label, parent) => ({
         label,
         build: () =>

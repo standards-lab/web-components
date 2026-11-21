@@ -1,8 +1,8 @@
 // The layer's import cases as one file tree in the repository's shape: a file per forbidden import
 // and form, each with the rules that catch it, and the imports the layer may make in the same
-// layout. layers.test.ts lints it.
-// Adapted from spike-html-apps-components (10dde51): test/unit/layers-tree.ts, its sibling and
-// above layers the stack's web-app-sdk and web-app-sdk-template.
+// layout.
+// Adapted from spike-html-apps-components (10dde51): test/unit/layers-tree.ts, its sibling and above layers the stack's web-app-sdk and web-app-sdk-template.
+// See docs/testing.md
 
 import { spawnSync } from "node:child_process";
 import { mkdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
@@ -12,36 +12,32 @@ import type { ESLint } from "eslint";
 
 const root = join(import.meta.dirname, "../..");
 
-/** The package's manifest as it stands, which the tree carries, so each import is judged against
- * it. */
+/** The package's manifest as it stands, which the tree carries. */
 export const manifest: { name: string; devDependencies: Record<string, string> } = JSON.parse(
   readFileSync(join(root, "package.json"), "utf8"),
 );
 const components = manifest.name;
 
-/** The foundation, the one layer below, as its install lays it out: its manifest, whose exports
- * the resolver reads, beside the subpaths the cases name. */
 const foundation = components.replace(/components$/, "foundation");
 const foundationManifest = readFileSync(
   join(root, "node_modules", foundation, "package.json"),
   "utf8",
 );
 
-/** The sibling layer, web-app-sdk, and the template above every layer, web-app-sdk-template,
- * which the components never import. */
 const sdk = components.replace(/components$/, "app-sdk");
 const app = components.replace(/components$/, "app-sdk-template");
 
-// The rules a case names: the layer table, the two manifest rules, and the CSS module script rule.
+/** The layer table's rule. */
 export const table = "boundaries/dependencies";
+/** The rule against a package the manifest doesn't declare. */
 export const extraneous = "import-x/no-extraneous-dependencies";
+/** The rule against a declared package reached by a relative path. */
 export const relativePackages = "import-x/no-relative-packages";
+/** The rule that admits a .css import only as a static CSS module script. */
 export const cssModule = "no-restricted-syntax";
 /** The rules the lint flags the tree with, no-unresolved among them, which no case may draw. */
 export const watched = [table, extraneous, relativePackages, cssModule, "import-x/no-unresolved"];
 
-/** An edge in each of the four import forms, one file per form, each named for the edge and its
- * form: a side-effect import, a type import, a re-export, and an import(). */
 function forms(base: string, specifier: string): Record<string, string> {
   return {
     [`${base}.ts`]: `import "${specifier}";`,
@@ -57,78 +53,72 @@ export interface Case {
   rules: string[];
 }
 
-/** `files`, each path to its source and the rules that flag it, sorted. */
 function by(rules: string[], files: Record<string, string>): Record<string, Case> {
   return Object.fromEntries(
     Object.entries(files).map(([path, source]) => [path, { source, rules: [...rules].sort() }]),
   );
 }
 
-/** The foundation's installed files, from the layer's src/. */
-const installed = `../node_modules/${foundation}`;
+const installedFoundation = `../node_modules/${foundation}`;
 
-// Each file holds one import, named for what it imports.
+const undeclaredPackages = by([table, extraneous], {
+  "src/sdk.ts": `import { Client } from "${sdk}/client.js";`,
+  ...forms("src/forms/sdk", `${sdk}/client.js`),
+  "src/lit-html.ts": `import { html } from "lit-html";`,
+  ...forms("src/forms/lit-html", "lit-html/directives/repeat.js"),
+  "src/app.ts": `import { define } from "${app}/main.js";`,
+  ...forms("src/forms/typescript", "typescript"),
+});
+
+const ownName = by([table], forms("src/forms/self-name", `${components}/status-badge.js`));
+
+const relativeIntoNodeModules = by([table, relativePackages], {
+  "src/foundation-path.ts": `import { define } from "${installedFoundation}/dist/dom.js";`,
+  ...forms("src/forms/foundation-path", `../${installedFoundation}/dist/dom.js`),
+  "src/foundation-sheet-path.ts": `import sheet from "${installedFoundation}/dist/baseline/reset.css" with { type: "css" };`,
+  "src/lit-path.ts": `import "../node_modules/lit/index.js";`,
+});
+
+const declarationValueImports = by([table], {
+  "src/item-value.ts": `import { kindOf } from "./item.js";`,
+  "src/item-side-effect.ts": `import "./item.js";`,
+  "src/item-inline-type.ts": `import { type Item } from "./item.js";`,
+  "src/item-export.ts": `export { kindOf } from "./item.js";`,
+  "src/item-export-all.ts": `export * from "./item.js";`,
+  "src/item-dynamic.ts": `await import("./item.js");`,
+  "src/nested/item-value.ts": `import { kindOf } from "../item.js";`,
+});
+
+const nonModuleCss = by([cssModule], {
+  "src/css-side-effect.ts": `import "./x.css";`,
+  "src/css-default.ts": `import sheet from "./x.css";`,
+  "src/css-json.ts": `import sheet from "./x.css" with { type: "json" };`,
+  "src/css-export.ts": `export { default } from "./x.css";`,
+  "src/css-export-all.ts": `export * from "./x.css";`,
+  "src/css-dynamic.ts": `await import("./x.css");`,
+  "src/css-dynamic-json.ts": `await import("./x.css", { with: { type: "json" } });`,
+  "src/css-dynamic-module.ts": `await import("./x.css", { with: { type: "css" } });`,
+  "src/css-dynamic-quoted.ts": `await import("./x.css", { "with": { "type": "css" } });`,
+  "src/css-dynamic-template.ts": "await import(`./x.css`, { with: { type: 'css' } });",
+  "src/css-dynamic-computed.ts": "const name = 'x'; await import(`./${name}.css`);",
+  "src/css-foundation.ts": `import sheet from "${foundation}/baseline/reset.css";`,
+  "src/css-foundation-dynamic.ts": `await import("${foundation}/baseline/reset.css");`,
+});
+
+/** Each forbidden import's file, named for what it imports, with the rules that flag it. */
 export const violations = {
-  // A package the manifest doesn't declare, by name: the table allows lit and the foundation
-  // alone. lit-html, which lit depends on, is installed beside it; the SDK, the sibling layer, is
-  // another layer's, and the app sits above every layer; and a devDependency ships nothing.
-  ...by([table, extraneous], {
-    "src/sdk.ts": `import { Client } from "${sdk}/client.js";`,
-    ...forms("src/forms/sdk", `${sdk}/client.js`),
-    "src/lit-html.ts": `import { html } from "lit-html";`,
-    ...forms("src/forms/lit-html", "lit-html/directives/repeat.js"),
-    "src/app.ts": `import { define } from "${app}/main.js";`,
-    ...forms("src/forms/typescript", "typescript"),
-  }),
-  // The package's own name, which resolves to its build, not its src/: the table alone catches it,
-  // since no-extraneous-dependencies (from eslint-plugin-import-x 4.18.0) passes a self-import in a
-  // package whose manifest has an exports field, as Node resolves one.
-  ...by([table], forms("src/forms/self-name", `${components}/status-badge.js`)),
-  // A declared package by a relative path into node_modules/: the foundation's installed files,
-  // its build and its sheets, and lit's.
-  ...by([table, relativePackages], {
-    "src/foundation-path.ts": `import { define } from "${installed}/dist/dom.js";`,
-    ...forms("src/forms/foundation-path", `../${installed}/dist/dom.js`),
-    "src/foundation-sheet-path.ts": `import sheet from "${installed}/dist/baseline/reset.css" with { type: "css" };`,
-    "src/lit-path.ts": `import "../node_modules/lit/index.js";`,
-  }),
-  // A value import of a declaration file, in each value form, an inline `type` specifier among
-  // them, since verbatimModuleSyntax keeps that import.
-  ...by([table], {
-    "src/item-value.ts": `import { kindOf } from "./item.js";`,
-    "src/item-side-effect.ts": `import "./item.js";`,
-    "src/item-inline-type.ts": `import { type Item } from "./item.js";`,
-    "src/item-export.ts": `export { kindOf } from "./item.js";`,
-    "src/item-export-all.ts": `export * from "./item.js";`,
-    "src/item-dynamic.ts": `await import("./item.js");`,
-    "src/nested/item-value.ts": `import { kindOf } from "../item.js";`,
-  }),
-  // A .css import that isn't a static CSS module script, the layer's own sheet and the
-  // foundation's.
-  ...by([cssModule], {
-    "src/css-side-effect.ts": `import "./x.css";`,
-    "src/css-default.ts": `import sheet from "./x.css";`,
-    "src/css-json.ts": `import sheet from "./x.css" with { type: "json" };`,
-    "src/css-export.ts": `export { default } from "./x.css";`,
-    "src/css-export-all.ts": `export * from "./x.css";`,
-    "src/css-dynamic.ts": `await import("./x.css");`,
-    "src/css-dynamic-json.ts": `await import("./x.css", { with: { type: "json" } });`,
-    "src/css-dynamic-module.ts": `await import("./x.css", { with: { type: "css" } });`,
-    "src/css-dynamic-quoted.ts": `await import("./x.css", { "with": { "type": "css" } });`,
-    "src/css-dynamic-template.ts": "await import(`./x.css`, { with: { type: 'css' } });",
-    "src/css-dynamic-computed.ts": "const name = 'x'; await import(`./${name}.css`);",
-    "src/css-foundation.ts": `import sheet from "${foundation}/baseline/reset.css";`,
-    "src/css-foundation-dynamic.ts": `await import("${foundation}/baseline/reset.css");`,
-  }),
+  ...undeclaredPackages,
+  ...ownName,
+  ...relativeIntoNodeModules,
+  ...declarationValueImports,
+  ...nonModuleCss,
 };
 
 /** `cases`, each path to its source alone. */
 export const sources = (cases: Record<string, Case>): Record<string, string> =>
   Object.fromEntries(Object.entries(cases).map(([path, { source }]) => [path, source]));
 
-// Every import the layer may make, in each form, with names that hold dots, which a rule must tell
-// from . and .. segments: its own files, lit, and the foundation by its package name, its modules,
-// its declarations as types, and its sheets as CSS module scripts.
+/** Every import the layer may make, in each form, each file named for what it imports. */
 export const allowed: Record<string, string> = {
   "src/badge.ts": `export { x } from "./events.ts";`,
   "src/nested/own.ts": `import type { X } from "../badge.ts";\nawait import("../badge.ts");`,
@@ -159,8 +149,6 @@ export const allowed: Record<string, string> = {
   ].join("\n"),
 };
 
-/** The files the cases import that no case is: the modules, the declaration, the stylesheet, and
- * the package's build, which its own name resolves to. */
 const targets = {
   "src/events.ts": "export const x = 1;",
   "src/index.ts": "export {};",
@@ -175,8 +163,6 @@ const targets = {
   "dist/status-badge.d.ts": "export interface X {}",
 };
 
-/** The packages the cases name by name, as stubs in node_modules/: lit and lit-html, the SDK, the
- * app, and typescript, a devDependency, each a module and its types at every subpath. */
 const externals = ["lit", "lit-html", sdk, app, "typescript"];
 const stub = (name: string): Record<string, string> => ({
   "package.json": JSON.stringify({
@@ -198,9 +184,6 @@ const stub = (name: string): Record<string, string> => ({
   ].join("\n"),
 });
 
-/** The foundation as installed: its manifest as the install holds it, and stubs of the build the
- * cases reach through its exports, a module with its types, the formatters' declaration, the
- * ambient ./css types, and the sheets. */
 const foundationFiles = {
   "package.json": foundationManifest,
   "dist/dom.js": "export const define = () => {};\nexport const emit = () => {};",
@@ -215,9 +198,7 @@ const foundationFiles = {
   "dist/baseline/elements.css": ".elements {}",
 };
 
-/** Writes `files` under `dir` with the manifest, the targets, the externals, the foundation, and a
- * link to the package itself, as an install of its own name lays it out, so every import resolves
- * and the lint judges it. Returns the code files written under src/. */
+/** Writes `files` and everything they import under `dir`, returning the code files under src/. */
 export function writeTree(dir: string, files: Record<string, string>): string[] {
   const written: Record<string, string> = {
     ...files,
@@ -242,9 +223,7 @@ export function writeTree(dir: string, files: Record<string, string>): string[] 
   return Object.keys(written).filter((path) => path.startsWith("src/") && /\.(js|ts)$/.test(path));
 }
 
-/** ESLint's JSON report on the tree under `dir`'s src/. -c takes the repo's config, whose patterns
- * then match from the working directory, the tree, and whose plugins load from the repo's
- * node_modules. Throws when ESLint doesn't run or exits other than 0 or 1. */
+/** ESLint's JSON report on `dir`'s src/ under the repository's config; throws when ESLint fails. */
 export function lint(dir: string): ESLint.LintResult[] {
   const eslint = join(root, "node_modules", ".bin", "eslint");
   const run = spawnSync(eslint, ["-c", join(root, "eslint.config.js"), "-f", "json", "src"], {

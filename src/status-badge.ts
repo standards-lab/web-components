@@ -1,6 +1,5 @@
 // A status badge, Lit with a shadow root on the foundation's reset and elements sheets.
-// Adapted from spike-html-apps-components (10dde51): src/status-badge.ts, on
-// @standards-lab/web-foundation.
+// Adapted from spike-html-apps-components (10dde51): src/status-badge.ts, on @standards-lab/web-foundation.
 
 import { html, LitElement, type PropertyDeclarations } from "lit";
 

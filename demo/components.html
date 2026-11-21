@@ -4,13 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>components</title>
-    <!-- The components from dist/ on the installed foundation's page entry: the shadow-root
-         pagination holding one entry per item of documents.js's pages, and the status badge. A
-         page change or a page size change moves through the fixture's directories; every event is
-         logged. Lit and the foundation map onto the demo server's /deps/, so the page runs served
-         only: mise run demo.
-         Adapted from spike-html-apps-components (10dde51): demo/components.html, on
-         @standards-lab/web-foundation and its default theme, Zen. -->
+    <!-- Adapted from spike-html-apps-components (10dde51): demo/components.html, on @standards-lab/web-foundation and its default theme, Zen. -->
     <link rel="stylesheet" href="/deps/@standards-lab/web-foundation/dist/page.css" />
     <script type="importmap">
       {
@@ -33,7 +27,6 @@
       import "../dist/status-badge.js";
       import { continued, directories, files, pageSizes } from "./documents.js";
 
-      // say writes what an element sent into the log, newest first.
       const say = (text) => {
         const item = document.createElement("li");
         item.textContent = text;
@@ -43,7 +36,6 @@
         document.addEventListener(type, (event) => say(`${type} ${JSON.stringify(event.detail)}`));
       }
 
-      // fill sets a pagination's fields from a page of the fixture and puts one entry per item in it.
       const fill = (pagination, page) => {
         Object.assign(pagination, {
           page: page.page ?? null,
@@ -63,8 +55,6 @@
       fill(document.getElementById("files"), files);
       fill(document.getElementById("continued"), continued);
 
-      // The directories' pagination follows its own requests, as a host would: the fixture holds
-      // one page, so every page shows its items under the page number asked for.
       const listing = document.getElementById("directories");
       listing.addEventListener("page-change", ({ detail }) => (listing.page = detail.page));
       listing.addEventListener("page-size-change", ({ detail }) => (listing.size = detail.size));

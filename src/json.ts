@@ -6,19 +6,31 @@
 // and the output's length stays linear in the text's however deep it nests.
 // From spike-html-apps-components (10dde51): src/json.ts.
 
-// The indent of a depth, two spaces a level.
+const QUOTE = 0x22;
+const COMMA = 0x2c;
+const COLON = 0x3a;
+const OPEN_BRACKET = 0x5b;
+const BACKSLASH = 0x5c;
+const CLOSE_BRACKET = 0x5d;
+const OPEN_BRACE = 0x7b;
+const CLOSE_BRACE = 0x7d;
+
 function indent(depth: number): string {
   return "  ".repeat(depth);
 }
 
-// JSON's whitespace between tokens: space, tab, line feed, and carriage return.
 function isSpace(code: number): boolean {
   return code === 0x20 || code === 0x09 || code === 0x0a || code === 0x0d;
 }
 
-// Where a number or a literal ends: whitespace, or the punctuation that may follow a value.
 function endsValue(code: number): boolean {
-  return isSpace(code) || code === 0x2c || code === 0x3a || code === 0x5d || code === 0x7d;
+  return (
+    isSpace(code) ||
+    code === COMMA ||
+    code === COLON ||
+    code === CLOSE_BRACKET ||
+    code === CLOSE_BRACE
+  );
 }
 
 /**
@@ -47,33 +59,28 @@ export function formatJson(text: string): string {
   const length = text.length;
   let depth = 0;
   let at = 0;
-  // Past whitespace from `from`, the index of the next token, or the text's length.
   const skip = (from: number): number => {
     while (from < length && isSpace(text.charCodeAt(from))) from++;
     return from;
   };
-  // From a string's opening quote, the index of its closing one: the first quote no backslash
-  // escapes, or the text's length.
   const stringEnd = (from: number): number => {
     let end = from + 1;
     while (end < length) {
       const inner = text.charCodeAt(end);
-      if (inner === 0x5c) end += 2;
-      else if (inner === 0x22) break;
+      if (inner === BACKSLASH) end += 2;
+      else if (inner === QUOTE) break;
       else end++;
     }
     return end;
   };
-  // From a container's opening bracket, the index past its matching closing one, strings skipped
-  // whole so a bracket inside one never counts.
   const containerEnd = (from: number): number => {
     let open = 0;
     let end = from;
     while (end < length) {
       const inner = text.charCodeAt(end);
-      if (inner === 0x22) end = stringEnd(end);
-      else if (inner === 0x7b || inner === 0x5b) open++;
-      else if ((inner === 0x7d || inner === 0x5d) && --open === 0) return end + 1;
+      if (inner === QUOTE) end = stringEnd(end);
+      else if (inner === OPEN_BRACE || inner === OPEN_BRACKET) open++;
+      else if ((inner === CLOSE_BRACE || inner === CLOSE_BRACKET) && --open === 0) return end + 1;
       end++;
     }
     return length;
@@ -81,20 +88,18 @@ export function formatJson(text: string): string {
   while ((at = skip(at)) < length) {
     const code = text.charCodeAt(at);
     switch (code) {
-      case 0x7b: // {
-      case 0x5b: {
-        // [
+      case OPEN_BRACE:
+      case OPEN_BRACKET: {
         if (depth === MAX_DEPTH) {
-          // Too deep to indent: the container as written, whole.
           const end = containerEnd(at);
           out.push(text.slice(at, end));
           at = end;
           break;
         }
         const next = skip(at + 1);
-        const close = code === 0x7b ? 0x7d : 0x5d;
+        const close = code === OPEN_BRACE ? CLOSE_BRACE : CLOSE_BRACKET;
         if (text.charCodeAt(next) === close) {
-          out.push(code === 0x7b ? "{}" : "[]");
+          out.push(code === OPEN_BRACE ? "{}" : "[]");
           at = next + 1;
         } else {
           depth++;
@@ -103,29 +108,27 @@ export function formatJson(text: string): string {
         }
         break;
       }
-      case 0x7d: // }
-      case 0x5d: // ]
+      case CLOSE_BRACE:
+      case CLOSE_BRACKET:
         depth--;
         out.push("\n", indent(depth), text[at]);
         at++;
         break;
-      case 0x2c: // ,
+      case COMMA:
         out.push(",\n", indent(depth));
         at++;
         break;
-      case 0x3a: // :
+      case COLON:
         out.push(": ");
         at++;
         break;
-      case 0x22: {
-        // " : a string, as written.
+      case QUOTE: {
         const end = stringEnd(at);
         out.push(text.slice(at, end + 1));
         at = end + 1;
         break;
       }
       default: {
-        // A number, true, false, or null, as written.
         let end = at + 1;
         while (end < length && !endsValue(text.charCodeAt(end))) end++;
         out.push(text.slice(at, end));

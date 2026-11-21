@@ -1,24 +1,4 @@
-// The drawer from this repository's dist/, on test/fixtures/components.html, its viewport set
-// either side of the dock width: docked at it and wider, the boundary exact for a rem and a px
-// dock, and docked for a length the query can't read, an aside exposed as a complementary
-// landmark named by its own visible heading, the one heading in the drawer's shadow tree, with no
-// Close button, visible, its content interactive, the page live, focus left where it was; the
-// heading at --text-l in either mode, below a page's h1 and h2; a control focused in the
-// scrolling body, docked or not, its whole focus outline drawn at either edge; below it, closed by
-// default, and opened modally by show(), toggle(), or open, open in its markup or set before it is
-// connected included, which is undone while docked, a dialog named by its visible heading and
-// covering the viewport edge to edge, its header in view while its content scrolls, the page
-// behind inert and focus on its heading, however it opened, not its Close button, the heading
-// drawing no outline and Tab from it reaching Close, closed by its Close button, Escape, close(),
-// toggle(), or open, focus returned to the opener; the Close button's text replaced through its
-// slot; open and close sent once each, bubbling and composed, never on a mode switch or on removal,
-// which closes it, a drawer put back closed and opening modally again; a switch in either
-// direction, by the viewport or by dock, keeping the very same slotted elements, never
-// disconnected, and what was typed and counted in them; the slide's transition, absent under
-// reduced motion and on a switch; and the slide from the inline-start edge, the left, or the right
-// in a right-to-left page.
-// Adapted from spike-html-apps-components (10dde51): test/browser/drawer.test.ts, on
-// @standards-lab/web-tooling.
+// Adapted from spike-html-apps-components (10dde51): test/browser/drawer.test.ts, on @standards-lab/web-tooling.
 
 import assert from "node:assert/strict";
 import { after, before, beforeEach, describe, test } from "node:test";
@@ -30,7 +10,6 @@ import type { Server } from "@standards-lab/web-tooling/server.js";
 
 import { served } from "./support/served.ts";
 
-/** An event the document heard from the drawer. */
 interface Heard {
   type: string;
   detail: unknown;
@@ -38,7 +17,6 @@ interface Heard {
   composed: boolean;
 }
 
-/** A box in the viewport. */
 interface Box {
   left: number;
   right: number;
@@ -47,8 +25,6 @@ interface Box {
   width: number;
 }
 
-/** What window.read reads from the drawer: its mode, its shadow wrapper and the dialog's state,
- * the wrapper's box, focus, and the events it sent and the document heard. */
 interface Shown {
   mode: "docked" | "drawer" | null;
   open: boolean;
@@ -63,15 +39,12 @@ interface Shown {
   heard: Heard[];
 }
 
-/** A node of the page's accessibility tree, as Accessibility.getFullAXTree gives it. */
 interface AXNode {
   ignored: boolean;
   role?: { value: string };
   name?: { value: string };
 }
 
-// The dock width, 48rem at the initial font size, at which the drawer docks, and a viewport either
-// side of it.
 const DOCK = 768;
 const WIDE = 1280;
 const NARROW = 480;
@@ -85,15 +58,7 @@ describe("drawer", { timeout: 60_000 }, () => {
     server = await serve(served);
     browser = await launch();
     page = await browser.open(`${server.origin}/test/fixtures/components.html`);
-    // Keys go to the focused element as a user's would, and :focus-visible matches, though a
-    // headless page never has the window's focus.
     await page.cdp("Emulation.setFocusEmulationEnabled", { enabled: true });
-    // window.mount(fields, extra, attributes, detached) renders, into main, an opener that calls
-    // show(), a drawer of the attributes in its markup and of the fields holding a filter field, a
-    // button that counts its clicks, a probe element that counts its connections and
-    // disconnections, and the extra markup, and a button outside it, all the page's; the fields
-    // are set once the drawer is connected, or, detached, on the upgraded drawer before it is.
-    // window.read() resolves, once the drawer renders, to what it shows.
     await page.evaluate(`window.verdict.then(async () => {
       await import("/dist/drawer.js");
       window.lifecycle = { connected: 0, disconnected: 0 };
@@ -115,7 +80,6 @@ describe("drawer", { timeout: 60_000 }, () => {
         window.lifecycle.connected = window.lifecycle.disconnected = 0;
         window.sent = [];
         window.heard.length = 0;
-        // Built apart and upgraded, so the drawer's events are counted from its first connection.
         const parts = document.createElement("div");
         parts.innerHTML = '<button id="opener" type="button">Documents</button>' +
           '<sl-drawer ' + attributes + '><input id="filter" aria-label="Filter">' +
@@ -142,7 +106,6 @@ describe("drawer", { timeout: 60_000 }, () => {
         const dialog = drawer.shadowRoot.querySelector("dialog");
         const { left, right, top, bottom, width } = wrapper.getBoundingClientRect();
         const active = document.activeElement;
-        // Focus in the drawer's own header is the host's, and its shadow root's active element.
         const focused = active === document.body || active === null ? null
           : active === drawer ? "drawer " + (drawer.shadowRoot.activeElement?.localName ?? "")
           : active.id || active.localName;
@@ -160,7 +123,6 @@ describe("drawer", { timeout: 60_000 }, () => {
           heard: window.heard,
         };
       };
-      // Whether the outside button takes focus, as no inert element does; focus is put back.
       window.pageLive = () => {
         const before = document.activeElement;
         const outside = document.querySelector("#outside");
@@ -169,7 +131,6 @@ describe("drawer", { timeout: 60_000 }, () => {
         before?.focus?.();
         return live;
       };
-      // The center of an element of the page's, or, with shadow, of the drawer's shadow root's.
       window.center = (selector, shadow) => {
         const root = shadow ? document.querySelector("sl-drawer").shadowRoot : document;
         const { left, top, width, height } = root.querySelector(selector).getBoundingClientRect();
@@ -186,10 +147,8 @@ describe("drawer", { timeout: 60_000 }, () => {
   const read = (): Promise<Shown> => page.evaluate("window.read()");
   const pageLive = (): Promise<boolean> => page.evaluate("window.pageLive()");
   const call = (method: string) => page.evaluate(`document.querySelector("sl-drawer").${method}()`);
-  // The drawer's mode once the viewport's media queries have settled on it.
   const settled = (mode: "docked" | "drawer") =>
     until(page, `document.querySelector("sl-drawer")?.matches(":state(${mode})")`);
-  // The viewport's size.
   const resize = async (width: number, height = HEIGHT) => {
     await page.cdp("Emulation.setDeviceMetricsOverride", {
       width,
@@ -199,9 +158,6 @@ describe("drawer", { timeout: 60_000 }, () => {
     });
     await until(page, `innerWidth === ${width} && innerHeight === ${height}`);
   };
-  // The drawer mounted at the viewport's size, once it has settled on the mode the default dock
-  // gives it there, or the mode given, for another dock.
-  // Its markup's attributes, if any, and, detached, its fields set before it is connected.
   const mount = async (
     width: number,
     fields: Record<string, unknown> = {},
@@ -214,7 +170,6 @@ describe("drawer", { timeout: 60_000 }, () => {
     await page.evaluate(`window.mount(...${JSON.stringify(args)})`);
     await settled(mode as "docked" | "drawer");
   };
-  // A key pressed and released on the focused element, with the text it types, if any.
   const press = async (key: string, keyCode: number, text?: string) => {
     for (const type of ["keyDown", "keyUp"]) {
       await page.cdp("Input.dispatchKeyEvent", {
@@ -233,30 +188,24 @@ describe("drawer", { timeout: 60_000 }, () => {
   };
   const center = (selector: string, shadow = false): Promise<{ x: number; y: number }> =>
     page.evaluate(`window.center(${JSON.stringify(selector)}, ${shadow})`);
-  // Resolves once the drawer's transitions have ended.
   const slid = () =>
     page.evaluate(
       `Promise.all(document.querySelector("sl-drawer").shadowRoot.getAnimations().map((a) => a.finished)).then(() => {})`,
     );
-  // The opener focused by the keyboard and activated by Enter, as a user opens the drawer.
   const openByKeyboard = async () => {
     await page.evaluate(`document.querySelector("#opener").focus()`);
     await press("Enter", 13, "\r");
     await until(page, `document.querySelector("sl-drawer").open`);
     await slid();
   };
-  // Resolves once the close events queued so far have reached the document.
   const closedHeard = (count: number) =>
     until(page, `window.heard.filter((e) => e.type === "close").length >= ${count}`);
-  // The names of the nodes of the role the accessibility tree exposes.
   const exposed = async (role: string): Promise<string[]> => {
     const { nodes }: { nodes: AXNode[] } = await page.cdp("Accessibility.getFullAXTree", {});
     return nodes
       .filter((node) => !node.ignored && node.role?.value === role)
       .map((node) => node.name?.value ?? "");
   };
-  // The drawer's shadow tree's headings, each with whether it sits in the wrapper rendered and
-  // shows, and the wrapper's naming attributes.
   const headings = (): Promise<{
     texts: string[];
     inWrapper: boolean;
@@ -294,7 +243,6 @@ describe("drawer", { timeout: 60_000 }, () => {
     assert.ok(shown.box.width > 0, "the docked aside takes space");
     assert.equal(shown.focused, null, "docking moves no focus into the content");
     assert.equal(await pageLive(), true, "the page takes focus");
-    // A click on the slotted button reaches it, and so does one on the page's button.
     await clickAt(await center("#count"));
     assert.equal(await page.evaluate(`document.querySelector("#count").textContent`), "1");
     await clickAt(await center("#opener"));
@@ -314,7 +262,6 @@ describe("drawer", { timeout: 60_000 }, () => {
       landmark.map((node) => node.name?.value),
       ["Documents"],
     );
-    // The name comes from aria-labelledby, the heading, and from no aria-label.
     const sources = landmark[0]?.name?.sources ?? [];
     assert.ok(
       sources.some(
@@ -329,7 +276,6 @@ describe("drawer", { timeout: 60_000 }, () => {
       labelledby: "title",
       label: null,
     });
-    // The fixture page has no heading of its own.
     assert.deepEqual(await exposed("heading"), ["Documents"]);
     const buttons = await exposed("button");
     assert.ok(!buttons.some((name) => name.startsWith("Close")), `no Close button: ${buttons}`);
@@ -340,8 +286,6 @@ describe("drawer", { timeout: 60_000 }, () => {
     );
   });
 
-  // The heading at a contained surface's size in both modes: the foundation's --text-l, an h4's
-  // step, read off a probe on the page at the same viewport, and smaller than a page's h1 and h2.
   for (const [mode, width] of [
     ["docked", WIDE],
     ["drawer", NARROW],
@@ -413,12 +357,6 @@ describe("drawer", { timeout: 60_000 }, () => {
     );
   });
 
-  // A control's focus outline inside the scrolling body, in both modes, the body held short so it
-  // scrolls: the app's composition, an upload dropzone with an upload in progress, its Cancel
-  // flush with the row's end, over a document list, whose entries span the body. Each control the
-  // keyboard reaches there, by Tab down to the last and Shift+Tab back up to the first, scrolled
-  // into view by its focus, draws its whole outline, the control's box grown by the outline's
-  // width and offset, inside the body's clip box, its padding box, cut by the wrapper's.
   for (const [mode, width, height] of [
     ["docked", WIDE, HEIGHT],
     ["drawer", NARROW, 300],
@@ -449,7 +387,6 @@ describe("drawer", { timeout: 60_000 }, () => {
         await Promise.all([dropzone.updateComplete, list.updateComplete]);
       })()`);
       if (mode === "drawer") await openByKeyboard();
-      // The focused control in the body, null once focus leaves it, with its outline and the clip.
       const measure = (): Promise<{
         name: string;
         visible: boolean;
@@ -502,7 +439,6 @@ describe("drawer", { timeout: 60_000 }, () => {
           if (one === null) break;
           seen.push(one);
         }
-        // Back to the last control, to walk up from there.
         if (!shift) await tab(true);
       }
       const names = new Set(seen.map(({ name }) => name.split(" ").slice(0, 2).join(" ")));
@@ -580,8 +516,6 @@ describe("drawer", { timeout: 60_000 }, () => {
       ["drawer", true, true, true, true, true],
     );
     assert.deepEqual(await exposed("dialog"), ["Documents"]);
-    // The fixture page has no heading of its own: the dialog's is the one exposed, and the
-    // shadow tree holds no other.
     assert.deepEqual(await exposed("heading"), ["Documents"]);
     assert.deepEqual(await headings(), {
       texts: ["Documents"],
@@ -593,7 +527,6 @@ describe("drawer", { timeout: 60_000 }, () => {
     assert.equal(shown.focused, "drawer h2", "focus moves to the dialog's heading");
     assert.equal(await pageLive(), false, "the page behind takes no focus");
     assert.deepEqual(shown.heard, [{ type: "open", detail: {}, bubbles: true, composed: true }]);
-    // Tab stays among the drawer's controls, or leaves for the browser's own, never the page's.
     for (let i = 0; i < 5; i++) {
       await press("Tab", 9);
       const { focused } = await read();
@@ -604,10 +537,6 @@ describe("drawer", { timeout: 60_000 }, () => {
     }
   });
 
-  // However it opens, the dialog's heading takes focus, by its tabindex="-1" and autofocus, not
-  // its first control, the Close button: autofocus on the dialog itself does nothing in Chromium
-  // 155 and 157. The heading is no control, so it draws no focus outline and Tab never reaches it
-  // again; the first Tab reaches Close, and Escape returns focus to the opener, focused first.
   for (const [how, open] of [
     ["show()", "document.querySelector('sl-drawer').show()"],
     ["toggle()", "document.querySelector('sl-drawer').toggle()"],
@@ -754,9 +683,6 @@ describe("drawer", { timeout: 60_000 }, () => {
   }
 
   test("show() just after a resize to narrow opens it, before the media query's change event", async () => {
-    // The change event lags a resize by a frame, a race a test can't win reliably, so the drawer's
-    // listener is held back while the viewport narrows: the drawer is still docked by the last
-    // event it heard, though the query matches. The original listener is put back afterwards.
     await page.evaluate(`(() => {
       const add = MediaQueryList.prototype.addEventListener;
       const wrapped = [];
@@ -883,8 +809,6 @@ describe("drawer", { timeout: 60_000 }, () => {
       };
       window.kept.count.click();
     })()`);
-    // The kept elements against the page's and the drawer's current slot, the probe's lifecycle
-    // callbacks, what was typed and counted, and the drawer's transitions running.
     const same = () =>
       page.evaluate(`(() => {
         const drawer = document.querySelector("sl-drawer");
@@ -910,7 +834,6 @@ describe("drawer", { timeout: 60_000 }, () => {
       count: "1",
       animations: 0,
     };
-    // Open at narrow, then wide: docked, with no event.
     await resize(WIDE);
     await settled("docked");
     let shown = await read();
@@ -919,35 +842,29 @@ describe("drawer", { timeout: 60_000 }, () => {
       ["docked", "aside", false, false, true],
     );
     assert.deepEqual(await same(), kept, "open at narrow, resized wide");
-    // The heading follows the mode: the aside's own, the one exposed, with no Close button.
     assert.deepEqual(await exposed("heading"), ["Documents"], "docked, one heading");
     assert.deepEqual(await exposed("complementary"), ["Documents"]);
     assert.ok(!(await exposed("button")).includes("Close Documents"), "docked, no Close button");
     assert.deepEqual((await headings()).texts, ["Documents"]);
-    // Back to narrow: closed, with no event.
     await resize(NARROW);
     await settled("drawer");
     shown = await read();
     assert.deepEqual([shown.wrapper, shown.dialogOpen, shown.open], ["dialog", false, false]);
     assert.deepEqual(await same(), kept, "docked, resized narrow");
-    // Closed at narrow, then wide and back.
     await resize(WIDE);
     await settled("docked");
     await resize(NARROW);
     await settled("drawer");
     assert.deepEqual(await same(), kept, "closed at narrow, resized wide and back");
-    // A change of dock switches the same way.
     await page.evaluate(`document.querySelector("sl-drawer").dock = "20rem"`);
     await settled("docked");
     assert.deepEqual(await same(), kept, "dock lowered past the viewport");
     await page.evaluate(`document.querySelector("sl-drawer").dock = "48rem"`);
     await settled("drawer");
     assert.deepEqual(await same(), kept, "dock raised past the viewport");
-    // It opens again from the same content.
     await call("show");
     shown = await read();
     assert.deepEqual([shown.modal, shown.focused], [true, "drawer h2"]);
-    // And back in the dialog's header, beside its Close button, the one heading still.
     await slid();
     assert.deepEqual(await exposed("heading"), ["Documents"], "a drawer again, one heading");
     assert.deepEqual(await exposed("dialog"), ["Documents"]);
@@ -958,7 +875,6 @@ describe("drawer", { timeout: 60_000 }, () => {
   });
 
   test("the drawer slides in by a transition, and under reduced motion opens with none", async () => {
-    // The transitions running on the dialog once show() returns.
     const running = () =>
       page.evaluate(`(() => {
         const drawer = document.querySelector("sl-drawer");
@@ -996,7 +912,6 @@ describe("drawer", { timeout: 60_000 }, () => {
     test(`in a ${dir} page the drawer slides in from past the ${edge} edge and ends flush with it`, async () => {
       await page.evaluate(`document.documentElement.dir = "${dir}"`);
       await mount(NARROW);
-      // The dialog's box at the slide's start, its transitions paused there, then at its end.
       const at = (time: "start" | "end") =>
         page.evaluate(`(() => {
           const dialog = document.querySelector("sl-drawer").shadowRoot.querySelector("dialog");

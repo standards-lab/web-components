@@ -1,9 +1,4 @@
-// The Markdown renderer from this repository's dist/, through its export, markdown(source), on
-// test/fixtures/components.html: each token kind as the element it renders, raw HTML and images
-// as text, each link scheme it refuses and admits, partial source, a growing source rendered in
-// place, and marked loaded only by a page that imports the renderer.
-// Adapted from spike-html-apps-components (10dde51): test/browser/markdown.test.ts, on
-// @standards-lab/web-tooling.
+// Adapted from spike-html-apps-components (10dde51): test/browser/markdown.test.ts, on @standards-lab/web-tooling.
 
 import assert from "node:assert/strict";
 import { readdirSync } from "node:fs";
@@ -25,9 +20,6 @@ describe("markdown", { timeout: 60_000 }, () => {
     server = await serve(served);
     browser = await launch();
     page = await browser.open(`${server.origin}/test/fixtures/components.html`);
-    // window.rendered(source) renders the source into a new container, resolving to its HTML
-    // with Lit's marker comments removed; a real comment in the source renders as escaped text,
-    // so none is removed.
     await page.evaluate(`window.verdict.then(async () => {
       const { render } = await import("lit");
       const { markdown } = await import("/dist/markdown.js");
@@ -44,7 +36,6 @@ describe("markdown", { timeout: 60_000 }, () => {
     await server?.stop();
   });
 
-  /** The HTML the source renders to. */
   const rendered = (source: string): Promise<string> =>
     page.evaluate(`window.rendered(${JSON.stringify(source)})`);
 
@@ -289,10 +280,6 @@ describe("markdown", { timeout: 60_000 }, () => {
   });
 
   test("a page that imports no Markdown-rendering module requests no marked module", async () => {
-    // The components page with every other module of dist/ imported; marked's request appears only
-    // once the renderer is imported, which shows the case can see it.
-    // The modules that render Markdown, the renderer, the artifact viewer, and the chat thread,
-    // are left out.
     const renderers = ["markdown.js", "artifact-viewer.js", "chat-thread.js"];
     const modules = readdirSync(join(root, "dist")).filter(
       (file) => file.endsWith(".js") && !renderers.includes(file),

@@ -1,6 +1,6 @@
 // Pagination, Lit with a shadow root: a page of entries between its summary and its controls.
-// Adapted from spike-html-apps-components (10dde51): src/pagination.ts, on
-// @standards-lab/web-foundation.
+// Adapted from spike-html-apps-components (10dde51): src/pagination.ts, on @standards-lab/web-foundation.
+// See docs/internals.md
 
 import { html, LitElement, nothing, type PropertyDeclarations } from "lit";
 
@@ -50,10 +50,6 @@ export function summaryRange(
 export class Pagination extends LitElement {
   static styles = [reset, elements, styles];
 
-  // Lit reads the reactive properties from this static map, in place of decorators. Each field is
-  // `declare`d, so the class emits no field to shadow Lit's accessor, and given its default in
-  // the constructor. Lit's converters give the attribute contract: a removed number attribute is
-  // null, and page-sizes is parsed as JSON, null when it isn't valid.
   static properties = {
     page: { type: Number },
     size: { type: Number },
@@ -121,9 +117,6 @@ export class Pagination extends LitElement {
     emit<PageSizeChangeDetail>(this, "page-size-change", { size });
   }
 
-  // Clamps the typed number to 1..pageCount (no upper bound while the count is unknown) and asks
-  // for that page if it differs. The input goes back to the current page either way: it shows
-  // `page` until the host sets another.
   #handlePageInput(e: Event): void {
     const input = e.target as HTMLInputElement;
     const typed = input.valueAsNumber;
@@ -141,8 +134,6 @@ export class Pagination extends LitElement {
     (e.target as HTMLInputElement).select();
   }
 
-  // The summary's line, its text and then the status slot's content, as one run of text that
-  // wraps as a paragraph does.
   #renderSummary() {
     const range = summaryRange(this.page, this.size, this.total);
     if (range === null) return nothing;

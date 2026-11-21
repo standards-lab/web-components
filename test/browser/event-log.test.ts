@@ -1,12 +1,4 @@
-// The event log from this repository's dist/, on test/fixtures/components.html: its frame a polite
-// log of additions; each event's type, time, formatted by the foundation in the page's locale and
-// time zone, and its source, subject, and id, labelled, each on its own line; its data
-// pretty-printed in a details, collapsed, or a note when it has none; the events in the order
-// given; events appended leaving those shown in their own nodes and places, an opened details open;
-// the frame following the newest only from its end, under a page zoom too; the details opened by
-// the keyboard; and no event sent.
-// Adapted from spike-html-apps-components (10dde51): test/browser/event-log.test.ts, on
-// @standards-lab/web-tooling.
+// Adapted from spike-html-apps-components (10dde51): test/browser/event-log.test.ts, on @standards-lab/web-tooling.
 
 import assert from "node:assert/strict";
 import { after, before, describe, test } from "node:test";
@@ -18,7 +10,6 @@ import type { Server } from "@standards-lab/web-tooling/server.js";
 
 import { served } from "./support/served.ts";
 
-/** What window.read shows of one event: its type, time, labelled pairs, and data or note. */
 interface Shown {
   type: string;
   time: string | null;
@@ -30,8 +21,6 @@ interface Shown {
   note: string | null;
 }
 
-/** What window.read resolves to: the frame's attributes, the list, and each event, and what the
- * host sent. */
 interface Read {
   frame: (string | null)[];
   list: string | null;
@@ -40,7 +29,6 @@ interface Read {
   sent: string[];
 }
 
-/** A frame's scroll position: its scrollTop and the most it scrolls, rounded. */
 interface Where {
   top: number;
   end: number;
@@ -54,12 +42,7 @@ describe("event log", { timeout: 60_000 }, () => {
     server = await serve(served);
     browser = await launch();
     page = await browser.open(`${server.origin}/test/fixtures/components.html`);
-    // Keys go to the focused element as a user's would, though a headless page never has the
-    // window's focus.
     await page.cdp("Emulation.setFocusEmulationEnabled", { enabled: true });
-    // window.mount(events) renders a log of the events into main, recording every event its host
-    // dispatches; window.read() resolves to what the frame and each event show, in the list's
-    // order.
     await page.evaluate(`window.verdict.then(async () => {
       await import("/dist/event-log.js");
       window.mount = async (events) => {
@@ -115,7 +98,6 @@ describe("event log", { timeout: 60_000 }, () => {
 
   const run = "0193a5c2-7e4b-7c1d-9f2a-3b4c5d6e7f80";
   const names = ["upload", "metadata", "extraction", "chunks", "embeddings"];
-  // The emulator's stage event for the stage at the index, as its stream carries it.
   const stage = (index: number) => ({
     id: `${run}.${index + 1}`,
     type: "emulator.run.stage",
@@ -140,7 +122,6 @@ describe("event log", { timeout: 60_000 }, () => {
     const { frame, list, events } = await read();
     assert.deepEqual(frame, ["log", "polite", "additions", "Events", null]);
     assert.equal(list, "ol");
-    // The browser runs in en-US at UTC, as the tooling's launch() starts it.
     assert.deepEqual(events[0], {
       type: "emulator.run.stage",
       time: "Oct 29, 2026, 3:42:00 PM",
@@ -155,7 +136,11 @@ describe("event log", { timeout: 60_000 }, () => {
       data: '{\n  "stage": "upload",\n  "position": 1,\n  "stage_count": 5,\n  "document_id": "doc-1"\n}',
       note: null,
     });
-    assert.equal(events[1].time, "Oct 29, 2026, 3:42:01 PM");
+    assert.equal(
+      events[1].time,
+      "Oct 29, 2026, 3:42:01 PM",
+      "en-US at UTC, as launch() starts the browser",
+    );
   });
 
   test("the events show in the order given, not by time", async () => {
@@ -225,7 +210,6 @@ describe("event log", { timeout: 60_000 }, () => {
   });
 
   test("an event without a time shows its type, source, subject, and id, its head the type alone", async () => {
-    // CloudEvents makes time optional: absent, as a stream without one sends it, or null.
     const untimed = { ...stage(0), time: undefined };
     await mount([untimed, { ...stage(1), time: null }, stage(2)]);
     const { events } = await read();
@@ -242,8 +226,6 @@ describe("event log", { timeout: 60_000 }, () => {
         ],
       ]),
     );
-    // The head holds the type alone, as tall as its line, so the metadata sits where it does
-    // under a timed event's head: no text and no room for a time.
     const heads: { text: string; children: number; head: number; type: number }[] =
       await page.evaluate(`[
         ...document.querySelector("sl-event-log").shadowRoot.querySelectorAll(".head"),
@@ -265,12 +247,6 @@ describe("event log", { timeout: 60_000 }, () => {
   });
 
   test("each event's source, subject, and id sit each on its own line, spaced by the width's step, at a wide and a narrow width", async () => {
-    // At 40rem the three pairs would fit one line, and at 20rem they would not: at both, each
-    // pair's box starts at or below the bottom of the one before, so no two share a line, in the
-    // order source, subject, id. Between two pairs is the step the width gives them: at 40rem,
-    // where each pair is one line, the smaller step, as between lines within one item; at 20rem,
-    // where each label sits over its value, the larger, keeping each pair grouped. Each step is
-    // the token's px, resolved by a probe inside the metadata, so the test follows the tokens.
     await mount([stage(0)]);
     for (const [width, token] of [
       ["40rem", "--space-3xs"],
@@ -319,8 +295,6 @@ describe("event log", { timeout: 60_000 }, () => {
   });
 
   test("events of one id from two sources are two events, each keeping its own node", async () => {
-    // Keyed by id alone, the two would be one key: reordered, each row would update in place, and
-    // the details opened on lab-b's row would stay on the second row, now lab-a's.
     const a = stage(0);
     const b = { ...stage(0), source: "/emulator/lab-b" };
     await mount([a, b]);
@@ -344,13 +318,11 @@ describe("event log", { timeout: 60_000 }, () => {
         ["/emulator/lab-b", true],
         ["/emulator/lab-a", false],
       ],
+      "keyed by id alone, the details opened on lab-b's row would stay on the second row",
     );
   });
 
   test("events appended leave those shown in their own nodes and places, an opened details open", async () => {
-    // At 20rem and at 40rem: the first two events shown, the second's data opened, then the rest
-    // appended one at a time. After each, the first two are the same nodes, at the same boxes,
-    // and the second's details is still open.
     for (const width of ["20rem", "40rem"]) {
       await mount(stages(2));
       const measured: { count: number; same: boolean; boxes: number[][]; open: boolean[] }[] = [];
@@ -405,16 +377,13 @@ describe("event log", { timeout: 60_000 }, () => {
         top: Math.round(frame.scrollTop),
         end: Math.round(frame.scrollHeight - frame.clientHeight),
       });
-      // Shown fresh with every event at once: the frame opens at the top.
       log.events = [];
       await log.updateComplete;
       await append(3);
       const first = where();
-      // Scrolled to its end, one more arrives: the frame follows it.
       frame.scrollTop = frame.scrollHeight;
       await append(4);
       const followed = where();
-      // Scrolled up, one more arrives: the frame keeps the reader's place.
       frame.scrollTop = 0;
       await append(5);
       const kept = where();
@@ -428,8 +397,6 @@ describe("event log", { timeout: 60_000 }, () => {
   });
 
   test("held under a page zoom, the frame goes on following, its end a fraction of a pixel off", async () => {
-    // A CSS zoom leaves the frame's end short of its scroll by its rounding, past a pixel at 0.9
-    // and 1.1, which a pixel's threshold took for the reader scrolling up.
     const lost: string[] = await page.evaluate(`(async () => {
       const lost = [];
       const event = (index) => ({ ...${JSON.stringify(stage(0))}, id: "${run}." + index });

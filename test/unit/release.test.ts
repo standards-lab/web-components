@@ -1,8 +1,4 @@
-// The release's integrity: a pnpm pack of the build, extracted, against package.json's files and
-// exports, its license, and its dependencies, by release.ts's releaseProblems, as it stands and in
-// scratch copies with one fault each. It packs the dist/ that mise run build writes.
-// Adapted from spike-html-apps-components (10dde51): test/unit/release.test.ts, on
-// @standards-lab/web-foundation.
+// Adapted from spike-html-apps-components (10dde51): test/unit/release.test.ts, on @standards-lab/web-foundation.
 
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
@@ -16,14 +12,12 @@ const root = join(import.meta.dirname, "../..");
 const src = join(root, "src");
 const scratches: string[] = [];
 
-/** A new temporary directory, removed after the run. */
 function scratchDir() {
   const scratch = mkdtempSync(join(tmpdir(), "release-"));
   scratches.push(scratch);
   return scratch;
 }
 
-// The pack under test: pnpm pack's tarball, extracted, its package/ directory.
 let pack: string;
 before(() => {
   const scratch = scratchDir();
@@ -36,7 +30,6 @@ after(() => {
   for (const scratch of scratches) rmSync(scratch, { recursive: true, force: true });
 });
 
-/** The pack's package.json, as a fault edits it: each field a fault changes is there in the pack. */
 interface Packed {
   license: string;
   files: string[];
@@ -46,10 +39,8 @@ interface Packed {
   devDependencies: Record<string, string>;
 }
 
-/** A fault's edit: to the scratch copy's directory, its manifest, or both. */
 type Change = (dir: string, manifest: Packed) => unknown;
 
-/** A scratch copy of the pack, `change` applied to it and its manifest, and its problems. */
 function faulted(change: Change) {
   const copy = join(scratchDir(), "package");
   cpSync(pack, copy, { recursive: true });
@@ -80,8 +71,7 @@ describe("release pack", () => {
     }
   });
 
-  // npm prepares a git dependency that has a build script, which the tag's tree must never need.
-  test("the packed manifest carries no scripts", () => {
+  test("the packed manifest carries no scripts, so npm prepares no build of the tag's tree", () => {
     const packed = JSON.parse(readFileSync(join(pack, "package.json"), "utf8"));
     assert.equal(packed.scripts, undefined);
   });
@@ -172,7 +162,6 @@ describe("release pack", () => {
       `package.json declares peer ${foundation} *, not a caret range`,
     ],
     "no peer": [
-      // A field's removal takes the manifest as possibly without it, which delete needs.
       (_, copy: Partial<Packed>) => delete copy.peerDependencies,
       `package.json doesn't declare peer ${foundation}`,
     ],
@@ -249,8 +238,6 @@ describe("release pack", () => {
       "package.json declares lit-html, which no release needs",
     ],
   };
-  // The tags a caret range admits: its own major at 1.0.0 and above, its own minor below, and its
-  // own patch below 0.1.0, each at or above the range's floor.
   const admitted = {
     "^0.1.0": ["v0.1.0", "v0.1.7"],
     "^0.0.3": ["v0.0.3"],

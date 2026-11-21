@@ -4,16 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>pagination specimen</title>
-    <!-- The pagination's specimen page, from dist/, on documents.js's fixture: the first, a
-         middle, and the last page of nine entries by three, a two- and a three-digit page of 300
-         by three, cursor mode, disabled, and no total.
-         Every state is labelled, then shown again in a section 20rem wide, and the focus section
-         holds one instance the screenshot script reaches with Tab presses. The page links the
-         installed foundation's full entry, page-full.css, and imports register-full.js, so a
-         profile applies by attribute on the root; its import map is components.html's, so it runs
-         served only: mise run demo, or mise run screenshots.
-         Adapted from spike-html-apps-components (10dde51): demo/pagination.html, on
-         @standards-lab/web-foundation. -->
+    <!-- Adapted from spike-html-apps-components (10dde51): demo/pagination.html, on @standards-lab/web-foundation. -->
     <link rel="stylesheet" href="/deps/@standards-lab/web-foundation/dist/page-full.css" />
     <link rel="stylesheet" href="demo.css" />
     <script type="importmap">
@@ -38,8 +29,6 @@
       import { continued, files, pageSizes } from "./documents.js";
       import { make, specimens } from "./specimen.js";
 
-      // A pagination of the fields given, over three entries, nine in all by three a page unless
-      // the fields say otherwise.
       const pagination =
         (fields, items = files.items) =>
         () =>
@@ -65,7 +54,6 @@
             build: pagination({ total: null }),
           },
         ],
-        // No entries, so the first Tab reaches the page size, not an entry.
         { label: "Focused by Tab", build: pagination({ page: 2, more: true }, []) },
       );
     </script>

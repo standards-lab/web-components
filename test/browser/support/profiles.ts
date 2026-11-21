@@ -1,8 +1,5 @@
-// The profiles the installed foundation registers, read from its registry rather than written out,
-// so a profile a later foundation adds is covered by every case and capture that reads them: its
-// full registration module, register-full.js, imports every built-in unit's module, each of which
-// registers its name and loads no CSS, so Node imports it as a page does. The browser tier's
-// profile combinations and the screenshots description's --all both read these.
+// The profiles the installed foundation registers, read from its registry.
+// See docs/testing.md
 
 import "@standards-lab/web-foundation/register-full.js";
 import { DEFAULTS, profiles } from "@standards-lab/web-foundation/registry.js";

@@ -1,31 +1,25 @@
 /*
- * The specimen pages' layout: page layout is the consumer's, so neither the foundation's sheets
- * nor the components' set it, and every specimen page links this sheet after page-full.css. Its
- * own layer, after the foundation's, holds the main column, its sections, and each specimen's
- * frame, and reads only the foundation's tokens, so it follows every profile.
+ * The specimen pages' layout, in its own layer after the foundation's, on the foundation's tokens.
  * From spike-html-apps-components (10dde51): demo/demo.css.
  */
 
 @layer demo {
-  /* The page: one centered column, capped, inside gutters. */
   main {
     inline-size: min(100% - 2 * var(--space-m), 80rem);
     margin-inline: auto;
     padding-block: var(--space-l) var(--space-2xl);
   }
 
-  /* A section opens on its heading, which the elements layer gives no top margin as its
-     container's first child: the section takes the space instead. */
   main > section {
     margin-block-start: var(--space-xl);
   }
 
-  /* The narrow section holds every state again, constrained to a narrow column's width. */
+  /* The narrow section: every state again, in a narrow column's width. */
   .narrow {
     max-inline-size: 20rem;
   }
 
-  /* The states, one figure each, stacked; the fit section's figures stack the same way. */
+  /* The states and the fit section's figures, stacked. */
   .states,
   .fits {
     display: grid;
@@ -33,8 +27,7 @@
     margin-block-start: var(--space-s);
   }
 
-  /* A state: its label, then the component in a dashed frame, which also outlines a component
-     that renders nothing, so the empty states show their slot. */
+  /* A state: its label, then the component in a dashed frame. */
   .state {
     margin: 0;
   }
@@ -49,26 +42,19 @@
     border: var(--line-s) dashed var(--border);
     border-radius: var(--radius-sm);
   }
-  /* A page whose component draws its own frame, and never renders nothing, drops the dashed one,
-     so the capture shows the component's frame alone. */
+  /* A page whose component draws its own frame: the dashed frame dropped. */
   .unframed .state-frame {
     min-block-size: 0;
     padding: 0;
     border: 0;
   }
 
-  /* A component held to a block size by its page, so its content scrolls inside it. */
+  /* A component held to a block size, so its content scrolls inside it. */
   .held {
     block-size: 16rem;
   }
 
-  /* The parents that size a component to its content: an inline-block; a flex container whose
-     item is sized by its content alone, neither growing nor shrinking; and a grid whose auto
-     track takes its content's width beside a 1fr track, which takes the rest. Each outlines the
-     width the component took, a step out from it, so the component sits inset in the outline:
-     the inline-block, the component's parent, pads it and draws the outline on itself; the flex
-     and grid items are the component, which has no frame and is not padded here, so its outline
-     is offset by the same step, and its container pads to hold the offset clear of the caption. */
+  /* The parents that size a component to its content, each outlining the width it took. */
   .fit-inline-block,
   .fit-flex,
   .fit-grid {
@@ -97,9 +83,7 @@
     grid-template-columns: auto 1fr;
   }
 
-  /* The drawer page's app frame: at 48rem, the drawer's dock, and wider, its drawer docked as a
-     first column beside the content; below it, one column, the drawer modal and out of the flow,
-     and the toolbar's button that opens it shown. The drawer's own header titles it either way. */
+  /* The drawer page's app frame: two columns at the drawer's 48rem dock and wider, one below. */
   .app {
     margin-block-start: var(--space-l);
   }

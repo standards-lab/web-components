@@ -2,8 +2,8 @@
 // file picker, and the list of the uploads the app reports, each with its progress or its finished
 // state. It knows no SDK and no domain: files go out as File objects, a cancel goes out by the
 // upload's id, and the app does the uploading. It binds no key.
-// Adapted from spike-html-apps-components (10dde51): src/upload-dropzone.ts, on
-// @standards-lab/web-foundation.
+// Adapted from spike-html-apps-components (10dde51): src/upload-dropzone.ts, on @standards-lab/web-foundation.
+// See docs/internals.md
 
 import { html, LitElement, nothing, type PropertyDeclarations } from "lit";
 import { repeat } from "lit/directives/repeat.js";
@@ -43,14 +43,12 @@ export interface UploadCancelDetail {
   id: string;
 }
 
-/** The finished states' labels, which mark each apart in words as well as in color. */
 const finished: Record<Exclude<UploadState, "uploading">, string> = {
   done: "Done",
   failed: "Failed",
   cancelled: "Cancelled",
 };
 
-/** Whether a drag carries files, so text or a link dragged over the zone leaves it as it is. */
 function carriesFiles(event: DragEvent): boolean {
   return event.dataTransfer?.types.includes("Files") ?? false;
 }
@@ -83,11 +81,8 @@ export class UploadDropzone extends LitElement {
   declare accept: string;
   /** Refuses files by drop and by the picker; reflected to `disabled`. */
   declare disabled: boolean;
-  /** Whether files are dragged over the zone: the component's own state, never the app's. */
   declare private over: boolean;
 
-  // How many of the zone's boxes the drag is over: dragenter on a child comes before dragleave on
-  // the box it left, so the mark clears only when the count returns to zero, never between them.
   #depth = 0;
 
   constructor() {
@@ -106,7 +101,6 @@ export class UploadDropzone extends LitElement {
     if (!this.disabled) this.#input?.click();
   }
 
-  // The input clears once its files go out, so choosing the same file again still sends them.
   #change(e: Event): void {
     const input = e.target as HTMLInputElement;
     const files = [...(input.files ?? [])];
@@ -114,9 +108,6 @@ export class UploadDropzone extends LitElement {
     if (!this.disabled && files.length) emit<FilesSelectDetail>(this, "files-select", { files });
   }
 
-  // Each drag event that carries files is the zone's: its default cancelled, so a drop never
-  // opens the file in the page, disabled or not. While disabled the drop effect is none, so the
-  // pointer shows the zone refuses.
   #enter(e: DragEvent): void {
     if (!carriesFiles(e)) return;
     e.preventDefault();
@@ -154,10 +145,6 @@ export class UploadDropzone extends LitElement {
   #upload(upload: UploadItem) {
     const size = formatBytes(upload.size);
     const uploading = upload.state === "uploading";
-    // The trailing cell, at the item's end: an uploading item's cancel control, beside its name,
-    // or a finished one's label, centered on its two lines. The detail line sits under the name:
-    // an uploading item's bar, as wide as the item, and its bytes sent of its size; a finished
-    // one's size, and a failed one's message after it.
     const end =
       upload.state === "uploading"
         ? html`<button
@@ -169,8 +156,6 @@ export class UploadDropzone extends LitElement {
           Cancel
         </button>`
         : html`<span class="state">${finished[upload.state]}</span>`;
-    // The bytes follow the bar, the sent count held to the widest count's width, so the bar keeps
-    // its length as they climb.
     const sent = Math.min(Math.max(upload.sent, 0), upload.size);
     const detail = uploading
       ? html`<progress value=${sent} max=${upload.size} aria-label="Uploading ${upload.name}"></progress
@@ -188,8 +173,6 @@ export class UploadDropzone extends LitElement {
   render() {
     const over = this.over && !this.disabled;
     const uploads = this.uploads ?? [];
-    // Each upload's row is keyed by its id, so a focused cancel control stays with its upload as
-    // the app reorders or removes others.
     return html`<div
         class="zone ${over ? "over" : ""}"
         @dragenter=${this.#enter}

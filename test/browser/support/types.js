@@ -1,6 +1,5 @@
 // The type guards: values that hold to the declarations dist/ ships, so a declaration that
-// narrows what a consumer may write fails `types:browser`. No page runs this module; tsc checks
-// it with the in-page modules, against the same dist/.
+// narrows what a consumer may write fails `types:browser`.
 // From spike-html-apps-components (10dde51): test/browser/support/types.js.
 
 /** @import { LogEvent } from "../../../dist/event-log.js" */

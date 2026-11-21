@@ -1,13 +1,9 @@
-// mise run screenshots' description, which web-tooling's web-screenshots bin reads: each specimen
-// page under demo/, captured whole in tiles, and the drawer's page in its viewport at a wide and a
-// narrow width, its drawer docked, closed, open, and open right to left; the profile's facets,
-// palette, space, and type, at the foundation's defaults, zen, regular, and mono; --all's
-// profiles, every palette the foundation registers at the defaults, light and dark, then each other
-// space and type, compact and sans, at zen, read from its registry as the browser tier reads
-// them; the profiles each page registers, from the page's registry; and the repository served as
-// the browser tier serves it.
-// Adapted from spike-html-apps-components (10dde51): scripts/screenshots.config.ts, on
-// @standards-lab/web-tooling, web-foundation v0.3.0's themes and registry key.
+// The capture description web-tooling's web-screenshots bin reads for mise run screenshots: each
+// specimen page under demo/, whole in tiles, and the drawer's page in its viewport at a wide and a
+// narrow width in four states; the palette, space, and type facets at the foundation's defaults;
+// --all's profiles; each page's registered profiles; and the repository served as the browser tier
+// serves it.
+// Adapted from spike-html-apps-components (10dde51): scripts/screenshots.config.ts, on web-tooling.
 
 import type {
   DescribedPage,
@@ -19,13 +15,10 @@ import type {
 import { DEFAULTS, colors, spaces, types } from "../test/browser/support/profiles.ts";
 import { served } from "../test/browser/support/served.ts";
 
-/** The drawer page's mode is the viewport's: at its dock, 48rem, and wider, and below it. */
-const wide = { width: 1280, height: 800 };
-const narrow = { width: 480, height: 800 };
+const docked = { width: 1280, height: 800 };
+const undocked = { width: 480, height: 800 };
 
-/** Opens the drawer as a user does, Enter on the toolbar's Documents button, the page's direction
- * set first, and resolves once its slide has ended; the drawer's first control holds focus. */
-const opened =
+const openedByEnter =
   (dir: "ltr" | "rtl"): Step =>
   async (page) => {
     await page.evaluate(`document.documentElement.dir = "${dir}"`);
@@ -40,38 +33,35 @@ const opened =
     })()`);
   };
 
-/** The drawer page's states, each its viewport alone. */
 const drawerStates: DescribedState[] = [
   {
     name: "drawer-docked",
     caption: "the drawer, docked at 48rem and wider",
-    viewport: wide,
+    viewport: docked,
     full: false,
   },
   {
     name: "drawer-closed",
     caption: "the drawer, closed below 48rem",
-    viewport: narrow,
+    viewport: undocked,
     full: false,
   },
   {
     name: "drawer-open",
     caption: "the drawer, open below 48rem",
-    viewport: narrow,
+    viewport: undocked,
     full: false,
-    open: opened("ltr"),
+    open: openedByEnter("ltr"),
   },
   {
     name: "drawer-open-rtl",
     caption: "the drawer, open below 48rem, right to left",
-    viewport: narrow,
+    viewport: undocked,
     full: false,
-    open: opened("rtl"),
+    open: openedByEnter("rtl"),
   },
 ];
 
-/** The specimen pages, in the order they're captured and numbered, each one full-page state but
- * the drawer's. */
 const pages: DescribedPage[] = (
   [
     ["status-badge", "the status badge"],
@@ -95,8 +85,6 @@ const pages: DescribedPage[] = (
     states: drawerStates,
   });
 
-/** The page's registered names, by flag, read from the foundation's store at its well-known
- * global key, so a profile an extension page registers counts too; its color facet is palette's. */
 const REGISTRY = `(() => {
   const store = globalThis[Symbol.for("web-foundation.registry")] ?? {};
   return { palette: store.color ?? [], space: store.space ?? [], type: store.type ?? [] };
