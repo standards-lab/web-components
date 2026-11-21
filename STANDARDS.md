@@ -19,6 +19,9 @@ The architecture pages that apply, in the architecture repository:
   import nothing above them.
 - `architecture/principles/validation-first.md`: a component checks what it is given, a content
   type, a JSON text, a URL in Markdown, before it renders it.
+- `architecture/principles/comments.md` governs TypeScript, JavaScript, CSS, HTML, tests, scripts,
+  and every configuration file (TOML, YAML, JSONC, `.gitignore`, `.prettierignore`), not just
+  exported API.
 
 ## Design
 
@@ -61,13 +64,13 @@ The architecture pages that apply, in the architecture repository:
 
 ## Code
 
-- Code meets the bar of spike-html-conventions' `layers/` code at a88828a: a header of about 2–6
-  lines, a one-line doc comment per export, and comments only for a non-obvious why, beside the
-  code it explains rather than in the header.
-- A copied file names its source repository and commit in a provenance line, which reads
-  `From|Adapted from <repo> (<commit>): <path>`. It names the immediate source alone; that source
-  keeps the earlier lines. A JSON file, which takes no comment, has its line in
-  `context/README.md`.
+- A module header documents the public contract, what the module provides and promises, with no
+  reasoning; each export carries a one-line doc comment. A sheet's CSS custom properties, classes,
+  and layers are its exports, and their comments stay.
+- A copied file names each source in one provenance line, which reads
+  `From|Adapted from <repo> (<commit>): <path>`, with at most a short clause naming what changed.
+  It names the immediate source alone; that source keeps the earlier lines. A JSON file, which takes
+  no comment, has its line in `context/README.md`.
 - Sources use `.ts` relative specifiers, which tsc rewrites.
 - The browser tier tests `dist/`, and no server transforms what it serves.
 - Tests are TypeScript run under Node's type stripping, erasable syntax only, type-checked by

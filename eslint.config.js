@@ -3,6 +3,7 @@
 // Adapted from spike-html-apps-components (10dde51): eslint.config.js, on
 // @standards-lab/web-foundation.
 
+import comments from "@eslint-community/eslint-plugin-eslint-comments";
 import js from "@eslint/js";
 import { defineConfig } from "eslint/config";
 import boundaries from "eslint-plugin-boundaries";
@@ -85,6 +86,22 @@ export default defineConfig([
   // The build, gitignored, which ESLint doesn't read.
   { ignores: ["dist/"] },
   { files: code, extends: [js.configs.recommended, tseslint.configs.recommended] },
+  {
+    files: code,
+    plugins: { "@eslint-community/eslint-comments": comments },
+    rules: {
+      "@eslint-community/eslint-comments/require-description": "error",
+      "@typescript-eslint/ban-ts-comment": [
+        "error",
+        {
+          "ts-check": false,
+          "ts-expect-error": "allow-with-description",
+          "ts-ignore": "allow-with-description",
+          "ts-nocheck": "allow-with-description",
+        },
+      ],
+    },
+  },
   { files: code, languageOptions: { globals: globals.browser } },
   { files: code, rules: { "no-restricted-syntax": ["error", ...cssImports] } },
   // The suite and the scripts run on node; test/'s .js, the modules a test page loads, run in the
