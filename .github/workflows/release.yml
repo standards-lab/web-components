@@ -1,5 +1,5 @@
 # Publishes the release a vX.Y.Z tag cuts, dispatched by hand with the tag once it is pushed. The
-# tag is cut by hand, as README.md's Release gives it: on a pack commit whose tree is the pack and
+# tag is cut by hand, as docs/release.md gives it: on a pack commit whose tree is the pack and
 # whose one parent is a merge commit on main. A tag push can't run it: GitHub reads a tag push's
 # workflows from the tagged tree, which holds only the pack, so it runs from main's copy instead.
 # The workflow runs the check on that parent, which builds dist/, packs it, holds the tag's tree to

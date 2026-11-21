@@ -7,7 +7,7 @@ imports the SDK. An application's internal element becomes a component once a se
 needs it.
 
 It is a package under the `@standards-lab` scope, released by a plain `vX.Y.Z` tag. Its goals
-live in the coordinator's roadmap (`standards-lab/context/roadmap.toml`, v1.client.stack), and its
+live in the coordinator's roadmap (`standards-lab/roadmap/index.toml`, v1.client.stack), and its
 strategy is `standards-lab/context/web-client.md`.
 
 ## Provenance
@@ -32,7 +32,7 @@ their provenance here:
 
 ## Capability map
 
-- **Conversation**: the chat thread and the composer.
-- **Ingest**: the upload dropzone and the stage timeline, its stages given by the app.
-- **Inspection**: the event log, search results, artifact viewer, and document list.
-- **Controls**: the status badge, entry, pagination, and `sl-drawer`.
+- **Conversation** (built): [the chat thread and the composer](../docs/components.md#conversation).
+- **Ingest** (built): [the upload dropzone and the stage timeline](../docs/components.md#ingest).
+- **Inspection** (built): [the artifact viewer, event log, search results, and document list](../docs/components.md#inspection).
+- **Controls** (built): [the status badge, entry, pagination, and drawer](../docs/components.md#controls).
