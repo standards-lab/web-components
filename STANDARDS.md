@@ -19,8 +19,7 @@ The architecture pages that apply, in the architecture repository:
   import nothing above them.
 - `architecture/principles/validation-first.md`: a component checks what it is given, a content
   type, a JSON text, a URL in Markdown, before it renders it.
-- `architecture/principles/comments.md`: every comment; reasoning a comment can't hold lives in
-  `docs/`.
+- `architecture/principles/comments.md`: the five kinds of comment.
 
 ## Design
 
@@ -66,7 +65,7 @@ The architecture pages that apply, in the architecture repository:
 
 - A module header documents the public contract, what the module provides and promises, with no
   reasoning; each export carries a one-line doc comment. A sheet's CSS custom properties, classes,
-  and layers are its exports, and their comments stay.
+  and layers are its exports, and each carries its comment.
 - A copied file names each source repository and commit in one provenance line per source, which
   reads `From|Adapted from <repo> (<commit>): <path>`, plus at most a short clause naming what
   changed, never why, and a third-party source's licence after a semicolon. The lines its immediate

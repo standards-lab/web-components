@@ -165,8 +165,8 @@ the behavior and layout each one holds to.
   `no-extraneous-dependencies`: lit-html, which lit depends on, is installed beside it; the SDK is
   the sibling layer's and the app sits above every layer; a devDependency ships nothing.
 - The package's own name resolves to its build, not its `src/`, and the table alone catches it:
-  `no-extraneous-dependencies` passes a self-import in a package
-  whose manifest has an `exports` field, as Node resolves one.
+  `no-extraneous-dependencies` passes a self-import in a package whose manifest has an `exports`
+  field, as Node resolves one.
 - A value import of a declaration file is caught in each value form, an inline `type` specifier
   among them, since `verbatimModuleSyntax` keeps that import.
 - The allowed imports use names that hold dots, which a rule must tell from `.` and `..` segments.
