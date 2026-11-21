@@ -59,7 +59,7 @@ that latest release so a consumer can declare it beside the components, by the r
 rule, `caretAdmits`. typescript is held to the newest version typescript-eslint's peer range
 accepts. A pin held back from its latest is named, with its reason, in `mise.toml`'s `HOLDS` list,
 in the format `scripts/currency.sh` gives. Each action a workflow uses is compared with its
-repository's latest release; none is while there is no workflow.
+repository's latest release.
 
 ## Lint
 

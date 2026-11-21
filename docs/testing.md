@@ -50,7 +50,8 @@ the behavior and layout each one holds to.
   component adds is covered with no edit. One case pins that the registry lists at least the four
   built-in colors, so an empty read can't pass with nothing checked. `demo/components.html` is left
   out: it links only the lean entry, so it shows one profile.
-- Text in a fully transparent color shows nothing, as a hidden mark does, so it takes no color token.
+- Text in a fully transparent color shows nothing, as a hidden mark does, so it takes no color
+  token.
 - The stage timeline holds no control, so the focus ring cases skip it; a case pins that it renders
   nothing focusable, so a control it gains must get a ring case.
 
@@ -167,5 +168,5 @@ the behavior and layout each one holds to.
 - A value import of a declaration file is caught in each value form, an inline `type` specifier
   among them, since `verbatimModuleSyntax` keeps that import.
 - The allowed imports use names that hold dots, which a rule must tell from `.` and `..` segments.
-- `lint` runs ESLint with `-c` on the repository's config, whose patterns then match from the
+- The `lint` mise task runs ESLint with `-c` on the repository's config, whose patterns then match from the
   tree, the working directory, and whose plugins load from the repository's `node_modules`.

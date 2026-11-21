@@ -24,8 +24,8 @@ each sheet is laid out as it is.
   is taken as unzoomed.
 - Valid JSON is shown by `formatJson()` from its own tokens: `JSON.parse` decides validity alone and
   its value is thrown away, since printing it would move integer-like keys first, rewrite numbers,
-  and drop duplicate keys. Text whose formatting would pass the longest string, a `RangeError`, shows
-  as it is.
+  and drop duplicate keys. Text whose formatting would pass the longest string, a `RangeError`,
+  shows as it is.
 
 ## Artifact viewer
 
@@ -74,8 +74,8 @@ each sheet is laid out as it is.
 
 ## Document list
 
-- Each document maps to its entry's item once, in a `WeakMap`, while the app holds it, so an entry is
-  handed the same item across renders and updates only when its document changes.
+- Each document maps to its entry's item once, in a `WeakMap`, while the app holds it, so an entry
+  is handed the same item across renders and updates only when its document changes.
 - The paging properties are the pagination's own declarations, so each attribute converts as the
   pagination's does.
 - The selected item holds `aria-current`: the entry's button is inside its own shadow root, out of
@@ -92,8 +92,8 @@ each sheet is laid out as it is.
 - The mode is null until the element connects, and again once it is removed, so a reconnected
   element reapplies its mode; the first mode on connecting is no switch, so `open` from the markup
   stands.
-- A removed modal dialog leaves the top layer but keeps its `open` attribute, which a reconnect would
-  show non-modally, so removing the element closes it.
+- A removed modal dialog leaves the top layer but keeps its `open` attribute, which a reconnect
+  would show non-modally, so removing the element closes it.
 - The element tracks whether it has opened the dialog modally, so a close it caused itself, one
   queued before a later open, or one from a dialog a switch has since replaced is never reported.
 - The media query's `change` event lags a resize by a frame, while its `matches` is current, so
@@ -106,8 +106,8 @@ each sheet is laid out as it is.
 
 - Each `wbr` in the content type is `aria-hidden`: Chrome's accessibility tree reads a `wbr` as a
   space, so the button's name would say "text/ plain".
-- The time is split into its date and its clock, each in a span, only when the locale writes the date
-  first and the clock last; otherwise it is the whole text, unsplit.
+- The time is split into its date and its clock, each in a span, only when the locale writes the
+  date first and the clock last; otherwise it is the whole text, unsplit.
 
 ## Event log
 
@@ -122,8 +122,8 @@ each sheet is laid out as it is.
   elsewhere on the page reaches this renderer.
 - The lexer leaves named character references in text, link destinations, and titles for its own
   renderer's HTML to resolve, and text inside a raw block as written. They are resolved by the HTML
-  parser in a `textarea`'s RCDATA, where no markup is parsed, of a document with no browsing context,
-  which loads and runs nothing.
+  parser in a `textarea`'s RCDATA, where no markup is parsed, of a document with no browsing
+  context, which loads and runs nothing.
 - A link's destination is checked by the URL parser, which reads it as an anchor's `href` would be
   read, trimming spaces and controls, dropping tabs and newlines, and folding case, so
   `JAVASCRIPT:` and `java\tscript:` are the scheme they spell. A link has no target, and
@@ -141,10 +141,10 @@ each sheet is laid out as it is.
 
 - Two code points match case-insensitively when they are the same, or the same in lower or upper
   case, each compared alone: the rune-by-rune simple case folding a search does, near enough to mark
-  what such a search matched. Marks are found on the text as given, never on a lowered copy, so their
-  offsets are the text's own even where a letter's other case is longer.
-- A snippet's ellipses are joined to their text by a word joiner (U+2060), so a narrow line leaves no
-  ellipsis alone.
+  what such a search matched. Marks are found on the text as given, never on a lowered copy, so
+  their offsets are the text's own even where a letter's other case is longer.
+- A snippet's ellipses are joined to their text by a word joiner (U+2060), so a narrow line leaves
+  no ellipsis alone.
 - A `total` that is NaN, from an attribute that doesn't parse, counts as none.
 
 ## Stage timeline
@@ -156,8 +156,8 @@ each sheet is laid out as it is.
 
 ## Upload dropzone
 
-- The drag counts the zone's boxes it is over: `dragenter` on a child comes before `dragleave` on the
-  box it left, so the mark clears only when the count returns to zero.
-- Every drag that carries files has its default cancelled, disabled or not, so a drop never opens the
-  file in the page; disabled, the drop effect is `none`, so the pointer shows the zone refuses.
+- The drag counts the zone's boxes it is over: `dragenter` on a child comes before `dragleave` on
+  the box it left, so the mark clears only when the count returns to zero.
+- Every drag that carries files has its default cancelled, disabled or not, so a drop never opens
+  the file in the page; disabled, the drop effect is `none`, so the pointer shows the zone refuses.
 - The picker's input clears once its files go out, so choosing the same file again still sends them.

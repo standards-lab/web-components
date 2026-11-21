@@ -60,13 +60,9 @@ Two-way: no tag.
 
 ## Progress
 
-slices 0/6 committed · standards — · spec — · editor —
+slices 6/6 committed · standards ✓ · spec ✓ · editor ✓
 
 ## Decisions
-
-- adopt: held @standards-lab/web-foundation at v0.3.0: v0.4.0 renames `--accent-color` and
-  `--interaction-color` and changes adopted element rules; v1.client.stack's components-settings
-  takes it with its design review. (C1)
 
 ## Pending edits
 

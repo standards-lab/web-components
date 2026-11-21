@@ -34,5 +34,7 @@ their provenance here:
 
 - **Conversation** (built): [the chat thread and the composer](../docs/components.md#conversation).
 - **Ingest** (built): [the upload dropzone and the stage timeline](../docs/components.md#ingest).
-- **Inspection** (built): [the artifact viewer, event log, search results, and document list](../docs/components.md#inspection).
-- **Controls** (built): [the status badge, entry, pagination, and drawer](../docs/components.md#controls).
+- **Inspection** (built): [the artifact viewer, event log, search results, and document
+  list](../docs/components.md#inspection).
+- **Controls** (built): [the status badge, entry, pagination, and
+  drawer](../docs/components.md#controls).

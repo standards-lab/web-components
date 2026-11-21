@@ -55,7 +55,8 @@ the foundation's `page.css`:
 - `./status-badge.js`: `sl-status-badge`, a label that dispatches `badge-select`.
 - `./entry.js`: `sl-entry`, one directory or file of a document hierarchy, as a button.
 - `./pagination.js`: `sl-pagination`, a page of entries between its summary and its controls.
-- `./drawer.js`: `sl-drawer`, its children docked inline on a wide viewport, in a modal drawer below.
+- `./drawer.js`: `sl-drawer`, its children docked inline on a wide viewport, in a modal drawer
+  below.
 - `./markdown.js`: `markdown(source)`, a Markdown string as a Lit template of plain elements.
 - `./json.js`: `formatJson(text)`, valid JSON text re-indented from its own tokens.
 - `./artifact-viewer.js`: `sl-artifact-viewer`, one artifact's content by its content type.

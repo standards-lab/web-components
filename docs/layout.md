@@ -43,9 +43,9 @@ layout each one promises.
   `visibility: hidden`, so it is as wide as the widest.
 - A visually hidden name (the composer's label, the entry's kind, the drawer's Close label) is a
   one-pixel absolute box clipped to nothing, so it takes no row and no gap.
-- `field-sizing` is Baseline newly available, as the foundation's `.field-grow` notes. Without it the
-  composer's field keeps one row and the native resize, and the pagination's page field keeps the
-  browser's own width for a number input, wider and never clipped.
+- `field-sizing` is Baseline newly available, as the foundation's `.field-grow` notes. Without it
+  the composer's field keeps one row and the native resize, and the pagination's page field keeps
+  the browser's own width for a number input, wider and never clipped.
 
 ## Artifact viewer
 
@@ -93,9 +93,9 @@ layout each one promises.
 
 - A user's message sits at the inline end, short of the full width, on the first elevated surface;
   the assistant's spans the list. Neither has a border: the thread's frame is the one.
-- A reasoning item with nothing to expand is a paragraph whose gutter is an inline list item with the
-  summaries' own disclosure marker, undrawn, so its kind lines up with theirs. The gutter is hidden
-  from the accessibility tree, so no marker is read for a disclosure that isn't one.
+- A reasoning item with nothing to expand is a paragraph whose gutter is an inline list item with
+  the summaries' own disclosure marker, undrawn, so its kind lines up with theirs. The gutter is
+  hidden from the accessibility tree, so no marker is read for a disclosure that isn't one.
 - A line's parts are inline blocks: the accessible name Chromium computes for a summary drops the
   spaces between inline parts that Lit renders around its markers, but keeps a space at an inline
   block's edge, so the name reads the parts a word apart.

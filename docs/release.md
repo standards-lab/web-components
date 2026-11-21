@@ -47,11 +47,10 @@ the tag's tree to the pack, file for file; and creates the GitHub release from t
 
 `test/unit/release.ts` holds every release to its dependencies. lit and marked are its two
 dependencies, each at one version, never a range. The foundation is a peer, by a caret range on its
-versions, never a git spec: a consumer declares the foundation beside the components, from whichever
-source, and one copy serves both, so a restyle of its sheets by package name reaches the components'
-shadow roots. The repository's own install of it is a devDependency at one release tag on GitHub,
-never a range, a branch, a commit, or a `#semver:` spec, which bun fails, and a tag the peer range
-admits: the same leftmost nonzero part and no lower, so `^0.1.0` admits 0.1.x only. Which version,
-range, and tag is `package.json`'s, and `mise run currency` reports each behind its latest. The
-packed manifest carries no scripts, since npm prepares a git dependency that has a build script,
-which the tag's tree must never need.
+versions, never a git spec, so a consumer declares it from whichever source; the
+[README](../README.md#install) says why it is a peer. The repository's own install of it is a
+devDependency at one release tag on GitHub, never a range, a branch, a commit, or a `#semver:` spec,
+which bun fails, and a tag the peer range admits: the same leftmost nonzero part and no lower, so
+`^0.1.0` admits 0.1.x only. Which version, range, and tag is `package.json`'s, and
+`mise run currency` reports each behind its latest. The packed manifest carries no scripts, since
+npm prepares a git dependency that has a build script, which the tag's tree must never need.
