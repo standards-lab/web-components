@@ -19,14 +19,13 @@ The architecture pages that apply, in the architecture repository:
   import nothing above them.
 - `architecture/principles/validation-first.md`: a component checks what it is given, a content
   type, a JSON text, a URL in Markdown, before it renders it.
-- `architecture/principles/comments.md` governs TypeScript, JavaScript, CSS, HTML, tests, scripts,
-  and every configuration file (TOML, YAML, JSONC, `.gitignore`, `.prettierignore`), not just
-  exported API.
+- `architecture/principles/comments.md`: the five kinds of comment.
 
 ## Design
 
 - spike-html-design v0.7.0 is the visual baseline: native elements keep its styling, and every
-  profile renders as it does there, its color profiles as web-foundation v0.3.0's themes give them.
+  profile renders as it does there, its color profiles as the pinned web-foundation release's
+  themes give them.
 - A component is finished in every state it can show (empty, loading, streaming, error, long
   content, narrow width) and in every profile, light and dark, regular and compact.
 - Focus is always visible, and nothing shifts layout as data arrives. Motion is brief, or a quiet
@@ -66,7 +65,7 @@ The architecture pages that apply, in the architecture repository:
 
 - A module header documents the public contract, what the module provides and promises, with no
   reasoning; each export carries a one-line doc comment. A sheet's CSS custom properties, classes,
-  and layers are its exports, and their comments stay.
+  and layers are its exports, and each carries its comment.
 - A copied file names each source repository and commit in one provenance line per source, which
   reads `From|Adapted from <repo> (<commit>): <path>`, plus at most a short clause naming what
   changed, never why, and a third-party source's licence after a semicolon. The lines its immediate

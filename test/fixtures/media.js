@@ -1,12 +1,11 @@
 // The artifact viewer's media fixtures, for its specimen page and its browser tier: each a Blob,
-// built fresh for each call, small enough to keep in source. The static server serves only .html,
-// .js, and .css, so the bytes are here, as base64, rather than in files of their own types.
+// built fresh for each call.
 // summary.pdf, 549 B: one 300 x 200 pt page reading "Run summary" in Helvetica. chart.png, 167 B:
 // a 160 x 90 bar chart. clip.webm, 567 B: one second of a 64 x 36 VP9 clip in one color, no audio
 // track. silence.wav is built, not stored: a quarter second of 8 kHz, 8-bit mono silence, 2,044 B.
 // From spike-html-apps-components (10dde51): test/fixtures/media.js.
+// See docs/testing.md
 
-/** Bytes from base64. */
 const bytes = (base64) => Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
 
 /** A one-page PDF, application/pdf. */
@@ -64,18 +63,24 @@ export const webm = () =>
  * their midpoint, 128. */
 export const wav = () => {
   const samples = 2000;
+  const fmtChunkSize = 16;
+  const pcm = 1;
+  const channels = 1;
+  const sampleRate = 8000;
+  const bitsPerSample = 8;
+  const bytesPerFrame = (channels * bitsPerSample) / 8;
   const view = new DataView(new ArrayBuffer(44 + samples));
   const ascii = (at, text) => [...text].forEach((c, i) => view.setUint8(at + i, c.charCodeAt(0)));
   ascii(0, "RIFF");
   view.setUint32(4, 36 + samples, true);
   ascii(8, "WAVEfmt ");
-  view.setUint32(16, 16, true); // the fmt chunk's size
-  view.setUint16(20, 1, true); // PCM
-  view.setUint16(22, 1, true); // one channel
-  view.setUint32(24, 8000, true); // samples a second
-  view.setUint32(28, 8000, true); // bytes a second
-  view.setUint16(32, 1, true); // bytes a frame
-  view.setUint16(34, 8, true); // bits a sample
+  view.setUint32(16, fmtChunkSize, true);
+  view.setUint16(20, pcm, true);
+  view.setUint16(22, channels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * bytesPerFrame, true);
+  view.setUint16(32, bytesPerFrame, true);
+  view.setUint16(34, bitsPerSample, true);
   ascii(36, "data");
   view.setUint32(40, samples, true);
   for (let i = 0; i < samples; i++) view.setUint8(44 + i, 128);

@@ -101,6 +101,8 @@ the behavior and layout each one holds to.
 
 ## Artifact viewer
 
+- The media fixtures in `test/fixtures/media.js` hold their bytes as base64, since the static
+  server serves only `.html`, `.js`, and `.css`; each is small enough to keep in source.
 - The binary content is a PNG, since its signature holds U+001A, a control character text never
   holds.
 - chrome-headless-shell has no PDF viewer plugin, so a PDF's pages never render under test; the PDF
@@ -163,8 +165,8 @@ the behavior and layout each one holds to.
   `no-extraneous-dependencies`: lit-html, which lit depends on, is installed beside it; the SDK is
   the sibling layer's and the app sits above every layer; a devDependency ships nothing.
 - The package's own name resolves to its build, not its `src/`, and the table alone catches it:
-  `no-extraneous-dependencies` (eslint-plugin-import-x 4.18.0) passes a self-import in a package
-  whose manifest has an `exports` field, as Node resolves one.
+  `no-extraneous-dependencies` passes a self-import in a package whose manifest has an `exports`
+  field, as Node resolves one.
 - A value import of a declaration file is caught in each value form, an inline `type` specifier
   among them, since `verbatimModuleSyntax` keeps that import.
 - The allowed imports use names that hold dots, which a rule must tell from `.` and `..` segments.

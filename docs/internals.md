@@ -100,7 +100,7 @@ each sheet is laid out as it is.
   `show()` reads the mode first and runs the update at once: the dialog is rendered and shown before
   `show()` returns.
 - The heading takes focus as the dialog opens, by its `tabindex="-1"` and `autofocus`, because
-  `autofocus` on the dialog itself does nothing in Chromium 155 and 157.
+  `autofocus` on the dialog itself does nothing in Chromium.
 
 ## Entry
 
