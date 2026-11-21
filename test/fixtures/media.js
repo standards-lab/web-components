@@ -1,12 +1,11 @@
 // The artifact viewer's media fixtures, for its specimen page and its browser tier: each a Blob,
-// built fresh for each call, small enough to keep in source. The static server serves only .html,
-// .js, and .css, so the bytes are here, as base64, rather than in files of their own types.
+// built fresh for each call.
 // summary.pdf, 549 B: one 300 x 200 pt page reading "Run summary" in Helvetica. chart.png, 167 B:
 // a 160 x 90 bar chart. clip.webm, 567 B: one second of a 64 x 36 VP9 clip in one color, no audio
 // track. silence.wav is built, not stored: a quarter second of 8 kHz, 8-bit mono silence, 2,044 B.
 // From spike-html-apps-components (10dde51): test/fixtures/media.js.
+// See docs/testing.md
 
-/** Bytes from base64. */
 const bytes = (base64) => Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
 
 /** A one-page PDF, application/pdf. */

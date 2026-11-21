@@ -99,7 +99,9 @@ mise run currency                         # report every tool, package, and acti
 `web-screenshots` bin of [web-tooling](https://github.com/standards-lab/web-tooling), the
 devDependency the browser tier's driver and server also come from, over the capture description
 `scripts/screenshots.config.ts`; `mise run screenshots -- --help` lists the flags with the pages
-and profiles, and web-tooling's README documents them. The check never runs it.
+and profiles, and web-tooling's
+[screenshots page](https://github.com/standards-lab/web-tooling/blob/main/docs/screenshots.md)
+documents them. The check never runs it.
 
 The check lints with ESLint, Prettier, shellcheck, actionlint, and marathon's lint-context and
 lint-references. CI runs `mise run install` and the check on each pull request to main and each
