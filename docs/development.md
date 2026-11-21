@@ -6,7 +6,11 @@ workflows.
 
 ## Tools
 
-`scripts/preflight.sh` fails a task whose tool is missing, naming `mise run install`. The foundation
+`mise.toml` pins every tool the tasks run, and no task installs a missing one:
+`task.run_auto_install` is off, and `mise run install` is the one task that reads the network.
+`scripts/preflight.sh` fails a task whose tool is missing, naming `mise run install`.
+`scripts/lint-marathon.sh` runs marathon's lint-context and lint-references, both, and fails when
+either fails or is missing from PATH, naming the same command. The foundation
 is a peer, which the repository's devDependency installs at its tag, so preflight looks for it in
 `node_modules` beside lit and marked.
 
@@ -14,6 +18,10 @@ Chrome for Testing publishes no checksums, so each chrome-headless-shell bump ta
 size from the download by hand. mise caches a download by its checksum, so a version bumped without
 its own sha256 installs the old build; preflight compares the installed browser's version with the
 pin and fails, naming the sha256, when they differ.
+
+actionlint shellchecks each workflow's `run:` block too, with the pinned shellcheck.
+`types:browser` depends on `build`: the browser cases' in-page modules read the declarations the
+build ships. `types:test` doesn't: the tests import nothing from `dist/`.
 
 ## TypeScript
 
@@ -53,7 +61,9 @@ pinned to its repository's release tag, which the registry doesn't hold, so it i
 repository's latest release. A peer, the foundation, is declared by a caret range, which must admit
 that latest release so a consumer can declare it beside the components, by the release test's own
 rule, `caretAdmits`. typescript is held to the newest version typescript-eslint's peer range
-accepts. Each action a workflow uses is compared with its repository's latest release; none is
+accepts. A pin held back from its latest is named, with its reason, in `mise.toml`'s `HOLDS` list,
+one `<item> <pin>: <reason>` line each; the report prints it with that reason and still exits 0. A
+held tag holds its peer range with it. Each action a workflow uses is compared with its repository's latest release; none is
 while there is no workflow.
 
 ## Lint
@@ -101,6 +111,11 @@ the Markdown, the YAML, and `pnpm-lock.yaml`. `.prettierignore` ignores every fi
 directory and the code, JSON, and CSS files back in. Prettier also skips what `.gitignore` lists.
 
 ## Screenshots
+
+`mise run screenshots` is a reviewer's look at the specimen pages, not a test, so it is never a
+dependency of the check. The capture is web-tooling's web-screenshots bin, which takes the task's
+arguments with or without a leading `--`. The task is `raw`: with dependencies, mise prefixes a
+task's output through a pipe, and the terminal output's inline images need the terminal.
 
 `scripts/screenshots.config.ts` captures the drawer's page in its viewport at a width at its dock,
 48rem, and wider, and one below it, since the drawer's mode is the viewport's. Its open states open

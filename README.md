@@ -77,7 +77,7 @@ Tasks run through [mise](https://mise.jdx.dev):
 
 ```
 mise run install                          # the pinned tools, and node_modules with the foundation and the tooling at their tags; reads the network
-mise run check                            # lint, types, build, and the unit and browser tiers; reads no network
+mise run check                            # lint, lint-context, lint-references, types, build, and both test tiers; reads no network
 mise run build                            # src/ into dist/
 mise run demo                             # serve the components demo page and the specimen pages on dist/
 mise run screenshots                      # capture each specimen page at the defaults, zen, regular, and mono, light and dark, in tiles, inline in kitty
@@ -90,7 +90,7 @@ mise run screenshots --scheme dark        # only the scheme named, light or dark
 mise run screenshots --output browser     # a gallery of the captures, opened in the browser; directory keeps the files
 mise run screenshots --dir <path>         # write the captures into the directory named, with any of the above
 mise run screenshots --keep               # keep the terminal output's captures, with any of the above
-mise run currency                         # report every tool, package, and action pin, the foundation's and the tooling's tags, and the foundation's peer range, behind its latest
+mise run currency                         # report every tool, package, and action pin, the foundation's and the tooling's tags, and the foundation's peer range, behind its latest; a held pin with its reason
 ```
 
 `mise run screenshots` captures each specimen page light and dark, in vertical tiles at most
@@ -100,8 +100,9 @@ devDependency the browser tier's driver and server also come from, over the capt
 `scripts/screenshots.config.ts`; `mise run screenshots -- --help` lists the flags with the pages
 and profiles, and web-tooling's README documents them. The check never runs it.
 
-The check lints with ESLint, Prettier, shellcheck, and actionlint. CI runs `mise run install` and
-the check on each pull request to main and each push to it.
+The check lints with ESLint, Prettier, shellcheck, actionlint, and marathon's lint-context and
+lint-references. CI runs `mise run install` and the check on each pull request to main and each
+push to it.
 [docs/development.md](https://github.com/standards-lab/web-components/blob/main/docs/development.md)
 gives the reasoning behind the configuration and the scripts.
 
