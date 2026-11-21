@@ -102,6 +102,8 @@ and profiles, and web-tooling's README documents them. The check never runs it.
 
 The check lints with ESLint, Prettier, shellcheck, and actionlint. CI runs `mise run install` and
 the check on each pull request to main and each push to it.
+[docs/development.md](https://github.com/standards-lab/web-components/blob/main/docs/development.md)
+gives the reasoning behind the configuration and the scripts.
 
 ## Release
 

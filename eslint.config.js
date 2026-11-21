@@ -1,7 +1,8 @@
-// The lint the check runs: the recommended rules, the layer's imports in src/, and every .css
-// import a CSS module script. test/unit/layers.test.ts runs it over test/unit/layers-tree.ts.
-// Adapted from spike-html-apps-components (10dde51): eslint.config.js, on
-// @standards-lab/web-foundation.
+// The lint the check runs: the recommended rules, a reason on every suppression, the layer's
+// imports in src/, and every .css import a CSS module script. test/unit/layers.test.ts runs it over
+// test/unit/layers-tree.ts.
+// See docs/development.md
+// Adapted from spike-html-apps-components (10dde51): eslint.config.js, on web-foundation.
 
 import comments from "@eslint-community/eslint-plugin-eslint-comments";
 import js from "@eslint/js";
@@ -13,12 +14,8 @@ import tseslint from "typescript-eslint";
 
 const code = ["**/*.js", "**/*.ts"];
 
-// The attribute a CSS module script carries among a declaration's attributes, by its key's name
-// or its quoted key.
 const cssType = `:matches(ImportAttribute[key.name='type'], ImportAttribute[key.value='type'])[value.value='css']`;
 const cssSource = "[source.value=/\\.css$/]";
-// An import() whose specifier ends in .css: a string, or a template whose last part does, matched
-// at that part.
 const cssDynamic = [
   `ImportExpression${cssSource}`,
   "ImportExpression > TemplateLiteral.source > TemplateElement[tail=true][value.cooked=/\\.css$/]",
@@ -36,26 +33,20 @@ const cssImports = [
   })),
 ];
 
-// The layer table cut to the components: their sources, which may import themselves and three
-// packages by name, lit, marked, and the foundation, which the manifest declares, the foundation as
-// a peer; the foundation is reached only through its install, as a consumer reaches it.
 const foundation = "@standards-lab/web-foundation";
+/** The layer table cut to the components: their sources, which may import themselves and three
+ * packages by name, lit, marked, and the foundation, which the manifest declares, the foundation as
+ * a peer; the foundation is reached only through its install, as a consumer reaches it. */
 export const layers = [
   { name: "components", path: "src", may: ["components", "lit", "marked", foundation] },
 ];
 
-// The layer is an element by its directory, matched from the root (partialMatch false), with a
-// second pattern for a file in a directory whose name starts with a dot, which micromatch's **
-// never enters, so ./.well-known/ and ./..x/ stay in the layer.
 const elements = layers.map(({ name, path }) => ({
   type: name,
   pattern: [path, `${path}/**/.*`],
   partialMatch: false,
 }));
 
-// The rule's default is disallow, and it checks every origin (a package is external) and local
-// files no element holds: an import passes only when a policy names its target, the layer or a
-// package the table names, which the rule matches by its name, any subpath of it.
 const policies = layers.map(({ name, may }) => ({
   from: { element: { type: name } },
   allow: {
@@ -67,14 +58,6 @@ const policies = layers.map(({ name, may }) => ({
   },
 }));
 
-// A declaration file in the layer (the components hold none yet) has no runtime, so an import that
-// resolves to one passes only as a type import, `import type` or `export type`, which tsc erases:
-// the last policy refuses any other kind, and as the last whose selector matches it overrides the
-// allow before it. The dependency's kind is the declaration's, so `import { type X }` is a value
-// import here, as it is to verbatimModuleSyntax, which keeps it as `import {}` and so loads the
-// file. checkInternals has the rule judge an import within the layer too, which the layer's policy
-// allows. internalPath is a local file's path: a package imported by name, which the resolver
-// takes to the .d.ts its build ships beside each .js, is the allows' to judge, not this policy's.
 const declarations = {
   disallow: { to: { internalPath: "**/*.d.ts" }, dependency: { kind: "value" } },
   message:
@@ -83,7 +66,6 @@ const declarations = {
 };
 
 export default defineConfig([
-  // The build, gitignored, which ESLint doesn't read.
   { ignores: ["dist/"] },
   { files: code, extends: [js.configs.recommended, tseslint.configs.recommended] },
   {
@@ -104,8 +86,6 @@ export default defineConfig([
   },
   { files: code, languageOptions: { globals: globals.browser } },
   { files: code, rules: { "no-restricted-syntax": ["error", ...cssImports] } },
-  // The suite and the scripts run on node; test/'s .js, the modules a test page loads, run in the
-  // browser.
   { files: ["test/**/*.ts", "scripts/**"], languageOptions: { globals: globals.node } },
   {
     files: ["src/**"],
@@ -115,15 +95,8 @@ export default defineConfig([
       "import-x/resolver": { typescript: true },
       "boundaries/elements": elements,
     },
-    // The rule judges the file an import resolves to, never the specifier's text, and
-    // no-unresolved fails a specifier that names no file, so no import passes by naming none.
     rules: {
       "import-x/no-unresolved": "error",
-      // Each judges an import against package.json: a package name it doesn't declare in
-      // dependencies or peerDependencies, where the foundation is (a devDependency alone ships
-      // nothing, and includeInternal holds the package's own name, which resolves inside it, to
-      // the same), in every import form (includeTypes), and a relative path that reaches another
-      // package's files.
       "import-x/no-extraneous-dependencies": [
         "error",
         { devDependencies: false, includeInternal: true, includeTypes: true },

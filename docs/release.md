@@ -32,6 +32,17 @@ main, whose `package.json` version the tag names; runs the check on that parent;
 the tag's tree to the pack, file for file; and creates the GitHub release from the version's
 `CHANGELOG.md` section, with the tarball attached.
 
+## Workflows
+
+- **CI** runs the check on each pull request to main and each push to it. `mise run install` first
+  installs every pin `mise.toml` names, the chrome-headless-shell the browser tier runs in
+  included, and `node_modules`, the foundation and the tooling at their release tags.
+- **Release** checks out every branch and tag, so the pack commit's parent and main are both at
+  hand. The parent must be main's merge commit, so it has two parents of its own. The tagged tree
+  must be the tarball's `package/`, file for file. The release action releases the tag its `ref`
+  names, not the dispatching ref, main: it runs `gh release create` on that tag with no target, so
+  the release is for the tag the workflow fetched and checked.
+
 ## Dependencies
 
 `test/unit/release.ts` holds every release to its dependencies. lit and marked are its two
