@@ -1,7 +1,6 @@
 // The restyle case: one edit to the elements sheet repaints the buttons in both components' shadow
-// roots, since a CSS module script is one CSSStyleSheet per document.
-// Adapted from spike-html-apps-components (10dde51): test/browser/support/restyle.js, on
-// @standards-lab/web-foundation.
+// roots.
+// Adapted from spike-html-apps-components (10dde51): test/browser/support/restyle.js, on @standards-lab/web-foundation.
 
 import elements from "@standards-lab/web-foundation/baseline/elements.css" with { type: "css" };
 import { directories } from "../../../demo/documents.js";
@@ -9,10 +8,8 @@ import { settle, version } from "./probe.js";
 
 /** @import { EntryItem } from "../../../dist/entry.js" */
 
-/** The background the edit gives every button: a color no source sets. */
 const edited = "rgb(1, 2, 3)";
 
-/** Adds a button rule at the end of the sheet's foundation.elements block, so it wins. */
 function edit() {
   const layer = Array.from(elements.cssRules).find(
     (rule) => rule instanceof CSSLayerBlockRule && rule.name === "foundation.elements",
@@ -21,7 +18,7 @@ function edit() {
   layer.insertRule(`:where(button) { background-color: ${edited}; }`, layer.cssRules.length);
 }
 
-/** A background value as the page computes it. @param {string} background */
+/** @param {string} background */
 function computed(background) {
   const swatch = document.createElement("div");
   swatch.style.setProperty("background", background);
@@ -31,7 +28,7 @@ function computed(background) {
   return value;
 }
 
-/** Each button's background, any transition finished. @param {HTMLButtonElement[]} buttons */
+/** @param {HTMLButtonElement[]} buttons */
 const backgrounds = (buttons) =>
   buttons.map((button) => {
     for (const animation of button.getAnimations()) animation.finish();
@@ -58,15 +55,14 @@ export async function run() {
   if (!buttons.every((button) => button instanceof HTMLButtonElement)) {
     throw new Error("a button didn't render in a shadow root");
   }
-  // A var() with no token computes to transparent, rgba(0, 0, 0, 0): an opaque rgb() shows the
-  // tokens loaded.
   const expected = computed("var(--bg-2)");
   const before = backgrounds(buttons);
   edit();
   const after = backgrounds(buttons);
 
+  const tokensLoaded = expected.startsWith("rgb(");
   const ok =
-    expected.startsWith("rgb(") &&
+    tokensLoaded &&
     before.every((value) => value === expected) &&
     after.every((value) => value === edited);
   const line = `pagination ${before[0]} -> ${after[0]}, entry ${before[1]} -> ${after[1]}`;

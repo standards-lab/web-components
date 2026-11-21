@@ -1,14 +1,4 @@
-// The upload dropzone from this repository's dist/, on test/fixtures/components.html: files chosen
-// through the native picker its button opens by the keyboard, and files dropped on the zone, each
-// sending files-select with an array of the files, bubbling and composed; the drag-over mark set
-// by a drag of files, kept across the zone's children, and cleared by leaving or dropping; a drop
-// never left to the browser; disabled refusing both paths, and reflecting; accept the picker's
-// alone; the uploads listed, each its name, its formatted size, an uploading one's bar and bytes
-// sent and its cancel control, which sends upload-cancel with its id, a finished one's label; and
-// neither progress nor a change of state moving an upload's rows; and each upload's layout, its
-// detail under its name, a finished label centered on the item, an uploading bar across it.
-// Adapted from spike-html-apps-components (10dde51): test/browser/upload-dropzone.test.ts, on
-// @standards-lab/web-tooling.
+// Adapted from spike-html-apps-components (10dde51): test/browser/upload-dropzone.test.ts, on @standards-lab/web-tooling.
 
 import assert from "node:assert/strict";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
@@ -23,8 +13,6 @@ import type { Server } from "@standards-lab/web-tooling/server.js";
 
 import { served } from "./support/served.ts";
 
-/** An event the document heard: a files-select's detail as whether its files are an array and
- * each file's name and size, an upload-cancel's as it was sent, its id. */
 interface Heard {
   type: string;
   detail: { array?: boolean; files?: [string, number][]; id?: string };
@@ -32,16 +20,12 @@ interface Heard {
   composed: boolean;
 }
 
-/** A drag event as the document heard it, after the zone: its default prevented, and its drop
- * effect. */
 interface Drag {
   type: string;
   prevented: boolean;
   effect: string;
 }
 
-/** What window.read resolves to: the zone's mark, its controls, the uploads listed, and the
- * events sent and heard. */
 interface Read {
   over: boolean;
   disabled: boolean;
@@ -64,7 +48,6 @@ interface Read {
   heard: Heard[];
 }
 
-/** A box's edges, as getBoundingClientRect gives them. */
 interface Edges {
   left: number;
   right: number;
@@ -78,23 +61,14 @@ describe("upload dropzone", { timeout: 60_000 }, () => {
   let page: Page;
   let files: string;
   before(async () => {
-    // Two files on disk for the picker, as a user's file system holds them.
     files = mkdtempSync(join(tmpdir(), "upload-dropzone."));
     writeFileSync(join(files, "notes.txt"), "a note");
     writeFileSync(join(files, "figure.png"), Buffer.alloc(1536));
     server = await serve(served);
     browser = await launch();
     page = await browser.open(`${server.origin}/test/fixtures/components.html`);
-    // Keys go to the focused element as a user's would, and :focus-visible matches, though a
-    // headless page never has the window's focus.
     await page.cdp("Emulation.setFocusEmulationEnabled", { enabled: true });
-    // The picker opens as a protocol event rather than a dialog, which the case answers.
     await page.cdp("Page.setInterceptFileChooserDialog", { enabled: true });
-    // window.mount(fields) renders a dropzone of the fields into main, recording every event its
-    // host dispatches and every files-select and upload-cancel the document hears, a
-    // files-select's files by name and size; window.drag(type, names, target) dispatches a drag
-    // event carrying files of those names, or text when names is null, on the zone or the named
-    // part of it, resolving to whether its default was prevented and its drop effect.
     await page.evaluate(`window.verdict.then(async () => {
       await import("/dist/upload-dropzone.js");
       window.heard = [];
@@ -111,8 +85,6 @@ describe("upload dropzone", { timeout: 60_000 }, () => {
           composed: event.composed,
         }));
       }
-      // The document hears each drag event after the zone, so it reads what the zone left: its
-      // default prevented, and its drop effect.
       window.drags = [];
       for (const type of ["dragover", "drop"]) {
         document.addEventListener(type, (event) => window.drags.push({
@@ -193,9 +165,6 @@ describe("upload dropzone", { timeout: 60_000 }, () => {
     page.evaluate(
       `window.drag(${JSON.stringify(type)}, ${JSON.stringify(names)}, ${JSON.stringify(target)})`,
     );
-  // A user's drag of the files on disk named onto the zone's center, through the browser's own
-  // drag path: entered, moved over, then dropped, or left when drop is false. Resolves to what the
-  // document heard of the dragover and the drop.
   const dragFiles = async (
     names: string[],
     { drop = true }: { drop?: boolean } = {},
@@ -214,7 +183,6 @@ describe("upload dropzone", { timeout: 60_000 }, () => {
     }
     return page.evaluate("window.drags");
   };
-  // A key pressed and released on the focused element.
   const press = async (key: string, keyCode: number, text?: string) => {
     const event = { key, code: key, windowsVirtualKeyCode: keyCode };
     await page.cdp("Input.dispatchKeyEvent", {
@@ -224,10 +192,7 @@ describe("upload dropzone", { timeout: 60_000 }, () => {
     });
     await page.cdp("Input.dispatchKeyEvent", { type: "keyUp", ...event });
   };
-  // Focuses the picker button, then presses Enter, as the keyboard opens the picker; resolves to
-  // the picker's event, or null when none opens within the wait.
   const openPicker = async () => {
-    // Page.fileChooserOpened's parameters, the two the cases read.
     const opened = new Promise<{ mode: string; backendNodeId: number }>((resolve) =>
       page.on("Page.fileChooserOpened", resolve),
     );
@@ -286,12 +251,14 @@ describe("upload dropzone", { timeout: 60_000 }, () => {
       },
     ]);
     assert.equal(shown.focused, "pick", "focus stays on the picker button");
-    // The input clears once its files go out, so the same file chosen again goes out again.
-    assert.equal(await page.evaluate("window.part('input').files.length"), 0);
+    assert.equal(
+      await page.evaluate("window.part('input').files.length"),
+      0,
+      "the input clears once its files go out, so the same file chosen again goes out again",
+    );
   });
 
   test("files dropped on the zone go out as an array, and the drop is never the browser's", async () => {
-    // Entering the zone fires a dragover too, so the document hears one or more, then the drop.
     const drags = await dragFiles(["notes.txt", "figure.png"]);
     assert.deepEqual(drags.at(-1), { type: "drop", prevented: true, effect: "copy" });
     assert.ok(drags.length > 1, "dragovers before the drop");
@@ -318,8 +285,6 @@ describe("upload dropzone", { timeout: 60_000 }, () => {
   });
 
   test("a user's drag of files marks the zone until it moves off it", async () => {
-    // Entered and moved over, the drag still on the zone; then moved off it, below the dropzone,
-    // and ended there without a drop.
     const { x, y }: { x: number; y: number } = await page.evaluate(`(() => {
       const rect = window.part(".zone").getBoundingClientRect();
       return { x: rect.left + rect.width / 2, y: rect.top + 8 };
@@ -341,7 +306,6 @@ describe("upload dropzone", { timeout: 60_000 }, () => {
     assert.equal((await read()).over, false);
     await drag("dragenter", ["a.txt"]);
     assert.equal((await read()).over, true, "entered");
-    // Moving onto the button enters it before leaving the zone's own box: the mark holds.
     await drag("dragenter", ["a.txt"], ".pick");
     await drag("dragleave", ["a.txt"], ".zone");
     assert.equal((await read()).over, true, "over a child");
@@ -374,13 +338,10 @@ describe("upload dropzone", { timeout: 60_000 }, () => {
       { type: "dragover", prevented: true, effect: "none" },
       "the pointer shows a refusal",
     );
-    // A drop that arrives anyway is taken from the browser, so it never opens the file, and sent
-    // nowhere.
     const dropped = await drag("drop", ["a.txt"]);
     assert.equal(dropped.prevented, true, "a refused drop never opens the file");
     assert.deepEqual((await read()).heard, [], "a refused drop sends nothing");
     assert.equal(await openPicker(), null, "the picker does not open");
-    // A click on the button, or a change on the input holding a file, sends nothing either.
     await page.evaluate(`(() => {
       window.part(".pick").click();
       const input = window.part("input");
@@ -391,7 +352,6 @@ describe("upload dropzone", { timeout: 60_000 }, () => {
     })()`);
     const after = await read();
     assert.deepEqual([after.sent, after.heard], [[], []]);
-    // Enabled again, the attribute goes, and a drop goes out.
     await page.evaluate(`document.querySelector("sl-upload-dropzone").disabled = false`);
     assert.equal((await read()).disabled, false);
     await drag("drop", ["a.txt"]);
@@ -497,9 +457,6 @@ describe("upload dropzone", { timeout: 60_000 }, () => {
   });
 
   test("neither progress nor a change of state moves an upload's rows", async () => {
-    // One upload at 20rem, its name long enough to be cut short, measured as it advances and then
-    // as it finishes each way: the item's height, the name's box, and the bar's.
-    // A missing bar's box is undefined, which JSON leaves out.
     const measure = async (
       upload: Record<string, unknown>,
     ): Promise<{ height: number; name: number[]; bar?: number[]; cut: boolean }> => {
@@ -542,11 +499,6 @@ describe("upload dropzone", { timeout: 60_000 }, () => {
   });
 
   test("a cancel control focused by Tab keeps its whole focus outline clear of the bar and the bytes, and the item its height as the upload finishes", async () => {
-    // The uploading item first, under the zone, then a finished one, at 20rem and at 40rem. The
-    // outline's box is the control's grown by the outline's width and offset, as the foundation's
-    // :focus-visible draws it; it must leave at least a px of space above the bar and the bytes.
-    // Then the same element's upload finishes, the control gone and its label in its place, and
-    // the item keeps its height.
     for (const width of ["20rem", "40rem"]) {
       await mount({ uploads: [uploads[0], uploads[1]] });
       await page.evaluate(
@@ -608,10 +560,6 @@ describe("upload dropzone", { timeout: 60_000 }, () => {
   });
 
   test("an upload's detail sits under its name at its start; a label is centered on the item, a bar spans it", async () => {
-    // Every state at 20rem and at 40rem. Each item's detail line starts where its name does,
-    // below it; a finished item's label ends the item, centered on its two lines; an uploading
-    // item's cancel control ends the name's line, and under it the bar runs from the name's start
-    // to its bytes, which end the item.
     await mount({ uploads });
     for (const width of ["20rem", "40rem"]) {
       const items: {

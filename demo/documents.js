@@ -3,9 +3,7 @@
 // From spike-html-apps-components (10dde51): demo/documents.js.
 
 /**
- * go-web-sdk's paginated read: `page` is omitted under a cursor, `total` when the read didn't
- * count, and `next` when the read can't continue by cursor.
- *
+ * go-web-sdk's paginated read: `page` omitted under a cursor, `total` uncounted, `next` at the end.
  * @template T
  * @typedef {{
  *   items: T[];
@@ -19,7 +17,6 @@
 
 /**
  * A directory as a listing presents it; only the single-directory read adds `path`.
- *
  * @typedef {{
  *   id: string;
  *   parent_id: string | null;
@@ -34,7 +31,6 @@
 
 /**
  * A file; `size` is null until its write completes.
- *
  * @typedef {{
  *   id: string;
  *   directory_id: string;
@@ -48,12 +44,10 @@
  * }} File
  */
 
-/** The document root's id: every directory below lists under it. */
 const root = "01a06121-cc00-78d5-82fe-91ab0d2477c3";
 
 /**
  * The second page of the root's directories by number, sorted by name: page 2 of 3.
- *
  * @type {Page<Directory>}
  */
 export const directories = {
@@ -95,7 +89,6 @@ export const directories = {
 
 /**
  * The first page of the designs directory's files: one still pending, so its size is null.
- *
  * @type {Page<File>}
  */
 export const files = {
@@ -142,9 +135,7 @@ export const files = {
 };
 
 /**
- * The legal directory's files continued by cursor (`cursor=<next>` in place of `page`): a
- * continued page has no `page`, and this read didn't count, so it has no `total` either.
- *
+ * The legal directory's files continued by cursor: no `page`, and uncounted, so no `total`.
  * @type {Page<File>}
  */
 export const continued = {

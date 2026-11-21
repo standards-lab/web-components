@@ -5,7 +5,8 @@
 The modules of `@standards-lab/web-components`, by capability. The
 [README](https://github.com/standards-lab/web-components/blob/main/README.md#use) shows how a page
 loads them. [layout.md](layout.md) says why each sheet is laid out as it is, and
-[internals.md](internals.md) why each module is built as it is.
+[internals.md](internals.md) why each module is built as it is, and [testing.md](testing.md) why
+the tests measure as they do.
 
 ## Controls
 
@@ -158,7 +159,10 @@ import map. Each component has a specimen page, `demo/<name>.html`, for `status-
 `pagination`, `artifact-viewer`, `chat-thread`, `composer`, `upload-dropzone`, `stage-timeline`,
 `event-log`, `search-results`, `document-list`, and `drawer`. A specimen page shows every state of
 its component, labelled, then again in a section 20rem wide, and, for a component that holds a
-control, one instance reached by the keyboard to show its focus ring. The drawer's mode is the
+control, one instance reached by the keyboard to show its focus ring: the screenshot script focuses
+the focus section's `[data-focus-start]` mark, which takes focus only by script, then presses Tab as
+many times as the mark's value says, so `:focus-visible` matches. A page whose component draws its
+own frame drops the dashed one, so a capture shows the component's frame alone. The drawer's mode is the
 viewport's, so its page is an app's frame instead, its states the page's at two widths: docked at
 1280px, and closed, open, and open right to left at 480px. The specimen pages link the
 foundation's `page-full.css` and import its `register-full.js`, so a profile applies by its

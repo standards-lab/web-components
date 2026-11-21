@@ -1,20 +1,4 @@
-// The chat thread from this repository's dist/, on test/fixtures/components.html: each item and
-// part type as it renders, user text plain and assistant text as Markdown, raw HTML as text; a
-// refusal labelled; each status labelled; unknown item and part types skipped; verbose hiding and
-// showing reasoning, function calls, and their outputs, collapsed, valid JSON formatted from its
-// own tokens and invalid JSON as it is; a reasoning item's summary on its line and its content
-// inside, as it streams, without a summary, and without content, a line alone, and the line's
-// accessible name; a streaming message re-rendered in place, the items above
-// it the same nodes; the verbose attribute reflected; a held frame opening at its end and following
-// the newest item, as items are added and a streaming reply grows, only from its end or on a user's
-// message, alone or with the reply's first text, the reader scrolling by the wheel, under a page
-// zoom too, and scrolling instantly; a details opened in a held frame's last item followed, under
-// reduced motion too, and a reader scrolled up keeping their place; one opened above the last item
-// not followed, its summary kept in place, nor a later growth of the last; a thread reattached
-// after a detached update scrolling nothing on its own; a thread not held scrolling no container
-// of its consumer's, as items are added or a details opens; and no event sent.
-// Adapted from spike-html-apps-components (10dde51): test/browser/chat-thread.test.ts, on
-// @standards-lab/web-tooling.
+// Adapted from spike-html-apps-components (10dde51): test/browser/chat-thread.test.ts, on @standards-lab/web-tooling.
 
 import assert from "node:assert/strict";
 import { after, before, describe, test } from "node:test";
@@ -27,7 +11,6 @@ import type { Server } from "@standards-lab/web-tooling/server.js";
 import { deepFormatted } from "./support/deep.ts";
 import { served } from "./support/served.ts";
 
-/** What window.read reads from a list item of a thread's shadow root. */
 interface Item {
   kind: string;
   element: string;
@@ -46,27 +29,22 @@ interface Item {
   empty: string | null;
 }
 
-/** A node of the page's accessibility tree, as Accessibility.getFullAXTree gives it. */
 interface AXNode {
   ignored: boolean;
   role?: { value: string };
   name?: { value: string };
 }
 
-/** A frame's scroll position: its scrollTop and the most it scrolls, rounded. */
 interface Where {
   top: number;
   end: number;
 }
 
-/** A held frame's place around a click on a summary, and the summary's top in the viewport and
- * whether it shows in the frame. */
 interface Opened extends Where {
   summary: number;
   shown: boolean;
 }
 
-/** What window.read reads from a thread's shadow root. */
 interface View {
   frame: { tabindex: string | null; role: string | null; label: string | null };
   list: string | null;
@@ -82,8 +60,6 @@ describe("chat thread", { timeout: 60_000 }, () => {
     server = await serve(served);
     browser = await launch();
     page = await browser.open(`${server.origin}/test/fixtures/components.html`);
-    // window.shown(fields) renders a thread of the fields into main, resolving to what its shadow
-    // root shows: the list's semantics, and each list item's kind, label, status, and content.
     await page.evaluate(`window.verdict.then(async () => {
       await import("/dist/chat-thread.js");
       window.read = (thread) => {
@@ -287,21 +263,21 @@ describe("chat thread", { timeout: 60_000 }, () => {
     assert.deepEqual(thinking.plain, ["Paris is a city.\nCall the tool."]);
     assert.deepEqual(called.names, ["get_weather", "call_1"]);
     assert.equal(called.pre, '{\n  "city": "Paris"\n}');
-    // The output names the function it answers, by its call_id.
-    assert.deepEqual(answered.names, ["get_weather", "call_1"]);
+    assert.deepEqual(
+      answered.names,
+      ["get_weather", "call_1"],
+      "the output names its call's function",
+    );
     assert.equal(answered.pre, '{\n  "temperature": 14\n}');
   });
 
   test("a call's name and id longer than a narrow thread's line wrap inside its frame, whole where they fit", async () => {
-    // A call_id as the pipeline's model writes one, and a long function name.
     const id = "call_01a19c590db77cc28219329571ef2e06";
     const name = "lookup_document_metadata_and_extracted_chunks";
     const items = [
       { ...call, name, call_id: id },
       { ...output, call_id: id },
     ];
-    // At the width given: whether the frame scrolls sideways, and each name and id's text, whether
-    // its box ends inside its item and the frame's content box, and the lines it takes.
     const measure = (
       width: string,
     ): Promise<{ scrolls: boolean; parts: [string, boolean, number][] }> =>
@@ -344,15 +320,14 @@ describe("chat thread", { timeout: 60_000 }, () => {
       narrow.parts.every(([, , lines]) => lines > 1),
       JSON.stringify(narrow.parts),
     );
-    // Wrapped, each line's name still reads the name and the id whole, a word apart.
     const { nodes }: { nodes: AXNode[] } = await page.cdp("Accessibility.getFullAXTree", {});
     assert.deepEqual(
       nodes
         .filter((node) => !node.ignored && node.role?.value === "DisclosureTriangle")
         .map((node) => node.name?.value ?? ""),
       [`Function call ${name} ${id}`, `Function output ${name} ${id}`],
+      "wrapped, each line's name reads the name and the id whole",
     );
-    // Wide, each keeps whole, on one line.
     const wide = await measure("60rem");
     assert.equal(wide.scrolls, false);
     assert.deepEqual(
@@ -384,7 +359,6 @@ describe("chat thread", { timeout: 60_000 }, () => {
     assert.equal(thinking.open, false);
     assert.equal(thinking.line, "Reasoning Look up the weather. Then answer.");
     assert.equal(thinking.gist, "Look up the weather. Then answer.");
-    // A middle dot and a space set the summary off from the kind, shown but not read.
     assert.equal(thinking.separator, '"·\u00a0" / ""');
     assert.deepEqual(thinking.plain, ["Paris is a city.\nCall the tool."]);
   });
@@ -407,7 +381,6 @@ describe("chat thread", { timeout: 60_000 }, () => {
       ]),
       [["details", "Reasoning Streaming", "Streaming", null, ["Paris is"]]],
     );
-    // A summary part just added, its text still empty, is no summary yet.
     const added = await shown({
       verbose: true,
       items: [{ ...streaming, summary: [{ type: "summary_text", text: "" }] }],
@@ -455,16 +428,18 @@ describe("chat thread", { timeout: 60_000 }, () => {
       items: [{ ...reasoning, status: "in_progress", content: [] }],
     });
     assert.equal(streaming.items[0].line, "Reasoning Streaming Look up the weather.");
-    // Beside a details, its kind lines up with the summary's, after the marker's room, and the
-    // accessibility tree holds no marker for it: the paragraph reads its text alone.
     await shown({ verbose: true, items: [{ ...reasoning, content: [] }, reasoning] });
     const lefts: number[] = await page.evaluate(`[
       ...document.querySelector("sl-chat-thread").shadowRoot.querySelectorAll(".kind"),
     ].map((kind) => kind.getBoundingClientRect().left)`);
-    assert.equal(lefts[0], lefts[1]);
+    assert.equal(lefts[0], lefts[1], "the line's kind lines up with the summary's");
     const { nodes }: { nodes: AXNode[] } = await page.cdp("Accessibility.getFullAXTree", {});
     const roles = nodes.filter((node) => !node.ignored).map((node) => node.role?.value);
-    assert.equal(roles.filter((role) => role === "ListMarker").length, 0);
+    assert.equal(
+      roles.filter((role) => role === "ListMarker").length,
+      0,
+      "the line alone exposes no marker",
+    );
   });
 
   test("a reasoning item's line is named, in the accessibility tree, for its kind and its summary", async () => {
@@ -481,8 +456,6 @@ describe("chat thread", { timeout: 60_000 }, () => {
     const names = nodes
       .filter((node) => !node.ignored && node.role?.value === "DisclosureTriangle")
       .map((node) => node.name?.value ?? "");
-    // The separator is generated with no alternative text, so the name reads the kind, the
-    // status, and the summary, a word apart, as a call's reads its kind, name, and call_id.
     assert.deepEqual(names, [
       "Reasoning Look up the weather.",
       "Reasoning",
@@ -492,8 +465,6 @@ describe("chat thread", { timeout: 60_000 }, () => {
   });
 
   test("a call's arguments and its output show their own keys, order, numbers, and duplicates as written", async () => {
-    // Parsed and printed again, "10" and "2" would move first, 9007199254740993 would round, 1.0
-    // and 1e3 would be rewritten, and the first "dup" would be dropped.
     const args = '{"b":1,"10":[1.0,1e3,9007199254740993],"2":{},"dup":"a","dup":"b"}';
     const formatted =
       '{\n  "b": 1,\n  "10": [\n    1.0,\n    1e3,\n    9007199254740993\n  ],\n  "2": {},\n  "dup": "a",\n  "dup": "b"\n}';
@@ -537,8 +508,7 @@ describe("chat thread", { timeout: 60_000 }, () => {
     assert.equal(view.items[0].pre, '{"city": Par');
     assert.equal(view.items[1].empty, "No arguments.");
     assert.equal(view.items[2].empty, "No output.");
-    // An output whose call isn't in the thread names its call_id alone.
-    assert.deepEqual(view.items[3].names, ["call_9"]);
+    assert.deepEqual(view.items[3].names, ["call_9"], "an output whose call isn't in the thread");
     assert.equal(view.items[3].pre, "line one\nline two");
     assert.equal(view.items[4].empty, "No reasoning text.");
   });
@@ -676,12 +646,6 @@ describe("chat thread", { timeout: 60_000 }, () => {
     });
   });
 
-  // A held thread's follow cases. followed(steps) mounts a thread held to 10rem and shows each
-  // step's items in turn, awaiting each update, after the reader scrolls the frame as the step
-  // says, by the wheel over it: "up", 40px up, or "end", as far down as it goes, the scroll
-  // settled before the update. It resolves to the frame's place after each step, read the moment
-  // the update completes, so a smooth scroll still under way would read short of its end, and
-  // where the reader's scroll left it, before the update.
   const followed = async (
     steps: { items: unknown[]; scroll?: "up" | "end"; verbose?: boolean }[],
   ): Promise<(Where & { scrolled: number | null })[]> => {
@@ -702,7 +666,6 @@ describe("chat thread", { timeout: 60_000 }, () => {
         })()`);
         const deltaY = scroll === "up" ? -40 : 100_000;
         await page.cdp("Input.dispatchMouseEvent", { type: "mouseWheel", x, y, deltaX: 0, deltaY });
-        // Settled: moved, and unchanged across two frames.
         const settled = `new Promise((resolve) => {
           const top = window.held.scrollTop;
           requestAnimationFrame(() => requestAnimationFrame(() =>
@@ -731,13 +694,11 @@ describe("chat thread", { timeout: 60_000 }, () => {
     return places;
   };
 
-  // A long conversation: turns of a question and a reply, each reply a few paragraphs.
   const turns = (count: number) =>
     Array.from({ length: count }, (_, turn) => [
       user(`Question ${turn + 1}?`),
       assistant(`msg_t${turn}`, `Answer ${turn + 1}.\n\nA second paragraph.\n\nA third.`),
     ]).flat();
-  // A reply streaming word by word: its text after each of the words.
   const words = "The run read the document, chunked it, and embedded every chunk in turn".split(
     " ",
   );
@@ -771,8 +732,6 @@ describe("chat thread", { timeout: 60_000 }, () => {
   });
 
   test("held under a page zoom, the thread goes on following, its end a fraction of a pixel off", async () => {
-    // A CSS zoom leaves the frame's end short of its scroll by its rounding, past a pixel at 0.9
-    // and 1.1; each height is one where a pixel's threshold stopped the follow part way.
     const lost: string[] = await page.evaluate(`(async () => {
       const lost = [];
       for (const [zoom, height] of [["0.9", "157.3px"], ["1.1", "9.77rem"], ["1.33", "10rem"], ["0.67", "9.77rem"]]) {
@@ -806,7 +765,6 @@ describe("chat thread", { timeout: 60_000 }, () => {
   test("scrolled up from the end by the reader, the thread keeps their place; scrolled back to the end, it follows again", async () => {
     const history = turns(4);
     const ask = user("How did the run go?");
-    // The reply a paragraph longer at each step, so each step grows the scroll.
     const reply = (count: number) =>
       assistant("msg_s", Array(count).fill(streamed(words.length)).join("\n\n"), "in_progress");
     const places = await followed([
@@ -871,8 +829,6 @@ describe("chat thread", { timeout: 60_000 }, () => {
   });
 
   test("the thread follows instantly where motion is allowed, never smoothly", async () => {
-    // Reduced motion could only make a scroll less smooth, so the case that proves the scroll
-    // instant is motion allowed.
     await page.cdp("Emulation.setEmulatedMedia", {
       features: [{ name: "prefers-reduced-motion", value: "no-preference" }],
     });
@@ -888,11 +844,6 @@ describe("chat thread", { timeout: 60_000 }, () => {
     }
   });
 
-  // A held thread's details opened, by a click on its summary, the native toggle, with no update
-  // of the thread's: opened({ scroll, below }) mounts a held, verbose thread whose call_1 has long
-  // arguments, the last item or followed by the item below, scrolled up by the wheel first when
-  // asked, opens the call's details, and resolves to the frame's place, and the clicked summary's
-  // top in the viewport, before the click and two frames after it.
   const opened = async ({ scroll, below }: { scroll?: "up"; below?: unknown } = {}) => {
     const args = JSON.stringify(
       Object.fromEntries(Array.from({ length: 12 }, (_, key) => [`key_${key}`, key])),
@@ -924,8 +875,6 @@ describe("chat thread", { timeout: 60_000 }, () => {
   };
 
   test("held at its end, a details opened in the last item keeps the frame's end in view", async () => {
-    // Read two frames after the click, a smooth scroll would be short of the end: motion allowed
-    // proves the follow instant too.
     await page.cdp("Emulation.setEmulatedMedia", {
       features: [{ name: "prefers-reduced-motion", value: "no-preference" }],
     });
@@ -964,8 +913,6 @@ describe("chat thread", { timeout: 60_000 }, () => {
   });
 
   test("a details grown above the last item leaves a later growth of the last unfollowed", async () => {
-    // At the end, a details opened above the last item: the reader is no longer at the end, so
-    // the last item's details opened next keeps their place too.
     const { after: above } = await opened({
       below: { ...call, id: "fc_2", call_id: "call_2", arguments: '{"city":"Lyon"}' },
     });
@@ -1022,7 +969,6 @@ describe("chat thread", { timeout: 60_000 }, () => {
         end: Math.round(element.scrollHeight - element.clientHeight),
       });
       const updated = { frame: where(frame), pane: where(pane) };
-      // A details opened at its end grows it with no update.
       [...frame.querySelectorAll("summary")].at(-1).click();
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       return [updated, { frame: where(frame), pane: where(pane) }];

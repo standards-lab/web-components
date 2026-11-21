@@ -1,13 +1,4 @@
-// The search results from this repository's dist/, on test/fixtures/components.html: the status
-// line, one polite region, in every state, idle, loading, no matches, matches, and error, and the
-// state reflected; each match a native button, its name, its field's label, and its snippet, a
-// snippet that only repeats the name left out; the query's occurrences marked case-insensitively,
-// as text, markup and a pattern's specials literal, a letter whose other case is longer shifting
-// no mark, a blank query marking nothing; activating a match by click and by the keyboard sending
-// open with its id, bubbling and composed; a focused match kept as the list changes; and no
-// event as the properties change.
-// Adapted from spike-html-apps-components (10dde51): test/browser/search-results.test.ts, on
-// @standards-lab/web-tooling.
+// Adapted from spike-html-apps-components (10dde51): test/browser/search-results.test.ts, on @standards-lab/web-tooling.
 
 import assert from "node:assert/strict";
 import { after, before, describe, test } from "node:test";
@@ -19,8 +10,6 @@ import type { Server } from "@standards-lab/web-tooling/server.js";
 
 import { served } from "./support/served.ts";
 
-/** What window.read reads from the results: the state, the status line's role and text, the
- * list's label and busy, each match's parts, and the events sent and heard. */
 interface Shown {
   state: string | null;
   status: [string | null, string];
@@ -45,13 +34,7 @@ describe("search results", { timeout: 60_000 }, () => {
     server = await serve(served);
     browser = await launch();
     page = await browser.open(`${server.origin}/test/fixtures/components.html`);
-    // Keys go to the focused element as a user's would, though a headless page never has the
-    // window's focus.
     await page.cdp("Emulation.setFocusEmulationEnabled", { enabled: true });
-    // window.mount(fields) renders results of the fields into main, recording every event its
-    // host dispatches and every open the document hears; window.read() resolves to what the
-    // results show: the status line, and each match's parts, each name and snippet as a list of
-    // its text runs, a marked run in brackets.
     await page.evaluate(`window.verdict.then(async () => {
       await import("/dist/search-results.js");
       window.heard = [];
@@ -76,7 +59,6 @@ describe("search results", { timeout: 60_000 }, () => {
               .map((node) => (node.localName === "mark" ? "[" + node.textContent + "]" : node.textContent))
               .filter((text) => text !== "")
               .join("")
-              // A word joiner shows as "+", so a case sees where the snippet's ellipses join.
               .replaceAll("\\u2060", "+");
       window.read = async () => {
         const results = document.querySelector("sl-search-results");
@@ -111,7 +93,6 @@ describe("search results", { timeout: 60_000 }, () => {
   const mount = (fields: Record<string, unknown> = {}) =>
     page.evaluate(`window.mount(${JSON.stringify(fields)}).then(() => {})`);
   const read = (): Promise<Shown> => page.evaluate("window.read()");
-  // A key pressed and released on the focused element, with the text it types, if any.
   const press = async (key: string, keyCode: number, text?: string) => {
     const event = { key, code: key === " " ? "Space" : key, windowsVirtualKeyCode: keyCode };
     await page.cdp("Input.dispatchKeyEvent", {
@@ -122,7 +103,6 @@ describe("search results", { timeout: 60_000 }, () => {
     await page.cdp("Input.dispatchKeyEvent", { type: "keyUp", ...event });
   };
 
-  // The emulator's matches for "report": two in content, one in a name.
   const matches = [
     {
       id: "doc-1",
@@ -221,7 +201,6 @@ describe("search results", { timeout: 60_000 }, () => {
           name: "quarterly-[report].md",
           snippet: "…+revenue rose. This [report] covers the regions+…",
         },
-        // A name match's snippet only repeats its name, which shows marked: no snippet.
         { type: "button", field: "in name", name: "[Report] template.docx", snippet: null },
         {
           type: "button",
@@ -231,7 +210,6 @@ describe("search results", { timeout: 60_000 }, () => {
         },
       ],
     );
-    // The button's name, its content, starts with the document's name.
     assert.ok(shown.every(({ text }, index) => text.startsWith(matches[index].name)));
     await mount({ query: "report", items: matches.slice(0, 1) });
     assert.deepEqual((await read()).status, ["status", "1 match for “report”"]);
@@ -239,7 +217,6 @@ describe("search results", { timeout: 60_000 }, () => {
 
   test("a total above the matches given says how many of it are shown; unset, no more, or no matches, the count is theirs", async () => {
     const statuses: string[] = [];
-    // Each case's fields and total; the total is set in the page, since JSON writes NaN as null.
     for (const [fields, total] of [
       [{ query: "report", items: matches }, "140"],
       [{ query: "", items: matches }, "140"],
@@ -272,7 +249,6 @@ describe("search results", { timeout: 60_000 }, () => {
       "3 matches for “report”",
       "No matches for “report”",
     ]);
-    // By its attribute too, while loading and in an error the total says nothing.
     const attributed: string[] = await page.evaluate(`(async () => {
       const results = document.querySelector("sl-search-results");
       results.items = ${JSON.stringify(matches)};
@@ -294,7 +270,6 @@ describe("search results", { timeout: 60_000 }, () => {
 
   test("while loading a new query, the matches shown keep the marks of the query they answer", async () => {
     await mount({ query: "report", items: matches });
-    // The consumer searches anew: the query and loading first, the new matches once they arrive.
     const step = (fields: Record<string, unknown>) =>
       page.evaluate(`(async () => {
         const results = document.querySelector("sl-search-results");
@@ -305,8 +280,6 @@ describe("search results", { timeout: 60_000 }, () => {
       const { status, matches: shown } = await read();
       return [status[1], ...shown.map(({ name, snippet }) => `${name} | ${snippet}`)];
     };
-    // The query in one update and loading in the next, as the pipeline's search view sets them,
-    // or both in one.
     await step({ query: "weekly" });
     assert.equal((await marks())[3], "notes.md | …+a weekly [REPORT], not a monthly [report].");
     await step({ state: "loading" });
@@ -316,20 +289,15 @@ describe("search results", { timeout: 60_000 }, () => {
       "[Report] template.docx | null",
       "notes.md | …+a weekly [REPORT], not a monthly [report].",
     ]);
-    // Loading set first and the query after, the same.
     await step({ query: "monthly" });
     assert.equal((await marks())[3], "notes.md | …+a weekly [REPORT], not a monthly [report].");
-    // The new matches arrive, marked by the query they answer.
     await step({ items: matches.slice(2), state: "ready" });
     assert.deepEqual(await marks(), [
       "1 match for “monthly”",
       "notes.md | …+a weekly REPORT, not a [monthly] report.",
     ]);
-    // Matches set while still loading, as a search streaming them would, take the query too.
     await step({ query: "weekly", state: "loading", items: matches.slice(2) });
     assert.equal((await marks())[1], "notes.md | …+a [weekly] REPORT, not a monthly report.");
-    // A query set alone re-marks nothing in any state, and the count names the query the matches
-    // answer; set with the matches again, it marks them.
     await step({ query: "report", state: "ready" });
     assert.deepEqual(await marks(), [
       "1 match for “weekly”",
@@ -344,7 +312,6 @@ describe("search results", { timeout: 60_000 }, () => {
 
   test("a query set alone leaves the line naming the query its matches answer, the live region unchanged", async () => {
     await mount({ query: "report", items: matches });
-    // Every change to the status line's nodes from here on, which a polite live region reads.
     const changes = (fields: Record<string, unknown>): Promise<number> =>
       page.evaluate(`(async () => {
         const results = document.querySelector("sl-search-results");
@@ -370,20 +337,16 @@ describe("search results", { timeout: 60_000 }, () => {
       "[Report] template.docx",
       "notes.md",
     ]);
-    // Loading, the line says what it searches for now.
     assert.notEqual(await changes({ state: "loading" }), 0);
     assert.equal((await shown())[0], "Searching for “weekly”…");
-    // A paged count names it too, and no matches name the query whose empty answer they are.
     await mount({ query: "report", items: matches, total: 140 });
     assert.equal(await changes({ query: "weekly" }), 0);
     assert.equal((await shown())[0], "3 of 140 matches for “report”");
     await mount({ query: "report", items: [] });
     assert.equal(await changes({ query: "weekly" }), 0);
     assert.deepEqual(await shown(), ["No matches for “report”"]);
-    // The new query's empty answer, once it arrives, names it.
     assert.notEqual(await changes({ items: [] }), 0);
     assert.deepEqual(await shown(), ["No matches for “weekly”"]);
-    // From idle, a query set alone leaves the prompt: no search has answered.
     await mount({ query: "", items: [] });
     assert.equal(await changes({ query: "weekly" }), 0);
     assert.deepEqual(await shown(), ["Search document names and content."]);
@@ -418,7 +381,6 @@ describe("search results", { timeout: 60_000 }, () => {
       match.snippet,
       "<i>aab</i> and [<b>(a+b)*</b>] and [<B>(A+B)*</B>], never ab or aab",
     );
-    // The only elements are the parts and the marks: no markup from the text.
     assert.deepEqual(match.elements, ["span", "span", "span", "span", "mark", "mark"]);
     await mount({
       query: ".*",
@@ -428,7 +390,6 @@ describe("search results", { timeout: 60_000 }, () => {
   });
 
   test("a letter whose other case is longer shifts no mark, and folds as one letter", async () => {
-    // Lowered, "İ" is two code points, so marks found on a lowered copy would land two places off.
     await mount({
       query: "straße",
       items: [
@@ -448,7 +409,6 @@ describe("search results", { timeout: 60_000 }, () => {
       items: [{ id: "y", name: "İİİ.md", field: "content", snippet: "İİİİ report İ" }],
     });
     assert.equal((await read()).matches[0].snippet, "İİİİ [report] İ");
-    // A letter beyond the basic plane is one letter: the match is whole.
     await mount({
       query: "𝒜b",
       items: [{ id: "z", name: "z", field: "content", snippet: "x𝒜By" }],
@@ -469,8 +429,6 @@ describe("search results", { timeout: 60_000 }, () => {
       (await read()).matches.map(({ snippet }) => snippet),
       ["…+https://example.com/[report]s/q3+…", "…+[report]", "…"],
     );
-    // Held to a column narrower than the URL, the leading ellipsis shares its line with the URL's
-    // start.
     const lines: number = await page.evaluate(`(async () => {
       const results = document.querySelector("sl-search-results");
       results.style.inlineSize = "12rem";

@@ -1,7 +1,5 @@
-// The output formatJson owes text nested in arrays alone, `[` repeated, a 1, `]` repeated: the
-// outer 64 levels, MAX_DEPTH, each bracket on its line two spaces a level, and the levels below
-// them kept as written on the line where they open. Written out here rather than read from
-// formatJson, so a test that compares a view with it checks the formatter too.
+// The output formatJson owes text nested in arrays alone: the outer MAX_DEPTH levels indented, the
+// levels below them kept as written.
 // From spike-html-apps-components (10dde51): test/browser/support/deep.ts.
 
 /** `"[".repeat(depth) + "1" + "]".repeat(depth)` as formatJson formats it. */

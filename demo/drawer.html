@@ -4,20 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>drawer specimen</title>
-    <!-- The drawer's specimen page, from dist/: an app's frame, its documents in an sl-drawer
-         beside a document's content. The drawer's mode is the viewport's, so its states are the
-         page's at two widths rather than figures on one page: at 48rem and wider the drawer docks
-         as the frame's first column, under its own header; below it the frame is one column, the
-         drawer is closed, and a Documents button in the toolbar opens it as a modal drawer over
-         the whole viewport, under the drawer's own header and Close button. The drawer's header
-         is the one Documents heading in either mode. mise run screenshots captures it docked at
-         1280px, then closed, open, and open in a right-to-left page at 480px, each opened by the
-         keyboard on the toolbar's button so the drawer's first control shows its focus ring. The
-         page links the installed foundation's full entry, page-full.css, and imports
-         register-full.js, so a profile applies by attribute on the root; its import map is
-         components.html's, so it runs served only: mise run demo, or mise run screenshots.
-         Adapted from spike-html-apps-components (10dde51): demo/drawer.html, on
-         @standards-lab/web-foundation. -->
+    <!-- Adapted from spike-html-apps-components (10dde51): demo/drawer.html, on @standards-lab/web-foundation. -->
     <link rel="stylesheet" href="/deps/@standards-lab/web-foundation/dist/page-full.css" />
     <link rel="stylesheet" href="demo.css" />
     <script type="importmap">
@@ -41,7 +28,6 @@
 
       const drawer = document.querySelector("sl-drawer");
       document.querySelector("#open-documents").addEventListener("click", () => drawer.show());
-      // The toolbar's button says whether the drawer it controls is open.
       const expanded = () =>
         document.querySelector("#open-documents").setAttribute("aria-expanded", String(drawer.open));
       drawer.addEventListener("open", expanded);

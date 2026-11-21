@@ -4,22 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>search results specimen</title>
-    <!-- The search results' specimen page, from dist/: idle, before any query; loading, a first
-         search's and a new query's with the last matches kept, marked by the last query; no
-         matches for a query; several matches, in names and in content, as the emulator's search
-         sends them, and a paged search's first page of a total; an error with its message; a
-         long name and a long snippet, wrapping, ellipses kept; and markup, a pattern's
-         specials, and other cases of letters in a query and its snippets, marked as text. Every
-         state is labelled, then shown again in a section 20rem wide; the fit section holds two
-         short matches in three parents that size the results to their content, an inline-block, a
-         content-sized flex item, and a grid's auto track; and the focus section holds one instance
-         whose first match the screenshot script reaches with a Tab press. Each match is a native
-         button, bordered, so main is unframed: no specimen frame around them. The page links the
-         installed foundation's full entry, page-full.css, and imports register-full.js, so a
-         profile applies by attribute on the root; its import map is components.html's, so it runs
-         served only: mise run demo, or mise run screenshots.
-         Adapted from spike-html-apps-components (10dde51): demo/search-results.html, on
-         @standards-lab/web-foundation. -->
+    <!-- Adapted from spike-html-apps-components (10dde51): demo/search-results.html, on @standards-lab/web-foundation. -->
     <link rel="stylesheet" href="/deps/@standards-lab/web-foundation/dist/page-full.css" />
     <link rel="stylesheet" href="demo.css" />
     <script type="importmap">
@@ -42,11 +27,6 @@
       import "../dist/search-results.js";
       import { figure, make, specimens } from "./specimen.js";
 
-      // The emulator's matches for "report", as its search sends them: in document creation order,
-      // each the document's id, a UUID v7, and name, the field it matched in, and the snippet, up
-      // to 40 runes each side of the first match, an ellipsis at an end cut short. A document whose
-      // content matches is a content match, its name matching or not; one whose name alone matches
-      // is a name match, its snippet the name's.
       const matches = [
         {
           id: "0193a5c1-2f60-7a8b-8c9d-0e1f2a3b4c5d",
@@ -83,8 +63,6 @@
             "…https://intranet.example.com/projects/north-campus/reports/2026/q3/final-report-v12-approved.pdf…",
         },
       ];
-      // Markup and a pattern's specials in the query and its snippets, which mark as text; and
-      // letters whose other case is longer, which mark where they are.
       const literal = [
         {
           id: "lit-1",
@@ -103,8 +81,6 @@
       ];
 
       const results = (fields) => () => make("sl-search-results", fields);
-      // Results of the fields, then, once they render, the next fields set, as a consumer searching
-      // anew sets the new query and loading before its matches arrive.
       const answered = (fields, next) => () => {
         const element = results(fields)();
         element.updateComplete.then(() => Object.assign(element, next));
@@ -155,8 +131,6 @@
         ],
         { label: "Focused by Tab: the first match", build: results({ query: "report", items: matches }) },
       );
-      // Two short name matches in each parent that sizes the results to their content, by the
-      // parent's class in demo.css.
       const short = [
         { id: "s-1", name: "report.md", field: "name", snippet: "report.md" },
         { id: "s-2", name: "notes.md", field: "content", snippet: "…the weekly report…" },

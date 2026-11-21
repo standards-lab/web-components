@@ -4,21 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>event log specimen</title>
-    <!-- The event log's specimen page, from dist/: an empty log; one run's five stage events, as
-         the emulator sends them; events without a time among them; the same with one event's
-         data opened among the others, as a reader leaves it while events arrive; events of every kind of data, each opened: an
-         object, a string, null, an array, and none; and many events, three runs', which the page
-         holds to 16rem by demo.css's held class, so they scroll. Appending is not capturable, so
-         the browser tier tests it. Every state is labelled, then shown again in a section 20rem
-         wide; the fit section holds a run's first two events in three parents that size it to
-         their content, an inline-block, a content-sized flex item, and a grid's auto track; and
-         the focus section holds one instance whose first data toggle the screenshot script
-         reaches with a Tab press. The log draws its own frame, so main is unframed: no specimen
-         frame around it. The page links the installed foundation's full entry, page-full.css, and
-         imports register-full.js, so a profile applies by attribute on the root; its import map is
-         components.html's, so it runs served only: mise run demo, or mise run screenshots.
-         Adapted from spike-html-apps-components (10dde51): demo/event-log.html, on
-         @standards-lab/web-foundation. -->
+    <!-- Adapted from spike-html-apps-components (10dde51): demo/event-log.html, on @standards-lab/web-foundation. -->
     <link rel="stylesheet" href="/deps/@standards-lab/web-foundation/dist/page-full.css" />
     <link rel="stylesheet" href="demo.css" />
     <script type="importmap">
@@ -41,10 +27,6 @@
       import "../dist/event-log.js";
       import { figure, make, specimens } from "./specimen.js";
 
-      // The emulator's stage events, as its stream carries them: the type its prefix and the run
-      // domain's run.stage; the source its instance's; the subject the run's id, a UUID v7; the id
-      // the run's id and the stage's position; and the data the stage, its position, the run's
-      // stage count, and the document's id.
       const names = ["upload", "metadata", "extraction", "chunks", "embeddings"];
       const seconds = [7, 9, 16, 31, 58];
       const runs = [
@@ -63,7 +45,6 @@
         }));
       const run = stages(runs[0]);
       const many = runs.flatMap(stages);
-      // An event of each kind of data, the run's own source and subject; the last carries none.
       const kinds = [
         { ...run[0], id: "kinds.1", data: run[0].data },
         { ...run[1], id: "kinds.2", type: "emulator.run.note", data: "Metadata read from the document's first page." },
@@ -74,8 +55,6 @@
 
       const log = (fields, open = () => false) => () => {
         const element = make("sl-event-log", fields);
-        // Each event whose place the open function picks has its data's details opened once the
-        // log renders, as a reader leaves one.
         element.updateComplete.then(() => {
           for (const [index, event] of element.shadowRoot.querySelectorAll(".event").entries()) {
             const details = event.querySelector("details");
@@ -109,8 +88,6 @@
         ],
         { label: "Focused by Tab: the first event's data toggle", build: log({ events: run.slice(0, 2) }) },
       );
-      // A run's first two events in each parent that sizes it to its content, by the parent's class
-      // in demo.css.
       const fit = (label, parent) => ({
         label,
         build: () => make("div", { className: parent }, [log({ events: run.slice(0, 2) })()]),

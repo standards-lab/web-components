@@ -1,14 +1,4 @@
-// The components from this repository's dist/: conventions' 27 probe cases, the restyle case, the
-// adopted sheets, and the entry's formatting, on test/fixtures/components.html, on the lean entry
-// and in every profile on the full entry; the marks the accent and interaction hooks color, on
-// test/fixtures/components.html; each component in every profile, on
-// test/fixtures/profiles.html; and the entry's, the pagination's, the artifact viewer's, the chat
-// thread's, the composer's, the upload dropzone's, the stage timeline's, the event log's, the
-// search results', and the document list's geometry on their specimen pages under demo/, in every
-// profile, the entry's, the viewer's, the thread's, the composer's, the dropzone's, the timeline's,
-// the log's, the results', and the list's in parents that size them to their content too.
-// Adapted from spike-html-apps-components (10dde51): test/browser/components.test.ts, on
-// @standards-lab/web-tooling and web-foundation v0.3.0's themes.
+// Adapted from spike-html-apps-components (10dde51): test/browser/components.test.ts, on @standards-lab/web-tooling and web-foundation v0.3.0's themes.
 
 import assert from "node:assert/strict";
 import { after, before, describe, test } from "node:test";
@@ -21,7 +11,6 @@ import type { Server } from "@standards-lab/web-tooling/server.js";
 import { DEFAULTS, colors, spaces, types } from "./support/profiles.ts";
 import { served } from "./support/served.ts";
 
-/** A profile combination: the facets it sets, the rest at their defaults, and its scheme. */
 interface Profile {
   color?: string;
   space?: string;
@@ -29,31 +18,25 @@ interface Profile {
   scheme: string;
 }
 
-/** A run of the components page's cases: its name, its page's query, and the root's dataset. */
 interface Run {
   name: string;
   query: string;
   dataset: Record<string, string>;
 }
 
-/** A specimen measure's result in one profile, which it names by its facets as JSON. */
 type Measured<T> = T & { profile: string };
 
-/** A states measure: how far the states overflow the column, and each component they show. */
 interface States<T> {
   overflow: number;
   shown: T[];
 }
 
-/** A fits measure: each component in the fit section. */
 interface Fits<T> {
   fits: T[];
 }
 
-/** A line's text and the number of lines it renders on. */
 type Lines = [string, number];
 
-/** A component in the fit section: its parent's class, its width, and the column's. */
 interface Fit {
   parent: string;
   width: number;
@@ -72,7 +55,6 @@ describe("components", { timeout: 60_000 }, () => {
     await server?.stop();
   });
 
-  // The components the package defines, each its element's tag.
   const tags = [
     "sl-drawer",
     "sl-document-list",
@@ -88,9 +70,6 @@ describe("components", { timeout: 60_000 }, () => {
     "sl-status-badge",
   ];
 
-  // The profiles the foundation's full entry carries, as its registry lists them: each color at
-  // the other facets' defaults, then each other space and type, compact and sans, at the rest's,
-  // and each of those light and dark.
   const schemes = ["light", "dark"];
   const profiles: Profile[] = [
     ...colors.map((color) => ({ color })),
@@ -98,8 +77,6 @@ describe("components", { timeout: 60_000 }, () => {
     ...types.map((type) => ({ type })),
   ].flatMap((profile) => schemes.map((scheme) => ({ ...profile, scheme })));
 
-  // Each case on the components page runs once on the lean entry, page.css, with no profile set,
-  // and once in each profile combination on the full entry, page-full.css with register-full.js.
   const defaults = DEFAULTS;
   const runs: Run[] = [
     { name: "on the lean page.css", query: "", dataset: {} },
@@ -111,11 +88,6 @@ describe("components", { timeout: 60_000 }, () => {
     }),
   ];
 
-  /**
-   * Opens the components page in a run's entry and profile, with the query's module when one is
-   * given, resolving to the page once its run settles, its entry's sheet linked and its profile
-   * set on the root.
-   */
   async function open(run: Run, module?: string): Promise<Page> {
     const query = new URLSearchParams(run.query);
     if (module !== undefined) query.set("module", module);
@@ -137,7 +109,6 @@ describe("components", { timeout: 60_000 }, () => {
     return page;
   }
 
-  /** Runs one case module on the components page, resolving to its verdict and report. */
   async function verdictOf(run: Run, module: string): Promise<{ verdict: string; report: string }> {
     const page = await open(run, module);
     try {
@@ -166,8 +137,6 @@ describe("components", { timeout: 60_000 }, () => {
       try {
         const { adopted, label }: { adopted: Record<string, string[]>; label: string } =
           await page.evaluate(`(async () => {
-        // A CSS module script is one sheet per URL: the foundation's by the page's import map, the
-        // URL its bare specifier in dist/ resolves to, and each component's own beside its module.
         const sheet = async (specifier) =>
           (await import(specifier, { with: { type: "css" } })).default;
         const foundation = "@standards-lab/web-foundation";
@@ -211,7 +180,6 @@ describe("components", { timeout: 60_000 }, () => {
     });
 
     test(`the entry shows a file's size and modified time in the page's locale and time zone, ${run.name}`, async () => {
-      // The browser runs in en-US at UTC, as the tooling's launch() starts it.
       const page = await open(run);
       try {
         const shown: { size: string; time: string } = await page.evaluate(`(async () => {
@@ -233,7 +201,11 @@ describe("components", { timeout: 60_000 }, () => {
           time: root.querySelector("time").textContent,
         };
       })()`);
-        assert.deepEqual(shown, { size: "1.5 kB", time: "Oct 12, 2026, 4:41 PM" });
+        assert.deepEqual(
+          shown,
+          { size: "1.5 kB", time: "Oct 12, 2026, 4:41 PM" },
+          "in en-US at UTC, as the tooling's launch() starts the browser",
+        );
       } finally {
         await page.close();
       }
@@ -241,16 +213,9 @@ describe("components", { timeout: 60_000 }, () => {
   }
 
   test("the entry's meta line shows no kind word, its button's name keeps it and the content type whole, and open sends the id and kind", async () => {
-    // A file's entry and a directory's on the lean page: the file's meta line is its size,
-    // content type, and time, the directory's its time alone, neither with "file" or "directory"
-    // in it; each button's accessible name, as the browser computes it, still says which it is,
-    // from the kind kept visually hidden, and says a file's content type whole, with no space
-    // where the type shows a break opportunity, a short type and the long openxml one alike; and
-    // activating each sends open with its id and kind.
     const openxml = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
     const page = await open(runs[0]);
     try {
-      /** One entry as it shows: its meta line's parts and text, and the open details it sent. */
       interface Shown {
         parts: string[];
         meta: string;
@@ -296,28 +261,25 @@ describe("components", { timeout: 60_000 }, () => {
       assert.deepEqual(shown.directory.opened, [{ id: "d-1", kind: "directory" }]);
       const { nodes }: { nodes: { role?: { value: string }; name?: { value: string } }[] } =
         await page.cdp("Accessibility.getFullAXTree", {});
-      // Each name whole: the kind after the status, and the content type with no space where
-      // its meta line offers a break.
       const names = nodes
         .filter((node) => node.role?.value === "button")
         .map((node) => node.name?.value ?? "")
         .filter((name) => /^(sketch\.txt|designs|brief\.docx) /.test(name));
-      assert.deepEqual(names, [
-        "sketch.txt available file 1.5 kB text/plain Oct 12, 2026, 4:41 PM",
-        "designs active directory Oct 12, 2026, 4:41 PM",
-        `brief.docx available file 1.5 kB ${openxml} Oct 12, 2026, 4:41 PM`,
-      ]);
+      assert.deepEqual(
+        names,
+        [
+          "sketch.txt available file 1.5 kB text/plain Oct 12, 2026, 4:41 PM",
+          "designs active directory Oct 12, 2026, 4:41 PM",
+          `brief.docx available file 1.5 kB ${openxml} Oct 12, 2026, 4:41 PM`,
+        ],
+        "each name whole: the kind after the status, no space where the content type breaks",
+      );
     } finally {
       await page.close();
     }
   });
 
   test("the entry's status takes its status tone's hue, the components' status hues, its text kept; no tone, or one it doesn't know, stays muted", async () => {
-    // On the lean page, an entry per tone, then one with none and one with a tone outside the
-    // vocabulary: each status's color as it resolves, against each hue resolved in the entry's
-    // root, at the accent hook's fallback and then with --accent-color set on the page; each
-    // entry's status-tone attribute, reflected from the property, and its status's text. One entry
-    // given its tone by the attribute reads it back as the property.
     const page = await open(runs[0]);
     try {
       const read = (hook: boolean) =>
@@ -388,8 +350,6 @@ describe("components", { timeout: 60_000 }, () => {
     }
   });
 
-  /** A component as the profiles case renders it in one profile: the profile's every facet, the
-   * component's tag and box, and its look, the color, font, and padding it shows. */
   interface Rendered {
     color: string;
     space: string;
@@ -415,13 +375,6 @@ describe("components", { timeout: 60_000 }, () => {
         const { directories, files } = await import("/demo/documents.js");
         await Promise.all(["drawer", "document-list", "search-results", "event-log", "stage-timeline", "upload-dropzone", "composer", "chat-thread", "artifact-viewer", "pagination", "entry", "status-badge"].map(
           (module) => import("/dist/" + module + ".js")));
-        // Each component as a host composes it: a drawer, docked at the page's width, holding one
-        // button, a document list of one document on its first page, search results of a match in
-        // content, whose button the profile styles, an event log of a stage event, a stage
-        // timeline part way through a run, an upload dropzone listing an upload in progress, a
-        // composer holding a draft, a chat thread of a user's message and the assistant's Markdown
-        // reply, an artifact viewer of a Markdown document, the pagination holding one entry per
-        // item, a lone entry, and a labelled badge.
         const components = {
           "sl-drawer": () => {
             const drawer = Object.assign(document.createElement("sl-drawer"), { label: "Documents" });
@@ -498,23 +451,9 @@ describe("components", { timeout: 60_000 }, () => {
           for (const [tag, make] of Object.entries(components)) {
             const element = document.querySelector("main").appendChild(make());
             await element.updateComplete;
-            // The document list's entries render in their own shadow roots, after the list's.
             const entries = [...element.shadowRoot.querySelectorAll("sl-entry")];
             await Promise.all(entries.map((entry) => entry.updateComplete));
             const { width, height } = element.getBoundingClientRect();
-            // The look the profile gives the component's first button, inside its shadow root, the
-            // search results' their first match's, the document list's its first entry's, the
-            // composer's its send control, enabled by the draft, the dropzone's its picker button;
-            // the artifact viewer, which holds no button, the color and padding of what its region
-            // scrolls, and its Markdown heading's font, since the region's text is the body font,
-            // which the type facet's profiles share; the chat thread, which holds none either, the
-            // color and padding of the user's message, and its label's font, the interface font;
-            // the stage timeline, which holds none either, its complete stage's marker's color,
-            // its step's column gap, the space between marker and text, and its label's font; the
-            // event log, which holds no button but its data's toggle, its list's color and padding,
-            // and its time's font, the interface font; the drawer, docked, which holds no button of
-            // its own there, its aside's color, its body's padding, and its slotted button's font,
-            // the interface font, since it sets no font itself.
             const drawer = tag === "sl-drawer";
             const viewer = tag === "sl-artifact-viewer";
             const thread = tag === "sl-chat-thread";
@@ -551,8 +490,6 @@ describe("components", { timeout: 60_000 }, () => {
         const registered = Object.fromEntries(registry.FACETS.map((f) => [f, registry.profiles(f)]));
         return { registered, rendered, errors: window.errors };
       })()`);
-      // register-full.js registered every built-in profile, so each attribute names one the page
-      // carries.
       assert.deepEqual(registered, {
         color: colors,
         space: [defaults.space, ...spaces],
@@ -563,8 +500,6 @@ describe("components", { timeout: 60_000 }, () => {
         assert.ok(width > 0 && height > 0, `${tag} under ${profile}: a ${width} × ${height} box`);
       }
       assert.deepEqual(errors, []);
-      // Each facet reaches every shadow root: each color, light and dark, is a look of its own,
-      // sans sets another font than mono, and compact pads tighter than regular.
       const looks = (tag: string, where: (shown: Rendered) => boolean) =>
         rendered.filter((shown) => shown.tag === tag && where(shown)).map((shown) => shown.look);
       for (const tag of tags) {
@@ -603,13 +538,6 @@ describe("components", { timeout: 60_000 }, () => {
     }
   });
 
-  /**
-   * Runs the measure, the source of an in-page function of the profile, on the specimen page under
-   * demo/ in each profile combination, resolving to its results in profile order. The page's
-   * components render once; each profile applies by attribute on the root, as on the profiles
-   * case's page, and the measure runs once the profile's fonts are ready and a frame has passed.
-   * The profiles are the full entry's unless others are given.
-   */
   async function measureSpecimen<T>(
     specimen: string,
     measure: string,
@@ -621,7 +549,6 @@ describe("components", { timeout: 60_000 }, () => {
         const tags = ${JSON.stringify(tags)}.filter((tag) => document.querySelector(tag));
         await Promise.all(tags.map((tag) => customElements.whenDefined(tag)));
         await Promise.all([...document.querySelectorAll(tags.join(","))].map((el) => el.updateComplete));
-        // A document list's entries and pagination render in its shadow root, after it.
         await Promise.all([...document.querySelectorAll("sl-document-list")].flatMap((list) =>
           [...list.shadowRoot.querySelectorAll("sl-entry, sl-pagination")].map((el) => el.updateComplete)));
         const defaults = ${JSON.stringify(defaults)};
@@ -643,8 +570,6 @@ describe("components", { timeout: 60_000 }, () => {
     }
   }
 
-  // In-page helpers the measures below share, as source: the number of lines an element's text
-  // renders on, and each entry with an item in a section of the specimen page.
   const LINES = `(element) => {
     const range = document.createRange();
     range.selectNodeContents(element);
@@ -655,10 +580,6 @@ describe("components", { timeout: 60_000 }, () => {
     .filter((entry) => entry.item !== null)`;
 
   test("the entry's name is its primary text, its status and meta quieter, the meta line under the name, in every profile", async () => {
-    // The name is set larger than the status and the meta, and every entry, a directory's or a
-    // file's, at full width and at 20rem, puts its name and its meta line, which a file's size or
-    // content type or a directory's time opens, at one inline start, the meta under the name: no
-    // column of its own beside it.
     const results = await measureSpecimen<{
       shown: {
         name: string;
@@ -707,9 +628,6 @@ describe("components", { timeout: 60_000 }, () => {
   });
 
   test("at 20rem, the entry's wrapped lines, its status's and its meta's, step by its row gap, in every profile", async () => {
-    // The lines of an entry's stack, top to bottom: the name's; the status's, when it wraps below
-    // the name; then each line of the meta's parts. Each steps from the one above by the entry's
-    // row gap, the name-to-meta step, within a pixel.
     const measure = `() => ({ wrapped: (${ENTRIES})(".narrow").flatMap((entry) => {
       const root = entry.shadowRoot;
       const rowGap = parseFloat(getComputedStyle(root.querySelector(".entry")).rowGap);
@@ -717,9 +635,6 @@ describe("components", { timeout: 60_000 }, () => {
       const status = root.querySelector(".status").getBoundingClientRect();
       const meta = root.querySelector(".meta");
       const metaTop = meta.getBoundingClientRect().top;
-      // The meta's lines: its parts, top to bottom, each on the line above's unless it starts
-      // below that line's bottom. Its parts sit on one baseline, the date and clock inside the
-      // time, so a line's parts needn't share a top; a line spans its parts' boxes.
       const lines = [];
       for (const part of [...meta.children].map((child) => child.getBoundingClientRect())
         .sort((a, b) => a.top - b.top)) {
@@ -730,8 +645,6 @@ describe("components", { timeout: 60_000 }, () => {
         } else lines.push({ top: part.top, bottom: part.bottom });
       }
       if (lines.length < 2) return [];
-      // The lines above the meta: the status is one of them when it wraps between the name and
-      // the meta, and on the name's line it ends that line with the name.
       const onName = status.top < name.bottom - 0.5;
       const head = !onName && status.bottom <= metaTop + 0.5
         ? [name, status]
@@ -781,9 +694,6 @@ describe("components", { timeout: 60_000 }, () => {
   });
 
   test("at 20rem, each meta value, the size and the time's date and clock, renders on one line, in every profile", async () => {
-    // A break may fall between the meta's parts, or between the time's date and its clock, never
-    // inside "1.5 kB" or "4:41 PM". The content type, which has no space to break at, wraps
-    // anywhere to keep inside the entry, so it isn't one of these.
     const measure = `() => ({ shown: (${ENTRIES})(".narrow").map((entry) => {
       const root = entry.shadowRoot;
       const time = root.querySelector("time");
@@ -812,11 +722,6 @@ describe("components", { timeout: 60_000 }, () => {
   });
 
   test("from 20rem down to 16rem, every part of the entry keeps inside its button, its size and clock whole and its date broken only at its spaces, in mono and sans, regular and compact", async () => {
-    // The narrow section restyled to each width in turn, down to 16rem, the entry's supported
-    // minimum width, then put back to its own 20rem. At each,
-    // every part of every entry, the name, the status, and each meta part, keeps inside
-    // its button; the size and the time's clock each render on one line; and each word of the
-    // date, its text between spaces, renders on one line, so the date breaks only at its spaces.
     const over = [defaults.type, ...types].flatMap((type) =>
       [defaults.space, ...spaces].flatMap((space) =>
         schemes.map((scheme) => ({ type, space, scheme })),
@@ -833,7 +738,6 @@ describe("components", { timeout: 60_000 }, () => {
           const parts = [".name", ".status", ".meta > *", "time > .date", "time > .clock"]
             .flatMap((selector) => [...root.querySelectorAll(selector)]);
           const date = root.querySelector("time > .date");
-          // Lit's markers stand beside the date's text: its one text node holds the date.
           const text = [...date.childNodes].find((node) => node.nodeType === Node.TEXT_NODE);
           const words = [...text.data.matchAll(/\\S+/g)].map((match) => {
             const range = document.createRange();
@@ -912,20 +816,17 @@ describe("components", { timeout: 60_000 }, () => {
       for (const { label, count, steps, control } of shown) {
         assert.equal(label, 1, `${profile}: "Page Size" on ${label} lines`);
         if (count !== null) assert.equal(count, 1, `${profile}: the page count on ${count} lines`);
-        // A pixel's allowance: in sans, the elements sheet's button is a pixel taller than its select.
         for (const step of steps) {
-          assert.ok(step <= control + 1, `${profile}: a step ${step} tall, a control ${control}`);
+          assert.ok(
+            step <= control + 1,
+            `${profile}: a step ${step} tall, a control ${control}, within the pixel sans makes a button taller than a select`,
+          );
         }
       }
     }
   });
 
   test("the page number's field fits a two- and a three-digit page inside its padding, at one width for every page to 999, and grows past it, in mono and sans, regular and compact", async () => {
-    // Every pagination on the page, pages 13 and 100 of 100 among them, in each section, and one
-    // added on page 1000 of 1000. The value's width, measured in the field's own font, fits the
-    // field's content box, its border box less its inline padding and border, and the field
-    // scrolls none of it; every field on the page, its page one, two, or three digits or none, is
-    // one width, so the field never jumps as the page changes; and page 1000's field is wider.
     const over = [defaults.type, ...types].flatMap((type) =>
       [defaults.space, ...spaces].flatMap((space) =>
         schemes.map((scheme) => ({ type, space, scheme })),
@@ -983,9 +884,6 @@ describe("components", { timeout: 60_000 }, () => {
   });
 
   test("at 20rem, every state keeps within the column, a long name wrapping inside its entry, in every profile", async () => {
-    // A component wider than the column widens its frame, the grid's item, past the list, so the
-    // list's scroll width shows it; a name too long for its entry spills past the entry's button.
-    // The status stays shown inside the entry, beside the name or on a line below it.
     const measure = `() => {
       const list = document.querySelector(".narrow .states");
       return {
@@ -1037,10 +935,6 @@ describe("components", { timeout: 60_000 }, () => {
   });
 
   test("in a parent that sizes it to its content, the entry takes its content's width, in every profile", async () => {
-    // The fit section's entries: brand-guide.pdf in an inline-block, as a content-sized flex
-    // item, and in a grid's auto track. Each entry is at least as wide as its first line laid out
-    // whole, the name on one line and the status, with the head's column gap between, and every
-    // part keeps inside its button.
     const results = await measureSpecimen<
       Fits<{
         parent: string;
@@ -1061,7 +955,6 @@ describe("components", { timeout: 60_000 }, () => {
         const gap = parseFloat(getComputedStyle(root.querySelector(".head")).columnGap);
         const part = (selector) => root.querySelector(selector).getBoundingClientRect();
         const [name, status, meta] = [".name", ".status", ".meta"].map(part);
-        // The name's text laid out on one line, however its box wraps it.
         const range = document.createRange();
         range.selectNodeContents(root.querySelector(".name"));
         const text = [...range.getClientRects()].reduce((sum, rect) => sum + rect.width, 0);
@@ -1102,13 +995,8 @@ describe("components", { timeout: 60_000 }, () => {
   });
 
   test("selected, reflected, frames the entry in the accent color, moving nothing", async () => {
-    // A file's entry on the specimen page, unselected, then selected by property, then by
-    // attribute removed: the attribute follows the property and the property the attribute; the
-    // frame is the border and an inset shadow in the accent color only while selected; and
-    // the button and every part keep their boxes across the change.
     const page = await browser.open(`${server.origin}/demo/entry.html`);
     try {
-      // The entry's frame as it shows, and the boxes of its button and parts.
       interface Look {
         attribute: boolean;
         property: boolean;
@@ -1127,7 +1015,6 @@ describe("components", { timeout: 60_000 }, () => {
         await document.fonts.ready;
         const root = entry.shadowRoot;
         const button = root.querySelector(".entry");
-        // The accent color as the button resolves it, read from a probe's color.
         const probe = root.appendChild(document.createElement("span"));
         probe.style.color = "var(--accent-color, var(--magenta))";
         const accent = getComputedStyle(probe).color;
@@ -1169,10 +1056,6 @@ describe("components", { timeout: 60_000 }, () => {
   });
 
   test("a selected entry focused by Tab shows its focus ring alone, and its frame once focus leaves", async () => {
-    // The focus section's entry is selected; Tab from the section's mark focuses its button. While
-    // its focus is visible the ring, the elements sheet's outline, is the one mark: the border is
-    // not the accent color and there is no inset shadow, the border's width the same. Focus
-    // moved to another entry's button, the frame returns.
     const page = await browser.open(`${server.origin}/demo/entry.html`);
     try {
       await page.cdp("Emulation.setFocusEmulationEnabled", { enabled: true });
@@ -1182,11 +1065,9 @@ describe("components", { timeout: 60_000 }, () => {
       const tab = { key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 };
       await page.cdp("Input.dispatchKeyEvent", { type: "keyDown", ...tab });
       await page.cdp("Input.dispatchKeyEvent", { type: "keyUp", ...tab });
-      // The focus section's entry as it shows: its ring, its frame, and its border's width.
       const look = `(() => {
         const entry = document.querySelector("#focus sl-entry");
         const button = entry.shadowRoot.querySelector(".entry");
-        // The accent color as the button resolves it, read from a probe's color.
         const probe = entry.shadowRoot.appendChild(document.createElement("span"));
         probe.style.color = "var(--accent-color, var(--magenta))";
         const accent = getComputedStyle(probe).color;
@@ -1201,7 +1082,6 @@ describe("components", { timeout: 60_000 }, () => {
           width: style.borderTopWidth,
         };
       })()`;
-      /** The focus section's entry as it shows. */
       interface Focus {
         selected: boolean;
         focused: boolean;
@@ -1245,13 +1125,6 @@ describe("components", { timeout: 60_000 }, () => {
   });
 
   test("the accent hook marks the active stage, the streaming dot, the selected frame, and progress; the interaction hook the drag-over and the focus ring", async () => {
-    // On the components page, in one subtree: a timeline with an active stage, a thread with a
-    // streaming message, a selected entry, a selected entry focused by Tab, and a dropzone with an
-    // upload in progress, a drag of files over its zone. Each mark is read as it resolves, at the
-    // hooks' fallbacks, then with --accent-color set on the subtree, then with
-    // --interaction-color set there instead: the state marks follow the accent hook alone, the
-    // drag-over and the focus ring the interaction hook alone. The focused entry's frame gives way
-    // to its ring, so the ring is read on it and the frame on the other.
     const page = await browser.open(`${server.origin}/test/fixtures/components.html`);
     try {
       await page.cdp("Emulation.setFocusEmulationEnabled", { enabled: true });
@@ -1297,8 +1170,6 @@ describe("components", { timeout: 60_000 }, () => {
       const tab = { key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 };
       await page.cdp("Input.dispatchKeyEvent", { type: "keyDown", ...tab });
       await page.cdp("Input.dispatchKeyEvent", { type: "keyUp", ...tab });
-      // Each mark's colors as it resolves, and the two hooks as the subtree resolves them, read
-      // from a probe's color. The active stage's tint is compared with the same mix of the hook.
       const read = (hook: string) =>
         page.evaluate(`(() => {
         const subtree = document.querySelector("#subtree");
@@ -1324,7 +1195,6 @@ describe("components", { timeout: 60_000 }, () => {
         const marker = timeline.querySelector(".active .marker");
         const style = getComputedStyle(marker);
         const zone = root("sl-upload-dropzone").querySelector(".zone");
-        // The zone eases its border's color: the transition the hook's change starts, finished.
         getComputedStyle(zone).borderTopColor;
         for (const transition of zone.getAnimations()) transition.finish();
         const is = (color) => color === accent ? "accent" : color === interaction ? "interaction" : color;
@@ -1380,16 +1250,9 @@ describe("components", { timeout: 60_000 }, () => {
     }
   });
 
-  // In-page helper the artifact viewer's measures share, as source: each viewer in a section of
-  // its specimen page.
   const VIEWERS = `(section) => [...document.querySelectorAll(section + " sl-artifact-viewer")]`;
 
   test("the artifact viewer's specimen renders every state, at full size or held, within 20rem, in every profile", async () => {
-    // Every viewer but the no-header ones shows its header, and every one a region, a note, or a
-    // native view's element: a PDF's frame, an image, audio, or video. The viewer is as tall as
-    // its content, so no region scrolls down but run.log's, which the page holds to 16rem, and it
-    // does; at 20rem the states keep within the column, every part of each viewer inside its box,
-    // and a JSON line too long for the column scrolls its region sideways, never wrapping.
     const measure = `() => {
       const list = document.querySelector(".narrow .states");
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -1478,8 +1341,6 @@ describe("components", { timeout: 60_000 }, () => {
   });
 
   test("in a parent that sizes it to its content, the artifact viewer takes its content's width, in every profile", async () => {
-    // The fit section's viewers: each is as wide as its widest line, so its region needs no
-    // sideways scroll, and no wider than the column.
     const results = await measureSpecimen<Fits<Fit & { sideways: number }>>(
       "artifact-viewer",
       `() => {
@@ -1510,22 +1371,13 @@ describe("components", { timeout: 60_000 }, () => {
     }
   });
 
-  // In-page helper the chat thread's measures share, as source: each thread in a section of its
-  // specimen page.
   const THREADS = `(section) => [...document.querySelectorAll(section + " sl-chat-thread")]`;
 
   test("the chat thread's specimen renders every state, at full size or held, within 20rem, its ids whole, in every profile", async () => {
-    // Every thread shows its frame. The thread is as tall as its content, so no frame scrolls down
-    // but the long content's and the two a reply streams into, which the page holds to 16rem, and
-    // they do. At 20rem the states keep within the column, every part of each thread inside its
-    // box across, and each id, function name, kind, role, status, and inline code span in a reply
-    // on one line, but a function name or a call id longer than its line, which wraps inside it,
-    // filling it.
     const measure = `() => {
       const list = document.querySelector(".narrow .states");
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
       const lines = ${LINES};
-      // Whether a name or an id fills its line's width: its box as wide as its parent's content.
       const fills = (part) => {
         const parent = part.parentElement;
         const style = getComputedStyle(parent);
@@ -1580,7 +1432,6 @@ describe("components", { timeout: 60_000 }, () => {
         62,
         `${profile}: 29 states twice, the three fits, and the focus state`,
       );
-      // The long call's name and id, as its output's, wrap at 20rem only, the name at least.
       const wrapped = (narrow: boolean) =>
         shown.filter((thread) => thread.narrow === narrow).flatMap((thread) => thread.wrapped);
       assert.deepEqual(wrapped(false), [], `${profile}: wrapped at full width`);
@@ -1612,8 +1463,6 @@ describe("components", { timeout: 60_000 }, () => {
   });
 
   test("in a parent that sizes it to its content, the chat thread takes its content's width, in every profile", async () => {
-    // The fit section's threads, a short exchange each: each takes its content's width, so its
-    // frame needs no sideways scroll, and is no wider than half the column.
     const results = await measureSpecimen<Fits<Fit & { sideways: number }>>(
       "chat-thread",
       `() => {
@@ -1642,15 +1491,9 @@ describe("components", { timeout: 60_000 }, () => {
       }
     }
   });
-  // In-page helper the composer's measures share, as source: each composer in a section of its
-  // specimen page.
   const COMPOSERS = `(section) => [...document.querySelectorAll(section + " sl-composer")]`;
 
   test("the composer's specimen renders every state within 20rem, its field grown to its text up to eight lines, in every profile", async () => {
-    // Every composer shows its field and one control, send or stop by busy, at the field's block
-    // end. The field is one line tall, the control's height, when its text fits one line, and
-    // grows to its text; only the fourteen lines' field is held, at eight, and scrolls. At 20rem
-    // the states keep within the column, every part of each composer inside its box.
     const measure = `() => {
       const list = document.querySelector(".narrow .states");
       const shown = (${COMPOSERS})("main").map((composer) => {
@@ -1727,9 +1570,6 @@ describe("components", { timeout: 60_000 }, () => {
   });
 
   test("in a parent that sizes it to its content, the composer takes its draft's width, in every profile", async () => {
-    // The fit section's composers, a short draft each: each takes its draft's width, so its field
-    // needs no sideways scroll and holds the draft on one line, and is no wider than half the
-    // column.
     const results = await measureSpecimen<Fits<Fit & { sideways: number; oneLine: boolean }>>(
       "composer",
       `() => {
@@ -1764,16 +1604,9 @@ describe("components", { timeout: 60_000 }, () => {
       }
     }
   });
-  // In-page helper the upload dropzone's measures share, as source: each dropzone in a section of
-  // its specimen page.
   const DROPZONES = `(section) => [...document.querySelectorAll(section + " sl-upload-dropzone")]`;
 
   test("the upload dropzone's specimen renders every state within 20rem, its names cut short and its sizes and labels whole, in every profile", async () => {
-    // Every dropzone shows its zone; only the drag-over state's, once in the states and once at
-    // 20rem, is marked. At 20rem the states keep within the column, every part of each dropzone
-    // inside its box across. Each name keeps one line, cut short when long; each size, bytes sent,
-    // label, and control keeps one line. Within a dropzone, every upload without a message is one
-    // height inside its divider, whatever its state or progress.
     const measure = `() => {
       const list = document.querySelector(".narrow .states");
       const lines = ${LINES};
@@ -1793,8 +1626,6 @@ describe("components", { timeout: 60_000 }, () => {
               return rect.left < box.left - 0.5 || rect.right > box.right + 0.5;
             })
             .map((part) => part.localName + "." + part.className),
-          // The bytes hold the sent count in an inline-block, whose box's top the line helper
-          // counts apart from its text's, so they are measured by height: one line of their own.
           broken: [
             ...[...root.querySelectorAll(".name, .state, button")].filter((part) => lines(part) > 1),
             ...[...root.querySelectorAll(".bytes")].filter((part) =>
@@ -1843,9 +1674,6 @@ describe("components", { timeout: 60_000 }, () => {
   });
 
   test("in a parent that sizes it to its content, the upload dropzone takes its content's width, in every profile", async () => {
-    // The fit section's dropzones, one short upload each: each takes its content's width, so its
-    // prompt and button share one line and its upload's name shows whole, and is no wider than
-    // half the column.
     const results = await measureSpecimen<Fits<Fit & { oneLine: boolean; cut: boolean }>>(
       "upload-dropzone",
       `() => {
@@ -1880,16 +1708,9 @@ describe("components", { timeout: 60_000 }, () => {
     }
   });
 
-  // In-page helper the stage timeline's measures share, as source: each timeline in a section of
-  // its specimen page.
   const TIMELINES = `(section) => [...document.querySelectorAll(section + " sl-stage-timeline")]`;
 
   test("the stage timeline's specimen renders every state within 20rem, its names, labels, and times whole, in every profile", async () => {
-    // Every timeline shows the emulator's five stages. At 20rem the states keep within the column,
-    // every part of each timeline inside its box across, a failed stage's reason too. Each label
-    // and time keeps one line, and each step but the last, which has no connector, is one height
-    // within a timeline, whatever its state, as is each detail line; the failed stage's reason
-    // adds its own height below its detail line, so its step is measured without it.
     const measure = `() => {
       const list = document.querySelector(".narrow .states");
       const lines = ${LINES};
@@ -1940,8 +1761,6 @@ describe("components", { timeout: 60_000 }, () => {
   });
 
   test("in a parent that sizes it to its content, the stage timeline takes its content's width, in every profile", async () => {
-    // The fit section's timelines, part way through a run: each takes its content's width, so
-    // each complete stage's label and time share one line, and is no wider than half the column.
     const results = await measureSpecimen<Fits<Fit & { complete: number; oneLine: boolean }>>(
       "stage-timeline",
       `() => {
@@ -1977,17 +1796,9 @@ describe("components", { timeout: 60_000 }, () => {
     }
   });
 
-  // In-page helper the event log's measures share, as source: each log in a section of its
-  // specimen page.
   const LOGS = `(section) => [...document.querySelectorAll(section + " sl-event-log")]`;
 
   test("the event log's specimen renders every state, at full size or held, within 20rem, its types, times, labels, and values on one line, its identifiers' text whole, in every profile", async () => {
-    // Every log shows its frame. The log is as tall as its events, so no frame scrolls down but
-    // the many events', which the page holds to 16rem, and it does. At 20rem the states keep
-    // within the column, every part of each log inside its box across, and each type, time,
-    // metadata label and value, and data toggle on one line. Whether an id fits its line whole
-    // depends on the monospace's width, so the test reads not its look but its text: each event's
-    // subject and id, in full, in its value and its title.
     const measure = `() => {
       const list = document.querySelector(".narrow .states");
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -2013,7 +1824,6 @@ describe("components", { timeout: 60_000 }, () => {
           broken: [...root.querySelectorAll(".type, .when, dt, dd, summary, .no-data")]
             .filter((part) => lines(part) > 1)
             .map((part) => part.textContent),
-          // Each event's identifiers as its values and titles hold them, and as its event has them.
           identifiers: [...root.querySelectorAll(".event")].map((event, index) => ({
             texts: [...event.querySelectorAll("dd.cut")].map((dd) => dd.textContent),
             titles: [...event.querySelectorAll("dd.cut")].map((dd) => dd.title),
@@ -2071,12 +1881,6 @@ describe("components", { timeout: 60_000 }, () => {
   });
 
   test("in a log narrower than its identifiers, each subject and id ends in an ellipsis on one line, its whole text kept, and the log never scrolls sideways, in every profile", async () => {
-    // A log 12rem wide, the many events' without their times, appended to the specimen page:
-    // narrower than a UUID in any monospace, so every subject and id is cut whatever the font, the
-    // test failing rather than passing if one is not. Each stays on one line, inside the log, its
-    // value clipped (its content wider than its box), its text and its title the whole identifier;
-    // the frame needs no sideways scroll. (A time keeps whole, so the times are left out: so
-    // narrow a log would scroll for them alone.)
     const measure = `async () => {
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
       const lines = ${LINES};
@@ -2145,9 +1949,6 @@ describe("components", { timeout: 60_000 }, () => {
   });
 
   test("in a parent that sizes it to its content, the event log takes its type's and time's width, in every profile", async () => {
-    // The fit section's logs, a run's first two events each: each takes its content's width, so
-    // each event's type and time share one line and its frame needs no sideways scroll, and is no
-    // wider than half the column; its metadata wraps within that width, every part inside it.
     const results = await measureSpecimen<
       Fits<
         Fit & {
@@ -2204,15 +2005,9 @@ describe("components", { timeout: 60_000 }, () => {
     }
   });
 
-  // In-page helper the search results' measures share, as source: each results element in a
-  // section of its specimen page.
   const SEARCHES = `(section) => [...document.querySelectorAll(section + " sl-search-results")]`;
 
   test("the search results' specimen renders every state within 20rem, their field labels whole, in every profile", async () => {
-    // Every results element shows its status line. At 20rem the states keep within the column,
-    // every part of each inside its box across, a long name and snippet wrapping inside their
-    // button; each field label keeps one line, and at full width sits on its name's line, at the
-    // line's end.
     const measure = `() => {
       const list = document.querySelector(".narrow .states");
       const lines = ${LINES};
@@ -2233,7 +2028,6 @@ describe("components", { timeout: 60_000 }, () => {
           broken: [...root.querySelectorAll(".field")]
             .filter((part) => lines(part) > 1)
             .map((part) => part.textContent),
-          // Each short name's field label on its name's last line, ending the button's content.
           beside: [...root.querySelectorAll(".match")]
             .filter((button) => button.querySelector(".name").textContent.length < 24)
             .map((button) => {
@@ -2279,9 +2073,6 @@ describe("components", { timeout: 60_000 }, () => {
   });
 
   test("in a parent that sizes them to their content, the search results take their content's width, in every profile", async () => {
-    // The fit section's results, two short matches each: each takes its content's width, so each
-    // name shares its line with its field label and each snippet keeps one line, every part
-    // inside, and is no wider than half the column.
     const results = await measureSpecimen<
       Fits<Fit & { matches: number; oneLine: boolean; outside: number }>
     >(
@@ -2327,10 +2118,6 @@ describe("components", { timeout: 60_000 }, () => {
     }
   });
 
-  // In-page helpers the document list's measures share, as source: each list in a section of its
-  // specimen page, and, for a list, its parts across its own and its parts' shadow roots, each by
-  // name with its box: its status line, its pagination and the controls' row, and each entry's
-  // button, name, status, meta, size, and clock.
   const LISTS = `(section) => [...document.querySelectorAll(section + " sl-document-list")]`;
   const LIST_PARTS = `(list) => {
     const root = list.shadowRoot;
@@ -2350,11 +2137,6 @@ describe("components", { timeout: 60_000 }, () => {
   }`;
 
   test("the document list's specimen renders every state within 20rem, its sizes and clocks whole, in every profile", async () => {
-    // Every list shows its status line and one pagination. At 20rem the states keep within the
-    // column, and every part of each list, its status line, its controls, and each entry's
-    // button and parts, inside the list's box across; each entry's parts inside its button; a
-    // size and a clock each on one line; and every entry of a list at the pagination's inline
-    // start, selected or not, no column held beside it.
     const measure = `() => {
       const list = document.querySelector(".narrow .states");
       const lines = ${LINES};
@@ -2430,9 +2212,6 @@ describe("components", { timeout: 60_000 }, () => {
   });
 
   test("in a parent that sizes it to its content, the document list takes its content's width, in every profile", async () => {
-    // The fit section's lists, one short document each: each takes its content's width, so the
-    // entry's name shares its line with its status, its meta keeps one line, and the controls
-    // keep one row, every part inside, and is narrower than the column.
     const results = await measureSpecimen<
       Fits<
         Fit & { head: boolean; meta: boolean; controls: boolean; entries: number; outside: number }
@@ -2450,8 +2229,6 @@ describe("components", { timeout: 60_000 }, () => {
           return {
             parent: element.parentElement.className,
             head: Math.abs(rect(entry, ".name").bottom - rect(entry, ".status").bottom) < 3,
-            // The meta on one line: no taller than its tallest part. Its parts' text runs may sit a
-            // pixel apart, the time's date and clock in their own spans, so it is measured by box.
             meta:
               rect(entry, ".meta").height <=
               Math.max(...[...entry.querySelector(".meta").children].map((part) => part.getBoundingClientRect().height)) + 0.5,

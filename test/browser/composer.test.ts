@@ -1,14 +1,4 @@
-// The composer from this repository's dist/, on test/fixtures/components.html: send sending the
-// field's text, bubbling and composed, and clearing the field; send() doing what activating send
-// does, under the same rules; empty and whitespace-only text unsendable; busy putting stop in
-// send's place, in the same footprint, typing still allowed; stop activated by the keyboard moving
-// focus to the field when send would be disabled under it, and keeping it on an enabled send, the
-// app emptying the field doing the same, and focus outside the composer left there; disabled
-// blocking typing, sending, and stopping; Enter, Shift+Enter, and Escape doing only what a native
-// textarea does; the field growing with its text to eight lines, then scrolling; value and the
-// attributes in step with the field; and no event but send and stop.
-// Adapted from spike-html-apps-components (10dde51): test/browser/composer.test.ts, on
-// @standards-lab/web-tooling.
+// Adapted from spike-html-apps-components (10dde51): test/browser/composer.test.ts, on @standards-lab/web-tooling.
 
 import assert from "node:assert/strict";
 import { after, before, beforeEach, describe, test } from "node:test";
@@ -20,8 +10,6 @@ import type { Server } from "@standards-lab/web-tooling/server.js";
 
 import { served } from "./support/served.ts";
 
-/** What window.read reads from the composer: its value and field, its action, its attributes,
- * its focus, and the events it sent and the document heard. */
 interface Shown {
   value: string;
   field: string;
@@ -36,7 +24,6 @@ interface Shown {
   heard: { type: string; detail: unknown; bubbles: boolean; composed: boolean }[];
 }
 
-/** An element's box, as the footprint case measures it. */
 interface Box {
   x: number;
   y: number;
@@ -52,12 +39,7 @@ describe("composer", { timeout: 60_000 }, () => {
     server = await serve(served);
     browser = await launch();
     page = await browser.open(`${server.origin}/test/fixtures/components.html`);
-    // Keys go to the focused element as a user's would, and :focus-visible matches, though a
-    // headless page never has the window's focus.
     await page.cdp("Emulation.setFocusEmulationEnabled", { enabled: true });
-    // window.mount(fields) renders a composer of the fields into main, recording every event its
-    // host dispatches and every send and stop the document hears; window.read() resolves, once it
-    // renders, to what it shows.
     await page.evaluate(`window.verdict.then(async () => {
       await import("/dist/composer.js");
       window.heard = [];
@@ -87,7 +69,6 @@ describe("composer", { timeout: 60_000 }, () => {
           field: field.value,
           fieldDisabled: field.disabled,
           action: action.classList.contains("stop") ? "stop" : "send",
-          // The button's name: its shown label, the hidden one out of the accessibility tree.
           name: [...action.children]
             .filter((label) => getComputedStyle(label).visibility === "visible")
             .map((label) => label.textContent),
@@ -101,7 +82,6 @@ describe("composer", { timeout: 60_000 }, () => {
       };
       window.focusField = () =>
         document.querySelector("sl-composer").shadowRoot.querySelector("textarea").focus();
-      // Focus moves to the control first, as a pointer or a key activating it moves it.
       window.clickAction = async () => {
         const action = document.querySelector("sl-composer").shadowRoot.querySelector(".action");
         action.focus();
@@ -126,9 +106,7 @@ describe("composer", { timeout: 60_000 }, () => {
   const clickAction = (): Promise<Shown> => page.evaluate("window.clickAction()");
   const callSend = (): Promise<Shown> => page.evaluate("window.callSend()");
   const focusField = () => page.evaluate("window.focusField()");
-  // Text typed into the focused element, as an input method commits it.
   const type = (text: string) => page.cdp("Input.insertText", { text });
-  // A key pressed and released on the focused element, with the text it types, if any.
   const press = async (
     key: string,
     {
@@ -264,8 +242,6 @@ describe("composer", { timeout: 60_000 }, () => {
   });
 
   test("stop activated by the keyboard with the field empty moves focus to the field, never leaving it on a disabled send", async () => {
-    // The app clears busy on stop, as a consumer does once the reply ends. The button turns to
-    // send, disabled for the empty field: focus left on it would sit on a disabled control.
     await page.evaluate(`(() => {
       const composer = document.querySelector("sl-composer");
       composer.busy = true;
@@ -350,7 +326,6 @@ describe("composer", { timeout: 60_000 }, () => {
       [shown.value, shown.fieldDisabled, shown.action, shown.sent],
       ["drafted while busy\n", false, "stop", []],
     );
-    // Once the app clears busy, send returns, enabled for the draft.
     const after: Shown = await page.evaluate(`(() => {
       document.querySelector("sl-composer").busy = false;
       return window.read();
@@ -378,7 +353,6 @@ describe("composer", { timeout: 60_000 }, () => {
       return window.clickAction();
     })()`);
     assert.deepEqual([busy.action, busy.actionDisabled, busy.heard], ["stop", true, []]);
-    // The attribute sets it too, and its removal enables the field again.
     const enabled: Shown = await page.evaluate(`(() => {
       document.querySelector("sl-composer").removeAttribute("disabled");
       return window.read();
@@ -503,7 +477,6 @@ describe("composer", { timeout: 60_000 }, () => {
       labels: number[];
     } = await page.evaluate(`(async () => {
       const composer = await window.mount({ value: "a draft" });
-      // A serif interface font, so the two labels differ in width.
       composer.style.setProperty("--font-ui", "serif");
       composer.style.inlineSize = "24rem";
       const root = composer.shadowRoot;
