@@ -3,7 +3,7 @@
 /*
  * The status badge's shadow-root sheet: an inline-block host.
  * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
- * See docs/layout.md.
+ * See docs/layout.md
  */
 
 :host {

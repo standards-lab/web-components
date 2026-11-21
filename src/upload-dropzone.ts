@@ -3,7 +3,7 @@
 // state. It knows no SDK and no domain: files go out as File objects, a cancel goes out by the
 // upload's id, and the app does the uploading. It binds no key.
 // Adapted from spike-html-apps-components (10dde51): src/upload-dropzone.ts, on @standards-lab/web-foundation.
-// See docs/internals.md.
+// See docs/internals.md
 
 import { html, LitElement, nothing, type PropertyDeclarations } from "lit";
 import { repeat } from "lit/directives/repeat.js";

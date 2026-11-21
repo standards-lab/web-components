@@ -4,7 +4,7 @@
 // emits: on the page through page.css, and in a shadow root that adopts the sheet, as each
 // component's does.
 // From spike-html-apps-components (10dde51): src/markdown.ts.
-// See docs/internals.md.
+// See docs/internals.md
 
 import { getDefaults, Lexer, type Token, type Tokens } from "marked";
 import { html, nothing, type TemplateResult } from "lit";

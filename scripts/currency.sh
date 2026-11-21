@@ -45,7 +45,7 @@ report_mise_tools() {
   done <<<"$lines"
 }
 
-report_peer_range_admitting() {
+report_peer_range() {
   local package=$1 latest=$2 reason=$3 range
   range=$(node -p 'require("./package.json").peerDependencies?.[process.argv[1]] ?? ""' \
     "$package") || return
@@ -65,7 +65,7 @@ report_release_tag_and_peer() {
   if [[ ${spec#*#} != "$latest" ]]; then
     report_pin "package.json: $package ${spec#*#} -> $latest" "$reason"
   fi
-  report_peer_range_admitting "$package" "$latest" "$reason"
+  report_peer_range "$package" "$latest" "$reason"
 }
 
 typescript_eslint_accepted_typescript() {

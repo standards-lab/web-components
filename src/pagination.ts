@@ -1,6 +1,6 @@
 // Pagination, Lit with a shadow root: a page of entries between its summary and its controls.
 // Adapted from spike-html-apps-components (10dde51): src/pagination.ts, on @standards-lab/web-foundation.
-// See docs/internals.md.
+// See docs/internals.md
 
 import { html, LitElement, nothing, type PropertyDeclarations } from "lit";
 

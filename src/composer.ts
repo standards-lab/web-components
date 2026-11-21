@@ -3,7 +3,7 @@
 // belong to the app, so the field does only what a native textarea does, and an app that sends on
 // a key calls send(), the one implementation of the send rules, which the send control calls too.
 // Adapted from spike-html-apps-components (10dde51): src/composer.ts, on @standards-lab/web-foundation.
-// See docs/internals.md.
+// See docs/internals.md
 
 import { html, LitElement, type PropertyDeclarations } from "lit";
 import { live } from "lit/directives/live.js";

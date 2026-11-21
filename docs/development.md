@@ -8,18 +8,14 @@ workflows.
 
 `mise.toml` pins every tool the tasks run, and no task installs a missing one:
 `task.run_auto_install` is off, and `mise run install` is the one task that reads the network.
-`scripts/preflight.sh` fails a task whose tool is missing, naming `mise run install`.
-`scripts/lint-marathon.sh` runs marathon's lint-context and lint-references, both, and fails when
-either fails or is missing from PATH, naming the same command. The foundation
-is a peer, which the repository's devDependency installs at its tag, so preflight looks for it in
-`node_modules` beside lit and marked.
+The foundation is a peer, which the repository's devDependency installs at its tag, so
+`scripts/preflight.sh` looks for it in `node_modules` beside lit and marked.
 
 Chrome for Testing publishes no checksums, so each chrome-headless-shell bump takes the sha256 and
 size from the download by hand. mise caches a download by its checksum, so a version bumped without
 its own sha256 installs the old build; preflight compares the installed browser's version with the
 pin and fails, naming the sha256, when they differ.
 
-actionlint shellchecks each workflow's `run:` block too, with the pinned shellcheck.
 `types:browser` depends on `build`: the browser cases' in-page modules read the declarations the
 build ships. `types:test` doesn't: the tests import nothing from `dist/`.
 
@@ -62,9 +58,8 @@ repository's latest release. A peer, the foundation, is declared by a caret rang
 that latest release so a consumer can declare it beside the components, by the release test's own
 rule, `caretAdmits`. typescript is held to the newest version typescript-eslint's peer range
 accepts. A pin held back from its latest is named, with its reason, in `mise.toml`'s `HOLDS` list,
-one `<item> <pin>: <reason>` line each; the report prints it with that reason and still exits 0. A
-held tag holds its peer range with it. Each action a workflow uses is compared with its repository's latest release; none is
-while there is no workflow.
+in the format `scripts/currency.sh` gives. Each action a workflow uses is compared with its
+repository's latest release; none is while there is no workflow.
 
 ## Lint
 

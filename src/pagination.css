@@ -4,7 +4,7 @@
  * The pagination's shadow-root sheet: the summary, and the row of the page size, the steps, and
  * the page field; it gives no control a look of its own.
  * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
- * See docs/layout.md.
+ * See docs/layout.md
  */
 
 :host {

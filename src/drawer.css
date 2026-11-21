@@ -4,7 +4,7 @@
  * The drawer's shadow-root sheet: the docked aside's frame and the modal dialog covering the
  * viewport, each a header over a scrolling body, and the dialog's slide.
  * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
- * See docs/layout.md.
+ * See docs/layout.md
  */
 
 :host {

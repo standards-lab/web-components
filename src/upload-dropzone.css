@@ -4,7 +4,7 @@
  * The upload dropzone's shadow-root sheet: the dashed zone, its drag-over and disabled looks,
  * and the list of uploads, each a name, a detail line, and a trailing label or cancel control.
  * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
- * See docs/layout.md.
+ * See docs/layout.md
  */
 
 :host {

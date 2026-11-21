@@ -4,7 +4,7 @@
 // their outputs, by the spec's JSON field names, so a response's output or a conversation's
 // history fits as it is.
 // Adapted from spike-html-apps-components (10dde51): src/chat-thread.ts, on @standards-lab/web-foundation.
-// See docs/internals.md.
+// See docs/internals.md
 
 import {
   html,

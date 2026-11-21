@@ -4,7 +4,7 @@
  * The search results' shadow-root sheet: the status line over the list of matches, each a
  * button of the name and field over the snippet.
  * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
- * See docs/layout.md.
+ * See docs/layout.md
  */
 
 :host {

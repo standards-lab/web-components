@@ -1,5 +1,5 @@
 // The profiles the installed foundation registers, read from its registry.
-// See docs/testing.md.
+// See docs/testing.md
 
 import "@standards-lab/web-foundation/register-full.js";
 import { DEFAULTS, profiles } from "@standards-lab/web-foundation/registry.js";

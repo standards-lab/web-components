@@ -4,7 +4,7 @@
  * The stage timeline's shadow-root sheet: the list of steps, each a marker, a connector to the
  * next, a name, a detail line of the state's label and time, and a failed stage's reason.
  * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
- * See docs/layout.md.
+ * See docs/layout.md
  */
 
 :host {

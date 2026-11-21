@@ -4,7 +4,7 @@
  * The chat thread's shadow-root sheet: one frame that scrolls the list of items, each message's
  * place and label row, a verbose item's line, a refusal's mark, and the streaming indicator.
  * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
- * See docs/layout.md.
+ * See docs/layout.md
  */
 
 :host {

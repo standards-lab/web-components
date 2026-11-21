@@ -4,7 +4,7 @@
  * The artifact viewer's shadow-root sheet: a header of the name and content type over one
  * frame that holds a note, the scrolling region, or a native view.
  * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
- * See docs/layout.md.
+ * See docs/layout.md
  */
 
 :host {

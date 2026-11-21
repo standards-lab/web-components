@@ -68,8 +68,8 @@ the foundation's `page.css`:
 - `./stage-timeline.js`: `sl-stage-timeline`, a run's stages as an ordered list of steps.
 - `./*.css`: each component's sheet, which its module imports itself.
 
-[docs/components.md](https://github.com/standards-lab/web-components/blob/main/docs/components.md) documents each module in full, and its demo and specimen
-pages.
+[docs/components.md](https://github.com/standards-lab/web-components/blob/main/docs/components.md)
+documents each module in full, and its demo and specimen pages.
 
 ## Development
 
@@ -109,7 +109,9 @@ gives the reasoning behind the configuration and the scripts.
 ## Release
 
 A release is an annotated `v<version>` tag on a pack commit, cut by hand and published by the
-release workflow; [docs/release.md](https://github.com/standards-lab/web-components/blob/main/docs/release.md) gives the procedure.
+release workflow;
+[docs/release.md](https://github.com/standards-lab/web-components/blob/main/docs/release.md) gives
+the procedure.
 
 ## Provenance
 

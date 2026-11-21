@@ -4,7 +4,7 @@
  * The composer's shadow-root sheet: the row of the growing field and its send or stop control,
  * and the visually hidden label.
  * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
- * See docs/layout.md.
+ * See docs/layout.md
  */
 
 :host {

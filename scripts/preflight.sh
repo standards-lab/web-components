@@ -22,7 +22,7 @@ require_node_modules() {
     fail "@standards-lab/web-foundation (devDependencies)"
 }
 
-require_browser_at_its_checksum_pin() {
+require_browser_at_pin() {
   local shell pin version
   shell=$(mise which chrome-headless-shell 2>/dev/null) || fail "chrome-headless-shell"
   pin=$(mise current http:chrome-headless-shell) || return
@@ -35,4 +35,4 @@ require_browser_at_its_checksum_pin() {
 
 require_node_modules
 [[ "${1:-}" == browser ]] || exit 0
-require_browser_at_its_checksum_pin
+require_browser_at_pin

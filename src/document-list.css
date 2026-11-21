@@ -4,7 +4,7 @@
  * The document list's shadow-root sheet: the status line, on the pagination's summary line or
  * a line of its own, and the list of entries.
  * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
- * See docs/layout.md.
+ * See docs/layout.md
  */
 
 :host {

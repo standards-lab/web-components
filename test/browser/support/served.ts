@@ -1,7 +1,7 @@
 // What the components serve to a browser: the repository root, whose demo/ and test/fixtures/
 // pages load the built dist/, and the packages the pages' import maps name under /deps/.
 // Adapted from spike-html-apps-components (10dde51): test/browser/support/served.ts, on @standards-lab/web-tooling and @standards-lab/web-foundation.
-// See docs/testing.md.
+// See docs/testing.md
 
 import { join } from "node:path";
 

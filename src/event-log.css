@@ -4,7 +4,7 @@
  * The event log's shadow-root sheet: one frame that scrolls the list of events, each its type
  * and time, its labelled source, subject, and id, and its data's details.
  * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
- * See docs/layout.md.
+ * See docs/layout.md
  */
 
 :host {

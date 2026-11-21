@@ -5,7 +5,7 @@
 // swaps only the shadow root's wrapper and its slot, so the slotted content, the host's own
 // children, is never moved, disconnected, or re-created.
 // Adapted from spike-html-apps-components (10dde51): src/drawer.ts, on @standards-lab/web-foundation.
-// See docs/internals.md.
+// See docs/internals.md
 
 import { html, LitElement, type PropertyDeclarations, type PropertyValues } from "lit";
 

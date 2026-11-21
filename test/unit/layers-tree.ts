@@ -2,7 +2,7 @@
 // and form, each with the rules that catch it, and the imports the layer may make in the same
 // layout.
 // Adapted from spike-html-apps-components (10dde51): test/unit/layers-tree.ts, its sibling and above layers the stack's web-app-sdk and web-app-sdk-template.
-// See docs/testing.md.
+// See docs/testing.md
 
 import { spawnSync } from "node:child_process";
 import { mkdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";

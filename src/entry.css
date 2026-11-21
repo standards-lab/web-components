@@ -4,7 +4,7 @@
  * The entry's shadow-root sheet: the button's head of the name and status, its meta line, the
  * status tones, and the selected frame.
  * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
- * See docs/layout.md.
+ * See docs/layout.md
  */
 
 :host {

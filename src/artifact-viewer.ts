@@ -4,7 +4,7 @@
 // or video; or, for a type that names no view, as text when its bytes are text. Only content that
 // is binary by those rules can't be shown.
 // Adapted from spike-html-apps-components (10dde51): src/artifact-viewer.ts, on @standards-lab/web-foundation.
-// See docs/internals.md.
+// See docs/internals.md
 
 import { html, LitElement, nothing, type PropertyDeclarations, type PropertyValues } from "lit";
 

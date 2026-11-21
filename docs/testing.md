@@ -23,8 +23,8 @@ the behavior and layout each one holds to.
 ## Every browser case
 
 - A headless page never has the window's focus. Each browser test that drives the keyboard turns on
-  CDP focus emulation (`Emulation.setFocusEmulationEnabled`), so keys reach the focused element as a user's would and
-  `:focus-visible` matches.
+  CDP focus emulation (`Emulation.setFocusEmulationEnabled`), so keys reach the focused element as
+  a user's would and `:focus-visible` matches.
 - Times and dates are checked in en-US at UTC, the locale and time zone web-tooling's `launch()`
   starts the browser in.
 - A measure the page returns as JSON leaves out a missing box, `undefined`, so a part that isn't

@@ -3,7 +3,7 @@
 // stage with why. It knows no SDK and no domain: the app maps its run's stages onto the shape
 // below. It is display-only: it sends no event, holds nothing focusable, and binds no key.
 // Adapted from spike-html-apps-components (10dde51): src/stage-timeline.ts, on @standards-lab/web-foundation.
-// See docs/internals.md.
+// See docs/internals.md
 
 import { html, LitElement, nothing, svg, type PropertyDeclarations } from "lit";
 import { repeat } from "lit/directives/repeat.js";

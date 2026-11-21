@@ -5,7 +5,7 @@
 // API's document fits once its run's status is beside it; it knows no SDK and no domain, and binds
 // no key.
 // Adapted from spike-html-apps-components (10dde51): src/document-list.ts, on @standards-lab/web-foundation.
-// See docs/internals.md.
+// See docs/internals.md
 
 import { html, LitElement, nothing, type PropertyDeclarations } from "lit";
 import { repeat } from "lit/directives/repeat.js";
