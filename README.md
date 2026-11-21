@@ -118,7 +118,7 @@ the procedure.
 
 The package is seeded by copy from spike-html-apps-components at 10dde51, the parent of its
 v0.10.3 pack commit, and moved onto web-foundation v0.3.0 and web-tooling v0.1.0. Each copied file
-that takes comments names its source in a provenance line.
+that takes comments names each of its sources in a provenance line.
 
 ## License
 

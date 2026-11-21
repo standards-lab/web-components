@@ -14,7 +14,7 @@ strategy is `standards-lab/context/web-client.md`.
 
 The package is seeded by copy from spike-html-apps-components at 10dde51, the parent of its v0.10.3
 pack commit, and moved onto web-foundation v0.3.0's four themes. The spike is archived and never a
-dependency. Each copied file that takes comments names its source in a provenance line; the
+dependency. Each copied file that takes comments names each of its sources in a provenance line; the
 workflows and CHANGELOG.md name theirs, web-foundation's at ceaab61. The files with no line have
 their provenance here:
 
