@@ -4,7 +4,8 @@
 
 The modules of `@standards-lab/web-components`, by capability. The
 [README](https://github.com/standards-lab/web-components/blob/main/README.md#use) shows how a page
-loads them.
+loads them. [layout.md](layout.md) says why each sheet is laid out as it is, and
+[internals.md](internals.md) why each module is built as it is.
 
 ## Controls
 

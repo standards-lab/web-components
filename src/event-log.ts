@@ -3,8 +3,8 @@
 // scrolls when its consumer constrains its block size. The event is a structural subset of
 // CloudEvents 1.0, by its attribute names, so an event as a stream carries it fits as it is. It
 // knows no SDK and no domain. It is display-only: it sends no event and binds no key.
-// Adapted from spike-html-apps-components (10dde51): src/event-log.ts, on
-// @standards-lab/web-foundation.
+// Adapted from spike-html-apps-components (10dde51): src/event-log.ts, on @standards-lab/web-foundation.
+// See docs/internals.md.
 
 import { html, LitElement, nothing, type PropertyDeclarations, type PropertyValues } from "lit";
 import { repeat } from "lit/directives/repeat.js";
@@ -33,22 +33,14 @@ export interface LogEvent {
   data?: unknown;
 }
 
-/** The time's format: the date, and the clock to the second, as the stage timeline shows it,
- * since a run's events arrive seconds apart. */
 const timeFormat: Intl.DateTimeFormatOptions = { dateStyle: "medium", timeStyle: "medium" };
 
-/** The event's time as a Date, or null when it has none or it doesn't parse. */
 function occurred(event: LogEvent): Date | null {
   if (event.time === undefined || event.time === null) return null;
   const date = new Date(event.time);
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-/**
- * The data as the log shows it: a string as it is, since text data reads as text; any other value
- * as JSON with two-space indents, a bigint as its digits. A value JSON can't write, a circular
- * object or a function, shows as its String().
- */
 function pretty(data: unknown): string {
   if (typeof data === "string") return data;
   try {
@@ -59,16 +51,11 @@ function pretty(data: unknown): string {
     );
     if (json !== undefined) return json;
   } catch {
-    // A circular object: shown below by its String().
+    return String(data);
   }
   return String(data);
 }
 
-/**
- * Whether a frame is scrolled to its end, as far as the browser can tell, as chat-thread.ts's: its
- * integer heights and its scroll position, snapped to the device pixel, leave up to two pixels
- * between, and more under a CSS zoom below 1, where a device pixel is more than a CSS one.
- */
 function atEnd(frame: HTMLElement): boolean {
   const zoom = Math.min((frame.currentCSSZoom as number | undefined) ?? 1, 1);
   return frame.scrollHeight - frame.clientHeight - frame.scrollTop <= 2 / zoom;
@@ -102,8 +89,6 @@ export class EventLog extends LitElement {
   /** The events to show, oldest first. */
   declare events: readonly LogEvent[];
 
-  /** Whether the update in flight follows the newest event: the frame was at its end, and showed
-   * events already. */
   #follow = false;
 
   constructor() {
@@ -112,8 +97,6 @@ export class EventLog extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>) {
-    // The frame as the last update left it, before this one appends: at its end, within the
-    // browser's rounding, when it doesn't scroll at all too.
     const frame = this.renderRoot.querySelector<HTMLElement>(".frame");
     const shown = (changed.get("events") as readonly LogEvent[] | undefined)?.length ?? 0;
     this.#follow = changed.has("events") && shown > 0 && frame !== null && atEnd(frame);
@@ -126,8 +109,6 @@ export class EventLog extends LitElement {
     if (frame) frame.scrollTop = frame.scrollHeight;
   }
 
-  // A label and its value. An identifier's value is cut: one line, an ellipsis where it is longer
-  // than the line, its whole text in its title.
   #pair(label: string, value: string, cut = false) {
     return html`<div class="pair">
       <dt>${label}</dt>
@@ -167,8 +148,6 @@ export class EventLog extends LitElement {
 
   render() {
     const events = this.events ?? [];
-    // The frame is the log. Each event keyed by its source and id: the keyed repeat keeps every
-    // shown event's DOM as the list grows.
     return html`<div class="frame" role="log" aria-live="polite" aria-relevant="additions" aria-label="Events">
       ${
         events.length

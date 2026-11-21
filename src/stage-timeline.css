@@ -1,22 +1,10 @@
 /* From spike-html-apps-components (10dde51): src/stage-timeline.css. */
 
 /*
- * The stage timeline's layout in a shadow root: stage-timeline.ts adopts this sheet into its root
- * after the foundation's reset and elements sheets (baseline/reset.css and elements.css). It holds
- * the list's layout, each step's marker, its connector to the next step, and its lines, and the
- * states' looks. It reads only the foundation's baseline tokens, which a shadow root takes by
- * inheritance from the page's entry. Unlayered, it sits above the adopted layers in the root.
- *
- * The timeline draws no frame: it is a list of steps, as tall as its stages, with no cap. Each step
- * is a grid of two columns, the marker's and the step's text. The marker sits on the name's line;
- * under the name, the detail line holds the state's label and the stage's time, of the small step;
- * under that, a failed stage's reason, a row no other step fills; under that, a gap, which the
- * connector spans with the detail line and the reason, from under this step's marker to above the
- * next one's. The last step has no connector and no gap. The label's and the time's slots each hold
- * the width of the widest they show, so a stage's lines keep their places and widths as its state
- * changes, and a narrow column wraps every step's detail line between its label and its time alike.
- * In a shrink-to-fit parent the timeline is as wide as its widest line, a name or a detail line
- * laid out whole, up to the parent's width; a reason wraps to that width and never sets it.
+ * The stage timeline's shadow-root sheet: the list of steps, each a marker, a connector to the
+ * next, a name, a detail line of the state's label and time, and a failed stage's reason.
+ * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
+ * See docs/layout.md.
  */
 
 :host {
@@ -37,8 +25,6 @@
 .stage:last-child {
   grid-template-rows: auto auto auto;
 }
-/* The connector: a line in the marker's column, under this step's marker and down to the next
-   step's, past a failed step's reason, short of each by a small step. */
 .stage:not(:last-child)::after {
   content: "";
   grid-column: 1;
@@ -49,8 +35,6 @@
   border-radius: var(--radius-full);
   background-color: var(--border-2);
 }
-/* The marker, a circle on the name's line: a pending or active stage's position, a complete one's
-   check, a failed one's cross. Its glyph is aria-hidden; the label says the state. */
 .marker {
   position: relative;
   grid-column: 1;
@@ -78,9 +62,6 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-/* The active stage in the accent color, the foundation's hook for what is in progress: its
-   marker's border and glyph, a tint of it behind them, its ring, and its label. The complete and
-   failed stages take their status hues. */
 .active .marker {
   border-color: var(--accent-color, var(--magenta));
   background-color: color-mix(in srgb, var(--accent-color, var(--magenta)) 12%, transparent);
@@ -97,8 +78,6 @@
   background-color: var(--red);
   color: var(--bg);
 }
-/* An active stage's marker sends out a ring that fades, unless motion is reduced, when the tinted
-   marker alone reads as in progress. The ring is painted, never laid out, so it moves nothing. */
 @media (prefers-reduced-motion: no-preference) {
   .active .marker::after {
     content: "";
@@ -126,12 +105,9 @@
   font-weight: 600;
   overflow-wrap: anywhere;
 }
-/* A pending stage's name recedes by color alone: its weight stays, so it keeps its width. */
 .pending .name {
   color: var(--fg-2);
 }
-/* The detail line, under the name at its start: the label, then the time, wrapping between them,
-   never inside either. */
 .detail {
   grid-column: 2;
   grid-row: 2;
@@ -142,8 +118,6 @@
   font-size: var(--text-s);
   color: var(--fg-2);
 }
-/* A slot stacks what it may show in one cell, the hidden as wide as the shown, so the slot is the
-   widest of them. */
 .slot {
   display: inline-grid;
   justify-items: start;
@@ -168,15 +142,10 @@
 .failed .label {
   color: var(--red);
 }
-/* The time keeps whole, its digits one width. */
 .when {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-/* A failed stage's reason, under the detail line at the name's start, in the detail's size and
-   muted color: the label above it carries the failure's hue. Its inline size is contained, so it
-   adds nothing to the step's width and wraps to the column the names and detail lines set,
-   breaking inside a run too long for its line. */
 .reason {
   grid-column: 2;
   grid-row: 3;

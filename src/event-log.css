@@ -1,34 +1,16 @@
 /* From spike-html-apps-components (10dde51): src/event-log.css. */
 
 /*
- * The event log's layout in a shadow root: event-log.ts adopts this sheet into its root after the
- * foundation's reset and elements sheets (baseline/reset.css and elements.css), which give the
- * pre, the native details and summary, and the focus outline their look. It holds the log's one
- * frame, the list's layout, and each event's lines. It reads only the foundation's baseline
- * tokens, which a shadow root takes by inheritance from the page's entry. Unlayered, it sits above
- * the adopted layers in the root.
- *
- * The host is a flex column holding the frame. Unconstrained, the log is as tall as its events. A
- * consumer that constrains its block size, by a block-size or max-block-size on the host or a
- * sized flex or grid parent, holds it there: the frame shrinks to it and the list scrolls inside,
- * the browser's own scrollbar showing, and the list's padding shows past its last event at the
- * scroll's end.
- *
- * Each event is its lines, divided from the next by a rule: its type, with its time at the line's
- * end; its source, its subject, and its id, each labelled, small and muted, and each on a line of
- * its own at every width; and its data's details. A line wraps between its parts, never inside
- * one, so a type, a time, an id, or a source stays whole; a subject or an id longer than its line
- * ends in an ellipsis, never broken; an opened data's pre keeps its whole lines and scrolls
- * sideways. The frame is a grid of one column, minmax(0, 1fr), so in a shrink-to-fit parent the
- * log takes its content's width, up to the parent's: its widest type and time, since the metadata
- * is contained across, and wraps at the width the rest give it.
+ * The event log's shadow-root sheet: one frame that scrolls the list of events, each its type
+ * and time, its labelled source, subject, and id, and its data's details.
+ * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
+ * See docs/layout.md.
  */
 
 :host {
   display: flex;
   flex-direction: column;
 }
-/* The one frame, the pre's border on the same tokens; it scrolls the list both ways. */
 .frame {
   flex: 1 1 auto;
   display: grid;
@@ -39,17 +21,11 @@
   border: var(--line-s) solid var(--border);
   border-radius: var(--radius-sm);
 }
-/* The list, padded across, and each event padded above and below, so the padding scrolls with
-   them and shows after the last event at the scroll's end. The inline padding is the small step,
-   so an id of a run's UUID and its stage's position, as the emulator writes one, has the most of
-   its line in a log 20rem wide, the frame's scrollbar beside it. */
 .events {
   margin: 0;
   padding: 0 var(--space-2xs);
   list-style: none;
 }
-/* An event: its lines in one column, as wide as the list, so an opened data's pre scrolls inside
-   it rather than widen it; the lines set no margins of their own, the gap spacing them. */
 .event {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -63,8 +39,6 @@
 .event + .event {
   border-block-start: var(--line-s) solid var(--border);
 }
-/* The type and the time: the type opens the line, the time ends it, and a narrow log wraps the
-   time under the type, at the line's start. */
 .head {
   display: flex;
   flex-wrap: wrap;
@@ -77,7 +51,6 @@
   font-weight: 600;
   white-space: nowrap;
 }
-/* The time keeps whole, its digits one width. */
 .when {
   font-family: var(--font-ui);
   font-size: var(--text-s);
@@ -85,9 +58,6 @@
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-/* The metadata: each label and its value a pair, one column of them, so each pair takes a line of
-   its own at every width. A container across, so it takes the width the type and the time give the
-   log rather than set it. */
 .meta {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -101,16 +71,9 @@
   align-items: baseline;
   gap: 0 var(--space-3xs);
 }
-/* The step between pairs. Where each pair is one line, it is the smaller step, as between the lines
-   within one item, the event's own lines among them. It is each pair's margin after the first, not
-   the metadata's gap, because the metadata is the container the query below reads, and a container
-   query styles only what is inside its container. */
 .pair + .pair {
   margin-block-start: var(--space-3xs);
 }
-/* The metadata as its own container queries it: narrower than a pair of a UUID and its label, each
-   pair's label sits over its value. Each pair is then two lines, and the larger step between pairs
-   keeps each label grouped with its own value rather than with the next pair's. */
 @container (inline-size < 30rem) {
   .pair {
     flex-direction: column;
@@ -124,8 +87,6 @@
   color: var(--fg-3);
   white-space: nowrap;
 }
-/* A value keeps whole: it moves to the next line rather than break, and breaks only when it is
-   longer than the line itself. It may shrink below its content, so a cut value fits its line. */
 .meta dd {
   max-inline-size: 100%;
   min-inline-size: 0;
@@ -133,17 +94,11 @@
   font-family: var(--font-code);
   overflow-wrap: anywhere;
 }
-/* An identifier, the subject or the id, never breaks: longer than its line, it is cut with an
-   ellipsis inside its own value, which neither scrolls nor takes focus. Its whole text stays in the
-   DOM, for selection, copying, and a screen reader, and its title shows it on hover. Where it fits,
-   it shows whole as before. */
 .meta dd.cut {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-/* The data's toggle in the label's type, and its JSON, which keeps whole lines and scrolls
-   sideways in its pre. */
 .data > summary {
   inline-size: fit-content;
   font-size: var(--text-s);
@@ -153,7 +108,6 @@
   overflow-x: auto;
   font-size: var(--text-s);
 }
-/* The notes: an event's with no data, in the toggle's place, and the empty log's. */
 .no-data {
   margin: 0;
   font-family: var(--font-ui);

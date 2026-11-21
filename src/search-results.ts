@@ -3,8 +3,8 @@
 // that says where the search stands. Each match is a native button that sends `open` with its
 // document's id. The match is a structural shape of its own, which a search API's match fits as
 // it is; the component knows no SDK and no domain. It binds no key.
-// Adapted from spike-html-apps-components (10dde51): src/search-results.ts, on
-// @standards-lab/web-foundation.
+// Adapted from spike-html-apps-components (10dde51): src/search-results.ts, on @standards-lab/web-foundation.
+// See docs/internals.md.
 
 import { html, LitElement, nothing, type PropertyDeclarations, type PropertyValues } from "lit";
 import { repeat } from "lit/directives/repeat.js";
@@ -42,38 +42,19 @@ export interface SearchOpenDetail {
   id: string;
 }
 
-/** The field labels, which say in words where each match was found. */
 const fields: Record<MatchField, string> = {
   name: "in name",
   content: "in content",
 };
 
-/**
- * The query as the results mark it: trimmed, its runs of whitespace one space each, as a snippet's
- * are, and split into code points. A blank query is empty, and marks nothing.
- */
 function needleOf(query: string): string[] {
   return Array.from((query ?? "").trim().replace(/\s+/g, " "));
 }
 
-/**
- * Whether two code points are one letter but for case: the same, or the same in lower case or in
- * upper case. Each is compared alone, so a code point whose case mapping is longer, "İ" lowered to
- * "i̇" or "ß" raised to "SS", matches only what maps to the same; "ß" matches "ẞ" but never "ss".
- * This is the rune-by-rune case folding a search by Unicode simple folding does, near enough to
- * mark what such a search matched.
- */
 function sameLetter(a: string, b: string): boolean {
   return a === b || a.toLowerCase() === b.toLowerCase() || a.toUpperCase() === b.toUpperCase();
 }
 
-/**
- * The text with each occurrence of the needle, case-insensitively and left to right, in a `mark`:
- * a list of strings and mark templates, which Lit renders as text nodes and elements, so markup in
- * the text or the query shows as text. It compares code point by code point on the text as given,
- * never on a lowered copy, so each mark's offsets are the text's own even where a letter's other
- * case is longer, and nothing in the query is a pattern. An empty needle marks nothing.
- */
 function withMarks(text: string, needle: readonly string[]): unknown {
   if (!needle.length) return text;
   const letters = Array.from(text ?? "");
@@ -93,22 +74,12 @@ function withMarks(text: string, needle: readonly string[]): unknown {
   return parts;
 }
 
-/**
- * The snippet with each end's ellipsis joined to the text beside it by a word joiner (U+2060), so
- * a line never breaks after a leading ellipsis or before a trailing one: a narrow line leaves no
- * ellipsis alone on it.
- */
 function joined(snippet: string): string {
   return (snippet ?? "")
     .replace(/^\u2026(?=.)/u, "\u2026\u2060")
     .replace(/(?<=.)\u2026$/u, "\u2060\u2026");
 }
 
-/**
- * Whether a match's snippet only repeats its name: a match in the name, whose snippet, its
- * ellipses and its whitespace runs aside, is the name or a stretch of it. The name shows whole and
- * marked, so such a snippet adds nothing.
- */
 function repeatsName(match: SearchMatch): boolean {
   if (match.field !== "name") return false;
   const collapse = (text: string) => text.trim().replace(/\s+/g, " ");
@@ -116,10 +87,6 @@ function repeatsName(match: SearchMatch): boolean {
   return collapse(match.name ?? "").includes(core);
 }
 
-/**
- * A count of matches in words: "1 match", "3 matches"; or, when the search found more than are
- * shown, the shown of the total, "96 of 140 matches".
- */
 function count(shown: number, total: number): string {
   if (total > shown) return `${shown} of ${total} matches`;
   return `${shown} ${shown === 1 ? "match" : "matches"}`;
@@ -190,8 +157,6 @@ export class SearchResults extends LitElement {
     this.message = "";
   }
 
-  /** The query the shown matches answer, `query` as it was when they were set: their marks', their
-   * count's, and, when there are none, no matches'; empty, none answered, the line prompts. */
   #answered = "";
 
   protected override willUpdate(changed: PropertyValues<this>) {
@@ -202,10 +167,6 @@ export class SearchResults extends LitElement {
     emit<SearchOpenDetail>(this, "open", { id: match.id });
   }
 
-  // The status line's content, by the state, the query, the query the matches answer, and the
-  // matches. Searching names the query; a count, and no matches, name the query the shown items
-  // answer, and with none answered the line prompts, so a query set alone, before loading, leaves
-  // the line, the one live region, unchanged in every state.
   #status(query: string, answered: string, matches: readonly SearchMatch[]) {
     const quote = (text: string) => `“${text}”`;
     switch (this.state) {
@@ -216,12 +177,10 @@ export class SearchResults extends LitElement {
           ${this.message ? html`<span class="detail">${this.message}</span>` : nothing}`;
     }
     if (matches.length) {
-      // A null total is none, as is NaN, an attribute that doesn't parse, which no count exceeds.
       const total = this.total !== null && this.total > matches.length ? this.total : 0;
       const answers = answered ? ` for ${quote(answered)}` : "";
       return html`<span class="label">${count(matches.length, total)}${answers}</span>`;
     }
-    // No matches shown, the total counts nothing: "0 of 5 matches" would count what isn't shown.
     return answered
       ? html`<span class="label">No matches for ${quote(answered)}</span>`
       : html`<span class="label prompt">Search document names and content.</span>`;
@@ -244,8 +203,6 @@ export class SearchResults extends LitElement {
     const needle = needleOf(this.#answered);
     const answered = needle.join("");
     const matches = this.state === "error" ? [] : (this.items ?? []);
-    // Each match is keyed by its id, so a focused match stays with its document as the list
-    // changes around it.
     return html`<p class="status ${this.state}" role="status">${this.#status(query, answered, matches)}</p>
       ${
         matches.length

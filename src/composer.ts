@@ -2,8 +2,8 @@
 // stop control replaces while the app is busy. It binds no key: Enter, Shift+Enter, and Escape
 // belong to the app, so the field does only what a native textarea does, and an app that sends on
 // a key calls send(), the one implementation of the send rules, which the send control calls too.
-// Adapted from spike-html-apps-components (10dde51): src/composer.ts, on
-// @standards-lab/web-foundation.
+// Adapted from spike-html-apps-components (10dde51): src/composer.ts, on @standards-lab/web-foundation.
+// See docs/internals.md.
 
 import { html, LitElement, type PropertyDeclarations } from "lit";
 import { live } from "lit/directives/live.js";
@@ -89,12 +89,8 @@ export class Composer extends LitElement {
   send(): void {
     if (!this.#sendable) return;
     const text = this.value;
-    // The field clears before `send` goes out, so a listener that sets `value`, restoring the
-    // draft when its send fails, keeps what it set.
     this.value = "";
     emit<SendDetail>(this, "send", { text });
-    // The control a pointer or the keyboard activated turns disabled once the field is empty,
-    // unless the app turns busy, so focus returns to the field.
     this.#field?.focus();
   }
 
@@ -103,19 +99,12 @@ export class Composer extends LitElement {
   }
 
   protected override updated() {
-    // The button turned disabled while it held focus: stop, activated with the field empty, became
-    // send once the app cleared busy, or the app emptied the field. A disabled control keeps focus
-    // and takes no keys, so the reader would lose their place; focus moves to the field, where they
-    // write next. While the composer is disabled the field is too, takes no focus, and focus is
-    // left where it is.
     const button = this.renderRoot.querySelector("button");
     if (button?.disabled && this.shadowRoot?.activeElement === button) this.#field?.focus();
   }
 
   render() {
     const busy = this.busy;
-    // One button, send or stop, keeps focus across the swap. Both labels sit in its one grid cell,
-    // the other hidden, so it is as wide as the wider label either way and nothing shifts.
     return html`<label class="label" for="field">${this.label}</label>
       <div class="composer">
         <textarea

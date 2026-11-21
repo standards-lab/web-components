@@ -2,8 +2,8 @@
 // each its name, its state in words and by its marker, and when it completed or failed, a failed
 // stage with why. It knows no SDK and no domain: the app maps its run's stages onto the shape
 // below. It is display-only: it sends no event, holds nothing focusable, and binds no key.
-// Adapted from spike-html-apps-components (10dde51): src/stage-timeline.ts, on
-// @standards-lab/web-foundation.
+// Adapted from spike-html-apps-components (10dde51): src/stage-timeline.ts, on @standards-lab/web-foundation.
+// See docs/internals.md.
 
 import { html, LitElement, nothing, svg, type PropertyDeclarations } from "lit";
 import { repeat } from "lit/directives/repeat.js";
@@ -38,7 +38,6 @@ export interface TimelineStage {
   reason?: string | null;
 }
 
-/** Each state's label, which tells the states apart in words as well as by marker and color. */
 const labels: Record<StageState, string> = {
   pending: "Pending",
   active: "In progress",
@@ -46,20 +45,13 @@ const labels: Record<StageState, string> = {
   failed: "Failed",
 };
 
-/** A stage's time's format: the date, and the clock to the second, since a run's stages complete
- * seconds apart. */
 const timeFormat: Intl.DateTimeFormatOptions = { dateStyle: "medium", timeStyle: "medium" };
 
-/** A time as wide as any the format writes in the page's locale, two-digit day and hour, which
- * the time slot holds hidden, so a stage that completes shows its time in space already there. */
 const widest = new Date(2026, 4, 28, 22, 58, 58);
 
-/** The markers' glyphs: a check for complete, a cross for failed, drawn in the marker's color. */
 const check = svg`<path d="M3.5 8.5l3 3 6-7" />`;
 const cross = svg`<path d="M4.5 4.5l7 7M11.5 4.5l-7 7" />`;
 
-/** The time the stage's state shows, a failed stage's failure, else its completion, as a Date; or
- * null when it has none or it doesn't parse. */
 function timeOf(stage: TimelineStage): Date | null {
   const at = stage.state === "failed" ? (stage.failedAt ?? stage.completedAt) : stage.completedAt;
   if (at === undefined || at === null) return null;
@@ -108,9 +100,6 @@ export class StageTimeline extends LitElement {
   #stage(stage: TimelineStage) {
     const date = timeOf(stage);
     const reason = stage.state === "failed" && stage.reason ? stage.reason : null;
-    // The label's slot stacks every label, the stage's own shown and the rest hidden, so it is as
-    // wide as the widest; the time's slot stacks the stage's time, when it has one, over the
-    // widest time hidden, so it holds its width with or without one.
     return html`<li
       class="stage ${stage.state}"
       data-name=${stage.name}
@@ -142,8 +131,6 @@ export class StageTimeline extends LitElement {
   }
 
   render() {
-    // In their positions' order, the given order kept between equal positions; each step keyed by
-    // its name, so a stage that advances re-renders in its own nodes.
     const stages = [...(this.stages ?? [])].sort((a, b) => a.position - b.position);
     return html`<ol class="stages" aria-label="Stages">
       ${repeat(

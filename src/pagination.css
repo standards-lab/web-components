@@ -1,12 +1,10 @@
 /* From spike-html-apps-components (10dde51): src/pagination.css. */
 
 /*
- * The pagination's layout in a shadow root: pagination.ts adopts this sheet into its root
- * after the foundation's reset and elements sheets (baseline/reset.css and elements.css), which
- * give the bare controls their look. It gives no control a look of its own: no background,
- * border, color, padding, or font on a control. It reads only the foundation's baseline tokens,
- * which a shadow root takes by inheritance from the page's entry. Unlayered, it sits above the
- * adopted layers in the root.
+ * The pagination's shadow-root sheet: the summary, and the row of the page size, the steps, and
+ * the page field; it gives no control a look of its own.
+ * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
+ * See docs/layout.md.
  */
 
 :host {
@@ -34,20 +32,12 @@
   align-items: center;
   gap: var(--space-2xs);
 }
-/* The label and the page count never break: a narrow pagination wraps its groups instead, by the
-   gap's row step. */
 .page-size-label,
 .page-indicator {
   font-size: var(--text-s);
   color: var(--fg-2);
   white-space: nowrap;
 }
-/* The page number's field is as wide as its value, field-sizing's content size, and never
-   narrower than three digits: its content box, so the elements sheet's padding and border add to
-   the 3ch rather than come out of it, at every spacing. Up to page 999 the field keeps one width
-   as the page changes; past it the field grows with the page rather than clip it. field-sizing is
-   Baseline newly available, as the composer's field notes; without it the field keeps the
-   browser's own width for a number input, wider, never clipped. */
 .page-input {
   box-sizing: content-box;
   min-inline-size: 3ch;

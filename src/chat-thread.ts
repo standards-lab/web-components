@@ -3,8 +3,8 @@
 // structural subset of Open Responses (spec 2026-04-24): messages, reasoning, function calls, and
 // their outputs, by the spec's JSON field names, so a response's output or a conversation's
 // history fits as it is.
-// Adapted from spike-html-apps-components (10dde51): src/chat-thread.ts, on
-// @standards-lab/web-foundation.
+// Adapted from spike-html-apps-components (10dde51): src/chat-thread.ts, on @standards-lab/web-foundation.
+// See docs/internals.md.
 
 import {
   html,
@@ -100,12 +100,6 @@ export interface FunctionCallOutputItem {
 /** An item the thread shows; an item of any other type is skipped. */
 export type ThreadItem = MessageItem | ReasoningItem | FunctionCallItem | FunctionCallOutputItem;
 
-/**
- * Text as shown: valid JSON formatted from its own tokens by `formatJson()`, two spaces an indent,
- * else the text as it is. `JSON.parse` decides validity alone and its value is thrown away:
- * printing the value would move integer-like keys first, rewrite numbers, and drop duplicate keys.
- * Text whose formatting would pass the longest string, a RangeError, shows as it is too.
- */
 function pretty(text: string): string {
   try {
     JSON.parse(text);
@@ -115,28 +109,17 @@ function pretty(text: string): string {
   }
 }
 
-/** The label a status shows beside an item's kind; a completed item, or one without a status,
- * shows none. */
 const STATUS_LABELS: Partial<Record<ItemStatus, string>> = {
   in_progress: "Streaming",
   incomplete: "Incomplete",
   failed: "Failed",
 };
 
-/**
- * Whether a frame is scrolled to its end, as far as the browser can tell. Its integer heights and
- * its scroll position, snapped to the device pixel, leave up to two pixels between, and more
- * under a CSS zoom below 1, where a device pixel is more than a CSS one; within one CSS pixel, the
- * follow would stop by itself at a zoom of 0.9 or 1.1. A browser without `currentCSSZoom` is taken
- * as unzoomed. `height` is the scroll height to measure against, the frame's own by default, or
- * the one it had before its content grew.
- */
 function atEnd(frame: HTMLElement, height = frame.scrollHeight): boolean {
   const zoom = Math.min((frame.currentCSSZoom as number | undefined) ?? 1, 1);
   return height - frame.clientHeight - frame.scrollTop <= 2 / zoom;
 }
 
-/** Scrolls a frame to its end, instantly: the follow's one scroll. */
 function end(frame: HTMLElement) {
   frame.scrollTop = frame.scrollHeight;
 }
@@ -186,39 +169,16 @@ export class ChatThread extends LitElement {
   /** Whether reasoning, function calls, and their outputs show; reflected to `verbose`. */
   declare verbose: boolean;
 
-  /** Whether the update in flight follows the newest item: the frame was at its end, or showed
-   * no items yet, or the update adds a user's message. */
   #follow = false;
 
-  /** The frame's scroll height when its content was last seen, by the last update, the last
-   * resize of any of it, or the thread's connecting: the end the reader was at, or not, before the
-   * last item grew with no update. */
   #height = 0;
 
-  /** The frame's content the observer watches: the list, or the empty note before any item. */
   #content: Element | null = null;
 
-  /** The content's end, the one item whose growth follows: the list's last item, or the empty
-   * note before any item. */
   #last: Element | null = null;
 
-  /** The last item's height when it was last seen, as `#height` is: whether it grew. */
   #size = 0;
 
-  // The content resized with no update. Only the last item grown follows, its end kept in view
-  // while the reader was at the end the content had; an item above it grown is left to the
-  // browser, the summary the reader clicked staying where it was. Every resize, the last item's
-  // or one above it, records the heights it leaves, so a growth above the end, which leaves the
-  // reader short of the new end, has the next growth of the last measured against the end as it
-  // now is. The observer watches the whole content, which any item's growth resizes, and the
-  // last item's growth is its height against the one last seen. A ResizeObserver rather than the
-  // details' toggle event sees every cause, an image's load as well as a disclosure, and leaves
-  // the details toggling natively. Its callback runs after layout, the growth already in the
-  // scroll height, so the reader's place is measured against the height last seen; a scroll
-  // listener keeping the place instead could read the grown height, its event dispatched between
-  // the growth and the callback. A reader at the end of content that shrank is at its new end
-  // already, the browser's clamp. The scroll leaves the content's size alone, so it never loops
-  // the observer.
   #resized = new ResizeObserver(() => {
     const frame = this.renderRoot.querySelector<HTMLElement>(".frame");
     if (!frame) return;
@@ -233,10 +193,6 @@ export class ChatThread extends LitElement {
     this.verbose = false;
   }
 
-  // Connected again, the frame is measured as it now is, its updates while detached unmeasured
-  // and its scroll position the browser's, and observed anew, so the observer's first callback
-  // finds the content as the reader does and scrolls nothing on its own. The first connection has
-  // no frame yet: its first update observes it.
   override connectedCallback() {
     super.connectedCallback();
     const frame = this.renderRoot.querySelector<HTMLElement>(".frame");
@@ -252,14 +208,10 @@ export class ChatThread extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>) {
-    // The frame as the last update left it, before this one grows it: at its end, within the
-    // browser's rounding, when it doesn't scroll at all too. No frame yet is the first render.
     const frame = this.renderRoot.querySelector<HTMLElement>(".frame");
     const before = changed.has("items")
       ? ((changed.get("items") as readonly ThreadItem[] | undefined) ?? [])
       : (this.items ?? []);
-    // A user's message among the items added, the newest or the one before the reply's first
-    // text, when the consumer adds both at once.
     const sent = (this.items ?? [])
       .slice(before.length)
       .some((item) => item?.type === "message" && item.role === "user");
@@ -271,30 +223,23 @@ export class ChatThread extends LitElement {
   protected override updated() {
     const follow = this.#follow;
     this.#follow = false;
-    // Detached, the frame has no layout to follow or measure, and the observer is disconnected:
-    // connecting measures and observes it.
     if (!this.isConnected) return;
     const frame = this.renderRoot.querySelector<HTMLElement>(".frame");
     if (!frame) return;
     if (follow) end(frame);
-    // The content as this update left it, followed or not.
     this.#observe(frame);
     this.#seen(frame);
   }
 
-  // The frame's content as it now is, the height the observer's next callback measures against.
   #seen(frame: HTMLElement) {
     this.#height = frame.scrollHeight;
     this.#size = this.#measured();
   }
 
-  // The last item's height, the empty note's before any item, or none.
   #measured() {
     return this.#last?.getBoundingClientRect().height ?? 0;
   }
 
-  // The frame's content observed, anew when the list replaced the empty note, or the note the
-  // list; and its end found again, an item added after the last.
   #observe(frame: HTMLElement) {
     const content = frame.firstElementChild;
     this.#last = content?.matches("ol") ? content.lastElementChild : content;
@@ -304,7 +249,6 @@ export class ChatThread extends LitElement {
     if (content) this.#resized.observe(content);
   }
 
-  // An item's status, labelled, when it has one worth saying: streaming carries its indicator.
   #status(status: ItemStatus | undefined) {
     const label = status ? STATUS_LABELS[status] : undefined;
     if (!label) return nothing;
@@ -336,9 +280,6 @@ export class ChatThread extends LitElement {
     </article>`;
   }
 
-  // A verbose item's line: its kind, what names it, and its status, then what describes it, in
-  // the label's type. The parts are inline, a space apart, so a narrow thread wraps the line
-  // between them, each whole but the description, which wraps as prose.
   #line(item: ThreadItem, kind: string, names: TemplateResult[], described: TemplateResult[]) {
     const status = this.#status(item.status);
     const parts = [html`<span class="kind">${kind}</span>`, ...names];
@@ -347,8 +288,6 @@ export class ChatThread extends LitElement {
     return parts.map((part, index) => (index ? html` ${part}` : part));
   }
 
-  // A verbose item: its line in the summary of a details collapsed by default, which keeps its
-  // native marker.
   #details(
     item: ThreadItem,
     kind: string,
@@ -362,14 +301,6 @@ export class ChatThread extends LitElement {
     </details>`;
   }
 
-  // A reasoning item: its summary on the line, after a separator the accessibility tree skips,
-  // and its content inside, the summary not again. Its summary parts join into one sentence run;
-  // a part with no text yet, as one just begun streaming, is no summary. With content but no
-  // summary, the line reads Reasoning alone; with neither, the details says there is no text. With
-  // a summary and no content, nothing would expand, so the line stands alone, a paragraph in the
-  // summary's type and place: no disclosure that opens on nothing. Its gutter, hidden from the
-  // accessibility tree, holds the room of the summaries' marker, so its kind lines up with theirs;
-  // no whitespace before the kind, which would widen it.
   #reasoning(item: ReasoningItem) {
     const parts = (parts: readonly ReasoningTextPart[] | undefined, type: string) =>
       (parts ?? []).filter((part) => part?.type === type);
@@ -426,11 +357,7 @@ export class ChatThread extends LitElement {
   }
 
   render() {
-    // Each call's name by its call_id, so an output names the function it answers.
     const names = new Map<string, string>();
-    // The items shown, each keyed by its id, or by its place when it has none, as a user's input
-    // message hasn't: the keyed repeat keeps every item's DOM as the list grows and as verbose
-    // turns, so a streaming message re-renders in place and the items above it don't move.
     const shown: { key: string; kind: string; view: TemplateResult }[] = [];
     (this.items ?? []).forEach((item, index) => {
       const key = item?.id ? `id:${item.id}` : `at:${index}`;
@@ -454,8 +381,6 @@ export class ChatThread extends LitElement {
           return;
       }
     });
-    // The frame scrolls when the consumer constrains it, so the keyboard reaches it by Tab, and it
-    // is named for what it holds.
     return html`<div class="frame" tabindex="0" role="region" aria-label="Conversation">
       ${
         shown.length
