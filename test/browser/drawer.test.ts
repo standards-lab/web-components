@@ -505,6 +505,93 @@ describe("drawer", { timeout: 60_000 }, () => {
     }
   });
 
+  for (const width of [WIDE, NARROW]) {
+    test(`with modal, at ${width}px, it is a closed drawer that opens as a modal dialog, the page behind inert; open goes out once`, async () => {
+      await mount(width, {}, "", HEIGHT, { attributes: "modal", mode: "drawer" });
+      let shown = await read();
+      assert.deepEqual(
+        [shown.mode, shown.wrapper, shown.dialogOpen, shown.open, shown.sent],
+        ["drawer", "dialog", false, false, []],
+      );
+      await openByKeyboard();
+      shown = await read();
+      assert.deepEqual(
+        [shown.mode, shown.dialogOpen, shown.modal, shown.open, shown.attribute, shown.visible],
+        ["drawer", true, true, true, true, true],
+      );
+      assert.equal(shown.box.width, width, "the dialog covers the viewport");
+      assert.deepEqual(await exposed("dialog"), ["Documents"]);
+      assert.deepEqual(await exposed("complementary"), []);
+      assert.equal(shown.focused, "drawer h2");
+      assert.equal(await pageLive(), false, "the page behind takes no focus");
+      assert.deepEqual(shown.heard, [{ type: "open", detail: {}, bubbles: true, composed: true }]);
+    });
+  }
+
+  test("with modal, dock is ignored: a dock below the viewport, one the query can't read, and a resize across dock leave it a drawer, open", async () => {
+    for (const dock of ["20rem", "wide"]) {
+      await mount(WIDE, { dock }, "", HEIGHT, { attributes: "modal", mode: "drawer" });
+      const shown = await read();
+      assert.deepEqual([shown.mode, shown.wrapper], ["drawer", "dialog"], `with dock ${dock}`);
+    }
+    await call("show");
+    await resize(NARROW);
+    await resize(WIDE);
+    await page.evaluate(`document.querySelector("sl-drawer").dock = "48rem"`);
+    const shown = await read();
+    assert.deepEqual(
+      [shown.mode, shown.wrapper, shown.modal, shown.open, shown.sent],
+      ["drawer", "dialog", true, true, ["open"]],
+    );
+  });
+
+  test("modal reflects from the property, and removing it docks the drawer again at dock and wider", async () => {
+    await mount(WIDE);
+    await page.evaluate(`document.querySelector("sl-drawer").modal = true`);
+    await settled("drawer");
+    let shown = await read();
+    assert.equal(
+      await page.evaluate(`document.querySelector("sl-drawer").hasAttribute("modal")`),
+      true,
+    );
+    assert.deepEqual([shown.wrapper, shown.dialogOpen, shown.sent], ["dialog", false, []]);
+    await page.evaluate(`document.querySelector("sl-drawer").modal = false`);
+    await settled("docked");
+    shown = await read();
+    assert.equal(
+      await page.evaluate(`document.querySelector("sl-drawer").hasAttribute("modal")`),
+      false,
+    );
+    assert.deepEqual([shown.wrapper, shown.sent], ["aside", []]);
+  });
+
+  test("modal set or removed while open closes it silently, either way, whether or not the mode changes", async () => {
+    const quiet = async (modal: boolean, mode: "docked" | "drawer", wrapper: string) => {
+      await page.evaluate(`document.querySelector("sl-drawer").modal = ${modal}`);
+      await settled(mode);
+      await page.evaluate("new Promise((resolve) => setTimeout(resolve, 50))");
+      const shown = await read();
+      assert.deepEqual(
+        [shown.wrapper, shown.dialogOpen, shown.modal, shown.open, shown.attribute],
+        [wrapper, false, false, false, false],
+        `modal set ${modal}, ${mode}`,
+      );
+      return shown.sent;
+    };
+    await mount(NARROW);
+    await call("show");
+    assert.deepEqual(await quiet(true, "drawer", "dialog"), ["open"]);
+    await call("show");
+    assert.deepEqual(await quiet(false, "drawer", "dialog"), ["open", "open"]);
+    await mount(WIDE, {}, "", HEIGHT, { attributes: "modal", mode: "drawer" });
+    await call("show");
+    assert.deepEqual(await quiet(false, "docked", "aside"), ["open"]);
+    await call("show");
+    assert.deepEqual(await quiet(true, "drawer", "dialog"), ["open"]);
+    await call("show");
+    assert.deepEqual((await read()).modal, true, "it opens again");
+  });
+
   test("docked, show(), toggle(), and open leave it docked and send nothing", async () => {
     await mount(WIDE);
     await call("show");

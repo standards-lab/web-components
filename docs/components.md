@@ -40,7 +40,9 @@ the tests measure as they do.
   and `close` as the modal drawer opens and closes, never as the viewport crosses `dock`, which
   swaps only the wrapper, so the slotted content is never moved, disconnected, or re-created: an
   open drawer docks, and docked content becomes a closed drawer. It slides only when the reader
-  allows motion. Its mode is the custom state `docked` or `drawer`, which a page may style.
+  allows motion. `modal`, a reflected boolean, makes it the modal dialog at every width, `dock`
+  ignored; setting or removing it is a switch too, closing an open drawer silently. Its mode is the
+  custom state `docked` or `drawer`, which a page may style.
 
 ## Rendering
 

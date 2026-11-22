@@ -1,9 +1,10 @@
 // The drawer, Lit with a shadow root: docked inline as a complementary landmark, an aside, in a
 // wide layout, and a modal dialog covering the viewport, sliding in from the inline-start edge, in
-// a narrow one. Both wrappers hold the same header, the label as the one heading that names them,
-// over a body holding the slot. The mode is the viewport's, by a media query on `dock`; a switch
-// swaps only the shadow root's wrapper and its slot, so the slotted content, the host's own
-// children, is never moved, disconnected, or re-created.
+// a narrow one, or at every width with `modal`. Both wrappers hold the same header, the label as
+// the one heading that names them, over a body holding the slot. The mode is the viewport's, by a
+// media query on `dock`, unless `modal` is set; a switch swaps only the shadow root's wrapper and
+// its slot, so the slotted content, the host's own children, is never moved, disconnected, or
+// re-created.
 // Adapted from spike-html-apps-components (10dde51): src/drawer.ts, on @standards-lab/web-foundation.
 // Adapted from spike-html-hosting-components (9fa5850): src/drawer.ts, its Close a glyph button showing web-icons' x-16.
 // See docs/internals.md
@@ -68,6 +69,9 @@ export type CloseDetail = Record<string, never>;
  * unless `open` is set again before. `dock` is read in a media query, `(width < <dock>)`, where
  * rem and em are the initial font size's, so a viewport of exactly `dock` docks; a length the
  * query can't read never matches, so the drawer stays docked.
+ * `modal`, reflected, makes the drawer a modal dialog at every width, as below `dock`, and `dock`
+ * is ignored while it is set. Setting or removing `modal` is a switch too: it closes an open drawer
+ * silently, whether or not the mode changes.
  * Each mode renders only its own header, so the shadow tree holds one heading at a time. The mode
  * is the custom state `docked` or `drawer`, which a page may style.
  */
@@ -76,12 +80,15 @@ export class Drawer extends LitElement {
 
   static properties = {
     open: { type: Boolean, reflect: true },
+    modal: { type: Boolean, reflect: true },
     dock: { type: String },
     label: { type: String },
   } satisfies PropertyDeclarations;
 
   /** Whether the modal drawer is open; reflected to `open`, and always false while docked. */
   declare open: boolean;
+  /** Whether the drawer is a modal dialog at every width, ignoring `dock`; reflected to `modal`. */
+  declare modal: boolean;
   /** The width at which the drawer docks, and wider: a CSS length, read in a media query. */
   declare dock: string;
   /** The visible heading of the docked aside and of the drawer, which names each. */
@@ -95,6 +102,7 @@ export class Drawer extends LitElement {
   constructor() {
     super();
     this.open = false;
+    this.modal = false;
     this.dock = "48rem";
     this.label = "";
   }
@@ -118,7 +126,7 @@ export class Drawer extends LitElement {
     this.#dialog?.close();
   }
 
-  /** Opens the modal drawer; below `dock` only. */
+  /** Opens the modal drawer; below `dock`, or at any width with `modal`, only. */
   show(): void {
     if (this.#query) this.#change();
     if (!this.#narrow || this.open) return;
@@ -147,7 +155,7 @@ export class Drawer extends LitElement {
   }
 
   #change = (): void => {
-    const narrow = this.#query?.matches ?? false;
+    const narrow = this.modal || (this.#query?.matches ?? false);
     if (narrow === this.#narrow) return;
     const switched = this.#narrow !== null;
     this.#narrow = narrow;
@@ -163,6 +171,14 @@ export class Drawer extends LitElement {
 
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (changed.has("dock") && this.#query) this.#watch();
+    if (changed.has("modal") && this.#query) {
+      if (this.#modal) {
+        this.#modal = false;
+        this.open = false;
+        this.#dialog?.close();
+      }
+      this.#change();
+    }
     if (!this.#narrow) this.open = false;
   }
 
