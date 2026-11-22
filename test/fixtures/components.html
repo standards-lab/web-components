@@ -1,9 +1,10 @@
 <!doctype html>
 <!-- The components cases' page: the query's module, when it names one, probe.js or restyle.js in
      test/browser/support/, runs and writes its verdict into #verdict. window.verdict settles once
-     the run ends, a module that failed to load included. Lit's, marked's, and the foundation's
-     bare specifiers map onto /deps/, where the server answers with the installed packages; the
-     foundation's map onto its dist/, as its exports do.
+     the run ends, a module that failed to load included. Lit's, marked's, the foundation's, and
+     the icons' bare specifiers map onto /deps/, where the server answers with the installed
+     packages; the foundation's map onto its dist/, as its exports do, and each icon the components
+     import onto its module in the icons' dist/.
      The page links the foundation's lean entry, page.css, and sets no profile. With entry=full in
      the query it links the full entry, page-full.css, imports register-full.js before the module,
      and sets the root's data-palette, data-space, data-type, and data-scheme from the query's
@@ -46,7 +47,8 @@
           "@lit/reactive-element": "/deps/@lit/reactive-element/reactive-element.js",
           "@lit/reactive-element/": "/deps/@lit/reactive-element/",
           "marked": "/deps/marked/lib/marked.esm.js",
-          "@standards-lab/web-foundation/": "/deps/@standards-lab/web-foundation/dist/"
+          "@standards-lab/web-foundation/": "/deps/@standards-lab/web-foundation/dist/",
+          "@standards-lab/web-icons/octicon/x-16": "/deps/@standards-lab/web-icons/dist/octicon/x-16.js"
         }
       }
     </script>

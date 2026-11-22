@@ -180,7 +180,7 @@ describe("components", { timeout: 60_000 }, () => {
       })()`);
         const base = ["reset", "elements"];
         const expected: Record<string, string[]> = {
-          "sl-drawer": [...base, "utilities", "dialog", "motion", "own"],
+          "sl-drawer": [...base, "utilities", "glyph-button", "dialog", "motion", "own"],
           "sl-stage-timeline": [...base, "utilities", "motion", "own"],
           "sl-upload-dropzone": [...base, "utilities", "motion", "own"],
           "sl-chat-thread": [...base, "utilities", "motion", "own"],

@@ -34,11 +34,13 @@ const cssImports = [
 ];
 
 const foundation = "@standards-lab/web-foundation";
-/** The layer table cut to the components: their sources, which may import themselves and three
- * packages by name, lit, marked, and the foundation, which the manifest declares, the foundation as
- * a peer; the foundation is reached only through its install, as a consumer reaches it. */
+const icons = "@standards-lab/web-icons";
+/** The layer table cut to the components: their sources, which may import themselves and four
+ * packages by name, lit, marked, the foundation, and the icons, which the manifest declares, the
+ * foundation and the icons as peers; each peer is reached only through its install, as a consumer
+ * reaches it. */
 export const layers = [
-  { name: "components", path: "src", may: ["components", "lit", "marked", foundation] },
+  { name: "components", path: "src", may: ["components", "lit", "marked", foundation, icons] },
 ];
 
 const elements = layers.map(({ name, path }) => ({

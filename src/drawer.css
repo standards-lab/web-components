@@ -4,8 +4,8 @@
  * The drawer's shadow-root sheet: the docked aside's frame and the modal dialog covering the
  * viewport, each a dialog header over a scrolling body, and the dialog's slide, in the motion
  * sheet's --duration-m.
- * Unlayered, above the foundation's reset, elements, utilities, dialog, and motion sheets; it reads
- * only the baseline tokens.
+ * Unlayered, above the foundation's reset, elements, utilities, glyph-button, dialog, and motion
+ * sheets; it reads only the baseline tokens.
  * See docs/layout.md
  */
 

@@ -1,6 +1,6 @@
 // A release's shape: a pack of the build checked against the sources, package.json's files and
 // exports as Node resolves them, the Apache 2.0 LICENSE its manifest declares, and its dependencies.
-// Adapted from spike-html-apps-components (10dde51): test/unit/release.ts, on @standards-lab/web-foundation.
+// Adapted from spike-html-apps-components (10dde51): test/unit/release.ts, on @standards-lab/web-foundation and @standards-lab/web-icons.
 // See docs/release.md
 
 import { execFileSync } from "node:child_process";
@@ -91,12 +91,16 @@ export function licenseProblems(root: string): string[] {
   return problems;
 }
 
-const foundation = "@standards-lab/web-foundation";
+const peerRepositories: Record<string, string> = {
+  "@standards-lab/web-foundation": "standards-lab/web-foundation",
+  "@standards-lab/web-icons": "standards-lab/web-icons",
+};
 
 const exactVersion = /^\d+\.\d+\.\d+$/;
 const dependencies = { lit: exactVersion, marked: exactVersion };
 const caretRange = /^\^\d+\.\d+\.\d+$/;
-const foundationTag = /^github:standards-lab\/web-foundation#(v\d+\.\d+\.\d+)$/;
+const releaseTag = (repository: string) =>
+  new RegExp(`^github:${repository}#(v\\d+\\.\\d+\\.\\d+)$`);
 
 /** Whether the caret range, ^x.y.z, admits the version, x.y.z or its tag vx.y.z, as npm reads it. */
 export function caretAdmits(range: string, version: string): boolean {
@@ -125,34 +129,44 @@ export function dependencyProblems(root: string): string[] {
     }
   }
   for (const name of Object.keys(declared)) {
-    if (name === foundation) {
-      problems.push(`package.json declares ${foundation} in dependencies, not as a peer`);
+    if (name in peerRepositories) {
+      problems.push(`package.json declares ${name} in dependencies, not as a peer`);
     } else if (!(name in dependencies)) {
       problems.push(`package.json declares ${name}, which no release needs`);
     }
   }
   for (const name of Object.keys(peers)) {
-    if (name !== foundation)
+    if (!(name in peerRepositories))
       problems.push(`package.json declares peer ${name}, which no release needs`);
   }
-  const range = caretRange.test(peers[foundation]) ? peers[foundation] : undefined;
-  if (!(foundation in peers)) problems.push(`package.json doesn't declare peer ${foundation}`);
-  else if (!range) {
-    problems.push(
-      `package.json declares peer ${foundation} ${peers[foundation]}, not a caret range`,
-    );
+  for (const [peer, repository] of Object.entries(peerRepositories)) {
+    problems.push(...peerProblems(peer, repository, peers, dev));
   }
-  const tag = dev[foundation]?.match(foundationTag);
-  if (!(foundation in dev))
-    problems.push(`package.json doesn't declare devDependency ${foundation}`);
+  return problems;
+}
+
+function peerProblems(
+  peer: string,
+  repository: string,
+  peers: Record<string, string>,
+  dev: Record<string, string>,
+): string[] {
+  const problems: string[] = [];
+  const range = caretRange.test(peers[peer]) ? peers[peer] : undefined;
+  if (!(peer in peers)) problems.push(`package.json doesn't declare peer ${peer}`);
+  else if (!range) {
+    problems.push(`package.json declares peer ${peer} ${peers[peer]}, not a caret range`);
+  }
+  const tag = dev[peer]?.match(releaseTag(repository));
+  if (!(peer in dev)) problems.push(`package.json doesn't declare devDependency ${peer}`);
   else if (!tag) {
     problems.push(
-      `package.json declares devDependency ${foundation} ${dev[foundation]}, not an exact release tag`,
+      `package.json declares devDependency ${peer} ${dev[peer]}, not an exact release tag`,
     );
   }
   if (range && tag && !caretAdmits(range, tag[1])) {
     problems.push(
-      `package.json's devDependency ${foundation} ${dev[foundation]} is outside its peer range ${peers[foundation]}`,
+      `package.json's devDependency ${peer} ${dev[peer]} is outside its peer range ${peers[peer]}`,
     );
   }
   return problems;

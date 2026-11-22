@@ -105,6 +105,6 @@ raw = true
 run = "BROWSER_EXECUTABLE=$(mise which chrome-headless-shell) pnpm exec web-screenshots scripts/screenshots.config.ts"
 
 [tasks.currency]
-description = "Report every mise tool, package.json pin, action pin, the foundation's and the tooling's tags, and the foundation's peer range behind its latest, a held pin with its reason, exiting nonzero if any isn't held; reads the network"
+description = "Report every mise tool, package.json pin, action pin, the foundation's, the icons', and the tooling's tags, and the foundation's and the icons' peer ranges behind their latest, a held pin with its reason, exiting nonzero if any isn't held; reads the network"
 run = "scripts/currency.sh"
 quiet = true
