@@ -10,7 +10,7 @@ HOLDS = '''
 '''
 
 [tools]
-"github:standards-lab/claude-plugins" = { version = "0.22.0", version_prefix = "marathon/v" }
+"github:standards-lab/claude-plugins" = { version = "0.23.0", version_prefix = "marathon/v" }
 actionlint = "1.7.12"
 node = "26.13.1"
 pnpm = "12.21.0"
