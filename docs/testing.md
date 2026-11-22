@@ -91,13 +91,6 @@ the behavior and layout each one holds to.
   and drop the first duplicate, so these values show the output comes from the text's own tokens.
 - `test/browser/support/deep.ts` writes out the formatter's output for deep nesting rather than
   reading it from `formatJson`, so a test that compares a view with it checks the formatter too.
-- The depth-65 case puts an opening brace in a key, an escaped quote before closing brackets, and an
-  escaped backslash before a string's real end, then at depth 64 a string holding the brackets that
-  would close it. A bracket count any of these fools ends the kept container early or late.
-- The 20,000-deep case bounds the output at the text's length plus 4·64·64 characters: the 64
-  formatted levels each add a line break and at most 128 spaces at their opening and closing
-  brackets, and the levels below are kept as written. Indenting every level would take some 800
-  million spaces.
 
 ## Artifact viewer
 

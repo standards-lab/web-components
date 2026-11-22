@@ -48,13 +48,6 @@ the tests measure as they do.
   marked's lexer: raw HTML shows as text, an image as its alt text, and a link is an anchor only
   to an http, https, or mailto URL or a relative one. It is the one module that imports marked,
   which an import map then maps too.
-- `./json.js`: `formatJson(text)`, valid JSON text re-indented from its own tokens, two spaces an
-  indent: its keys in their order, duplicates included, its number literals, and its strings with
-  their escapes as written, only the whitespace between tokens changed. Containers to `MAX_DEPTH`,
-  64, deep are indented; one that would open deeper is kept as written on the line where it opens,
-  so the output's length stays linear in the text's at any depth. It never decides whether
-  the text is valid; its caller does, as the artifact viewer and the chat thread do with
-  `JSON.parse`.
 
 ## Inspection
 
@@ -63,8 +56,8 @@ the tests measure as they do.
   and content type that `no-header` (`noHeader`) leaves out, for a page whose own header shows
   them. Every state, its content or its loading, error, invalid JSON, unsupported, or empty note,
   is in a region named `<name> content`, header or not. Valid JSON is formatted from its own
-  tokens by `./json.js`, never parsed and printed again, so it shows its own keys, their order,
-  and its numbers; JSON that doesn't parse shows as text under a note. `viewOf(contentType)` gives
+  tokens by the foundation's `format.js`, never parsed and printed again, so it shows its own
+  keys, their order, and its numbers; JSON that doesn't parse shows as text under a note. `viewOf(contentType)` gives
   a type's `view` and the `content` it takes, `text` or `blob`, so a consumer knows what to
   fetch. A text view is always safe, never a URL and never a document, so the viewer shows text
   whenever the content is text: "can't be shown" is left for bytes that aren't. The
@@ -124,7 +117,7 @@ the tests measure as they do.
   labelled, and a streaming reply re-rendered in place; with `verbose`, reasoning, function calls,
   and their outputs too, each collapsed in a native details, a reasoning item's summary on its
   line and its content inside, and a call's arguments and its output that are valid JSON
-  formatted from their own tokens by `./json.js`. A thread its consumer holds
+  formatted from their own tokens by the foundation's `format.js`. A thread its consumer holds
   to a height scrolls inside, opening at its end and following the newest item only from its end
   or on a user's message; unheld, it is as tall as its content and follows nothing, so a consumer
   that wants it followed holds it. It exports its item types and sends no event. It imports

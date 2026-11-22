@@ -21,7 +21,7 @@ import reset from "@standards-lab/web-foundation/baseline/reset.css" with { type
 import motion from "@standards-lab/web-foundation/motion.css" with { type: "css" };
 import utilities from "@standards-lab/web-foundation/utilities.css" with { type: "css" };
 import { define } from "@standards-lab/web-foundation/dom.js";
-import { formatJson } from "./json.ts";
+import { tryFormatJson } from "@standards-lab/web-foundation/format.js";
 import { markdown } from "./markdown.ts";
 import styles from "./chat-thread.css" with { type: "css" };
 
@@ -103,12 +103,8 @@ export interface FunctionCallOutputItem {
 export type ThreadItem = MessageItem | ReasoningItem | FunctionCallItem | FunctionCallOutputItem;
 
 function pretty(text: string): string {
-  try {
-    JSON.parse(text);
-    return formatJson(text);
-  } catch {
-    return text;
-  }
+  const json = tryFormatJson(text);
+  return json.ok ? json.text : text;
 }
 
 const STATUS_LABELS: Partial<Record<ItemStatus, string>> = {

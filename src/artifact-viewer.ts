@@ -12,7 +12,7 @@ import elements from "@standards-lab/web-foundation/baseline/elements.css" with 
 import reset from "@standards-lab/web-foundation/baseline/reset.css" with { type: "css" };
 import utilities from "@standards-lab/web-foundation/utilities.css" with { type: "css" };
 import { define } from "@standards-lab/web-foundation/dom.js";
-import { formatJson } from "./json.ts";
+import { type FormattedJson, tryFormatJson } from "@standards-lab/web-foundation/format.js";
 import { markdown } from "./markdown.ts";
 import styles from "./artifact-viewer.css" with { type: "css" };
 
@@ -129,28 +129,14 @@ async function textOf(blob: Blob): Promise<string | null> {
   }
 }
 
-type Json = { ok: true; text: string } | { ok: false; reason: string };
-
-function pretty(content: string): Json {
-  try {
-    JSON.parse(content);
-  } catch (error) {
-    return { ok: false, reason: error instanceof Error ? error.message : String(error) };
-  }
-  try {
-    return { ok: true, text: formatJson(content) };
-  } catch {
-    return { ok: true, text: content };
-  }
-}
-
 /**
  * Shows one artifact: a header of its name and content type over its content, or, with
  * `noHeader`, its content alone, for a page that already shows the name and type in a header of
  * its own. Markdown renders through `markdown()`; valid JSON is formatted from its own tokens by
- * `formatJson()`, two spaces an indent, so its keys, their order, duplicates, numbers, and
- * strings show as written, never parsed and printed again; and other text, text/html, XML, and
- * SVG's source included, is shown as it is, never as a page and from no URL. JSON that doesn't
+ * the foundation's `formatJson()`, two spaces an indent, so its keys, their order, duplicates,
+ * numbers, and strings show as written, never parsed and printed again; and other text,
+ * text/html, XML, and SVG's source included, is shown as it is, never as a page and from no URL.
+ * JSON that doesn't
  * parse shows its raw text under a note saying so, and empty content a note saying so. Long
  * content scrolls inside the viewer, in a region the keyboard reaches.
  *
@@ -198,7 +184,7 @@ export class ArtifactViewer extends LitElement {
   /** Leaves out the header, so the content shows alone; its region keeps its name. */
   declare noHeader: boolean;
 
-  #json: Json | null = null;
+  #json: FormattedJson | null = null;
   #url = "";
   #blob: Blob | null = null;
   #type = "";
@@ -230,7 +216,7 @@ export class ArtifactViewer extends LitElement {
     if (changed.has("content") || changed.has("contentType")) {
       const text = typeof this.content === "string" ? this.content : "";
       const { view } = viewOf(this.contentType);
-      this.#json = view === "json" ? pretty(text) : null;
+      this.#json = view === "json" ? tryFormatJson(text) : null;
       if (view === "unknown" && this.content instanceof Blob) this.#readBlob(this.content);
     }
     this.#sync();
@@ -353,7 +339,7 @@ export class ArtifactViewer extends LitElement {
       case "markdown":
         return html`<div class="frame">${this.#region(markdown(content), true)}</div>`;
       case "json": {
-        const json = this.#json ?? pretty(content);
+        const json = this.#json ?? tryFormatJson(content);
         if (json.ok) return html`<div class="frame">${this.#region(json.text)}</div>`;
         return html`<div class="frame">
           ${this.#note("invalid", "Invalid JSON, shown as text.", json.reason)}

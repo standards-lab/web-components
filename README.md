@@ -59,7 +59,6 @@ the foundation's `page.css`:
 - `./drawer.js`: `sl-drawer`, its children docked inline on a wide viewport, in a modal drawer
   below.
 - `./markdown.js`: `markdown(source)`, a Markdown string as a Lit template of plain elements.
-- `./json.js`: `formatJson(text)`, valid JSON text re-indented from its own tokens.
 - `./artifact-viewer.js`: `sl-artifact-viewer`, one artifact's content by its content type.
 - `./event-log.js`: `sl-event-log`, events as a log in the order given.
 - `./search-results.js`: `sl-search-results`, a search's matches under a status line.
