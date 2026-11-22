@@ -1,9 +1,10 @@
 /* From spike-html-apps-components (10dde51): src/entry.css. */
 
 /*
- * The entry's shadow-root sheet: the button's head of the name and status, its meta line, the
- * status tones, and the selected frame.
- * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
+ * The entry's shadow-root sheet: the button's head of the name and status on the utilities' head
+ * row, its meta line, the status tones, and the selected frame.
+ * Unlayered, above the foundation's reset, elements, and utilities sheets; it reads only the
+ * baseline tokens.
  * See docs/layout.md
  */
 
@@ -24,26 +25,10 @@
   border-color: var(--color-accent, var(--magenta));
   box-shadow: inset 0 0 0 var(--line-s) var(--color-accent, var(--magenta));
 }
-.head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-3xs) var(--space-xs);
-  min-inline-size: 0;
-}
 .name {
-  flex: 1 1 16ch;
-  max-inline-size: max-content;
-  min-inline-size: 0;
   font-size: var(--text-m);
   font-weight: 600;
   overflow-wrap: anywhere;
-}
-.status {
-  margin-inline-start: auto;
-  font-size: var(--text-xs);
-  color: var(--fg-2);
-  white-space: nowrap;
 }
 :host([status-tone="active"]) .status {
   color: var(--color-accent, var(--magenta));
@@ -57,30 +42,16 @@
 :host([status-tone="failed"]) .status {
   color: var(--red);
 }
-.kind {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
 .meta {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--space-3xs) var(--space-xs);
   min-inline-size: 0;
-  font-size: var(--text-s);
-  color: var(--fg-2);
 }
 .type {
   min-inline-size: 0;
   overflow-wrap: break-word;
-}
-.size,
-time > .clock {
-  white-space: nowrap;
 }
 time {
   min-inline-size: 0;

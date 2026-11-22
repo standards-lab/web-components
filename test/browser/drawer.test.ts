@@ -889,6 +889,19 @@ describe("drawer", { timeout: 60_000 }, () => {
     await mount(NARROW);
     const motion = await running();
     assert.ok(motion.transitions.includes("translate"), `transitions ${motion.transitions}`);
+    const durations = (duration: string) => new Set(duration.split(", "));
+    assert.equal(durations(motion.duration).size, 1, `durations ${motion.duration}`);
+    assert.notEqual(
+      motion.duration.split(", ")[0],
+      "0s",
+      "the motion sheet's --duration-m resolves",
+    );
+    await mount(NARROW, {}, "", HEIGHT, { attributes: 'style="--duration-m: 345ms"' });
+    assert.deepEqual(
+      durations((await running()).duration),
+      new Set(["0.345s"]),
+      "the slide takes --duration-m",
+    );
     await page.cdp("Emulation.setEmulatedMedia", {
       features: [{ name: "prefers-reduced-motion", value: "reduce" }],
     });

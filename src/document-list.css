@@ -2,8 +2,9 @@
 
 /*
  * The document list's shadow-root sheet: the status line, on the pagination's summary line or
- * a line of its own, and the list of entries.
- * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
+ * a line of its own, the utilities' status line, and the list of entries, a bare list.
+ * Unlayered, above the foundation's reset, elements, and utilities sheets; it reads only the
+ * baseline tokens.
  * See docs/layout.md
  */
 
@@ -17,17 +18,9 @@
 .status[slot="status"] {
   display: inline;
 }
-.status[slot="status"] .label {
-  white-space: nowrap;
-}
 .status[slot="status"] .label::before {
   content: "·" / "";
   margin-inline: 0.5ch;
-}
-.status:not([slot]) {
-  min-block-size: 1lh;
-  font-size: var(--text-s);
-  color: var(--fg-2);
 }
 .status .empty {
   color: var(--fg-3);
@@ -36,10 +29,5 @@
   color: var(--red);
 }
 .documents {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.documents > li {
   margin: 0;
 }

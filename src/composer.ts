@@ -5,11 +5,12 @@
 // Adapted from spike-html-apps-components (10dde51): src/composer.ts, on @standards-lab/web-foundation.
 // See docs/internals.md
 
-import { html, LitElement, type PropertyDeclarations } from "lit";
+import { html, LitElement, nothing, type PropertyDeclarations } from "lit";
 import { live } from "lit/directives/live.js";
 
 import elements from "@standards-lab/web-foundation/baseline/elements.css" with { type: "css" };
 import reset from "@standards-lab/web-foundation/baseline/reset.css" with { type: "css" };
+import utilities from "@standards-lab/web-foundation/utilities.css" with { type: "css" };
 import { define, emit } from "@standards-lab/web-foundation/dom.js";
 import styles from "./composer.css" with { type: "css" };
 
@@ -43,7 +44,7 @@ export type StopDetail = Record<string, never>;
  * field, where the reader writes next.
  */
 export class Composer extends LitElement {
-  static styles = [reset, elements, styles];
+  static styles = [reset, elements, utilities, styles];
 
   static properties = {
     value: { type: String },
@@ -105,7 +106,7 @@ export class Composer extends LitElement {
 
   render() {
     const busy = this.busy;
-    return html`<label class="label" for="field">${this.label}</label>
+    return html`<label class="visually-hidden" for="field">${this.label}</label>
       <div class="composer">
         <textarea
           id="field"
@@ -117,12 +118,12 @@ export class Composer extends LitElement {
         ></textarea>
         <button
           type="button"
-          class="action ${busy ? "stop" : "send"}"
+          class="action alternatives ${busy ? "stop" : "send"}"
           ?disabled=${busy ? this.disabled : !this.#sendable}
           @click=${busy ? this.#stop : this.send}
         >
-          <span class=${busy ? "off" : "on"}>Send</span>
-          <span class=${busy ? "on" : "off"}>Stop</span>
+          <span aria-hidden=${busy ? "true" : nothing}>Send</span>
+          <span aria-hidden=${busy ? nothing : "true"}>Stop</span>
         </button>
       </div>`;
   }

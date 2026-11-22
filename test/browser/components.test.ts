@@ -132,7 +132,7 @@ describe("components", { timeout: 60_000 }, () => {
       assert.match(verdict, /^ok: /, verdict);
     });
 
-    test(`each component adopts the foundation's reset and elements sheets, then its own, ${run.name}`, async () => {
+    test(`each component adopts the foundation's reset and elements sheets, then the opt-in sheets it uses, then its own, ${run.name}`, async () => {
       const page = await open(run);
       try {
         const { adopted, label }: { adopted: Record<string, string[]>; label: string } =
@@ -142,6 +142,14 @@ describe("components", { timeout: 60_000 }, () => {
         const foundation = "@standards-lab/web-foundation";
         const reset = await sheet(foundation + "/baseline/reset.css");
         const elements = await sheet(foundation + "/baseline/elements.css");
+        const named = new Map([
+          [reset, "reset"],
+          [elements, "elements"],
+          [await sheet(foundation + "/utilities.css"), "utilities"],
+          [await sheet(foundation + "/glyph-button.css"), "glyph-button"],
+          [await sheet(foundation + "/dialog.css"), "dialog"],
+          [await sheet(foundation + "/motion.css"), "motion"],
+        ]);
         const components = [
           ["sl-drawer", "drawer", "drawer.css"],
           ["sl-document-list", "document-list", "document-list.css"],
@@ -163,15 +171,23 @@ describe("components", { timeout: 60_000 }, () => {
           const element = document.body.appendChild(document.createElement(tag));
           await element.updateComplete;
           adopted[tag] = element.shadowRoot.adoptedStyleSheets.map((s) =>
-            s === reset ? "reset" : s === elements ? "elements" : s === ownSheet ? "own" : "other");
+            s === ownSheet ? "own" : named.get(s) ?? "other");
         }
         const badge = document.querySelector("sl-status-badge");
         badge.label = "Draft";
         await badge.updateComplete;
         return { adopted, label: badge.shadowRoot.querySelector("button").textContent };
       })()`);
+        const base = ["reset", "elements"];
+        const expected: Record<string, string[]> = {
+          "sl-drawer": [...base, "utilities", "dialog", "motion", "own"],
+          "sl-stage-timeline": [...base, "utilities", "motion", "own"],
+          "sl-upload-dropzone": [...base, "utilities", "motion", "own"],
+          "sl-chat-thread": [...base, "utilities", "motion", "own"],
+          "sl-status-badge": [...base, "own"],
+        };
         for (const tag of tags) {
-          assert.deepEqual(adopted[tag], ["reset", "elements", "own"], tag);
+          assert.deepEqual(adopted[tag], expected[tag] ?? [...base, "utilities", "own"], tag);
         }
         assert.equal(label, "Draft");
       } finally {
@@ -235,7 +251,7 @@ describe("components", { timeout: 60_000 }, () => {
           root.querySelector("button").click();
           const meta = root.querySelector(".meta");
           return {
-            parts: [...meta.children].map((part) => part.className || part.localName),
+            parts: [...meta.children].map((part) => part.classList[0] ?? part.localName),
             meta: meta.textContent.replace(/\\s+/g, " ").trim(),
             opened,
           };
@@ -571,9 +587,13 @@ describe("components", { timeout: 60_000 }, () => {
   }
 
   const LINES = `(element) => {
-    const range = document.createRange();
-    range.selectNodeContents(element);
-    const rects = [...range.getClientRects()].filter((rect) => rect.width > 0);
+    const texts = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+    const rects = [];
+    for (let text = texts.nextNode(); text; text = texts.nextNode()) {
+      const range = document.createRange();
+      range.selectNodeContents(text);
+      rects.push(...[...range.getClientRects()].filter((rect) => rect.width > 0));
+    }
     return new Set(rects.map((rect) => Math.round(rect.top))).size;
   }`;
   const ENTRIES = `(section) => [...document.querySelectorAll(section + " sl-entry")]
@@ -598,7 +618,7 @@ describe("components", { timeout: 60_000 }, () => {
         return {
           name: entry.item.name,
           sizes: { name: size(".name"), status: size(".status"), meta: size(".meta") },
-          first: first.className || first.localName,
+          first: first.classList[0] ?? first.localName,
           starts: [rect(root.querySelector(".name")).left, rect(first).left],
           under: rect(first).top >= rect(root.querySelector(".name")).bottom - 0.5,
         };
@@ -701,7 +721,7 @@ describe("components", { timeout: 60_000 }, () => {
         .flatMap((selector) => [...root.querySelectorAll(selector)]);
       return {
         name: entry.item.name,
-        parts: [...time.children].map((part) => part.className),
+        parts: [...time.children].map((part) => part.classList[0]),
         lines: values.map((value) => [value.textContent, (${LINES})(value)]),
       };
     }) })`;
@@ -1206,10 +1226,10 @@ describe("components", { timeout: 60_000 }, () => {
             "the active marker's border": is(style.borderTopColor),
             "the active marker's tint": style.backgroundColor === tint ? "accent" : style.backgroundColor,
             "the active marker's glyph": is(style.color),
-            "the active marker's ring": is(getComputedStyle(marker, "::after").borderTopColor),
+            "the active marker's ring": is(getComputedStyle(marker.querySelector(".ring")).borderTopColor),
             "the active label": is(getComputedStyle(timeline.querySelector(".active .label")).color),
             "the streaming dot": is(getComputedStyle(
-              root("sl-chat-thread").querySelector(".status.in_progress"), "::before").backgroundColor),
+              root("sl-chat-thread").querySelector(".status.in_progress > .dot")).backgroundColor),
             "the selected frame's border": is(getComputedStyle(framed).borderTopColor),
             "the selected frame's shadow": getComputedStyle(framed).boxShadow.includes(accent)
               ? "accent" : getComputedStyle(framed).boxShadow,
@@ -1245,6 +1265,57 @@ describe("components", { timeout: 60_000 }, () => {
         );
         assert.deepEqual(marks, expected, where);
       }
+    } finally {
+      await page.close();
+    }
+  });
+
+  test("the motion sheet runs the streaming dot's pulse and the active marker's ring inside their shadow roots, and the drag-over's change in its --duration-s; under reduced motion none of them", async () => {
+    const page = await browser.open(`${server.origin}/test/fixtures/components.html`);
+    try {
+      await page.evaluate(`window.verdict.then(async () => {
+        await Promise.all(["stage-timeline", "chat-thread", "upload-dropzone"]
+          .map((name) => import("/dist/" + name + ".js")));
+        window.motion = async () => {
+          const subtree = document.createElement("div");
+          subtree.append(
+            Object.assign(document.createElement("sl-stage-timeline"), { stages: [
+              { name: "extraction", position: 1, state: "active", completedAt: null },
+            ] }),
+            Object.assign(document.createElement("sl-chat-thread"), { items: [
+              { type: "message", id: "m-1", role: "assistant", status: "in_progress",
+                content: [{ type: "output_text", text: "Reading" }] },
+            ] }),
+            Object.assign(document.createElement("sl-upload-dropzone"), { uploads: [] }),
+          );
+          document.querySelector("main").replaceChildren(subtree);
+          await Promise.all([...subtree.children].map((element) => element.updateComplete));
+          const [timeline, thread, dropzone] = [...subtree.children].map((element) => element.shadowRoot);
+          const names = (element) => element.getAnimations().map((animation) => animation.animationName);
+          const zone = dropzone.querySelector(".zone");
+          const durations = () => getComputedStyle(zone).transitionDuration;
+          const before = durations();
+          dropzone.host.style.setProperty("--duration-s", "345ms");
+          return {
+            ring: names(timeline.querySelector(".active .marker > .ring")),
+            dot: names(thread.querySelector(".status.in_progress > .dot")),
+            zone: [before, durations()],
+          };
+        };
+      })`);
+      const shown = (): Promise<{ ring: string[]; dot: string[]; zone: string[] }> =>
+        page.evaluate(`window.motion()`);
+      await page.cdp("Emulation.setEmulatedMedia", {
+        features: [{ name: "prefers-reduced-motion", value: "no-preference" }],
+      });
+      const moving = await shown();
+      assert.deepEqual([moving.ring, moving.dot], [["ring"], ["pulse"]]);
+      assert.notEqual(moving.zone[0], "0s", "the motion sheet's --duration-s resolves");
+      assert.equal(moving.zone[1], "0.345s, 0.345s", "the drag-over's change takes --duration-s");
+      await page.cdp("Emulation.setEmulatedMedia", {
+        features: [{ name: "prefers-reduced-motion", value: "reduce" }],
+      });
+      assert.deepEqual(await shown(), { ring: [], dot: [], zone: ["0s", "0s"] });
     } finally {
       await page.close();
     }
@@ -1825,8 +1896,8 @@ describe("components", { timeout: 60_000 }, () => {
             .filter((part) => lines(part) > 1)
             .map((part) => part.textContent),
           identifiers: [...root.querySelectorAll(".event")].map((event, index) => ({
-            texts: [...event.querySelectorAll("dd.cut")].map((dd) => dd.textContent),
-            titles: [...event.querySelectorAll("dd.cut")].map((dd) => dd.title),
+            texts: [...event.querySelectorAll("dd.text-truncate")].map((dd) => dd.textContent),
+            titles: [...event.querySelectorAll("dd.text-truncate")].map((dd) => dd.title),
             expected: [log.events[index].subject, log.events[index].id].filter(Boolean),
           })),
           scrolls: frame.scrollHeight > frame.clientHeight,
@@ -1904,7 +1975,7 @@ describe("components", { timeout: 60_000 }, () => {
         width: box.width / rem,
         events: log.events.length,
         values: [...root.querySelectorAll(".event")].flatMap((event, index) =>
-          [...event.querySelectorAll("dd.cut")].map((dd, at) => {
+          [...event.querySelectorAll("dd.text-truncate")].map((dd, at) => {
             const rect = dd.getBoundingClientRect();
             return {
               expected: [log.events[index].subject, log.events[index].id].filter(Boolean)[at],

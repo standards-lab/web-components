@@ -8,8 +8,12 @@ layout each one promises.
 
 - Each component adopts its sheet into its shadow root after the foundation's `baseline/reset.css`
   and `baseline/elements.css`, which give the native controls, the pre, the rendered Markdown, the
-  details and summary, and the focus outline their look. The sheet is unlayered, so it sits above
-  both, and it gives a native control no look of its own beyond its layout.
+  details and summary, and the focus outline their look. Between those and its own, it adopts the
+  foundation's opt-in sheets whose classes it uses: `utilities.css` (every component but the status
+  badge), `dialog.css` (the drawer's header row), and `motion.css` (the drawer's slide, the
+  dropzone's drag-over change, the chat thread's pulse, and the stage timeline's ring). Its own
+  sheet is unlayered, so it sits above all of them, and it gives a native control no look of its own
+  beyond its layout.
 - A sheet reads only the foundation's baseline tokens, which a shadow root inherits from the page's
   entry. A component in progress takes `--color-accent`, the foundation's hook for what is current
   or in progress, falling back to `--magenta`; an interaction takes `--color-primary`, falling
@@ -160,9 +164,8 @@ layout each one promises.
 - The field and the control are siblings in a row, each its own native frame, never one inside
   another; the control sits at the row's block end, beside the field's last line.
 - The field's bound is eight lines inside its padding and border; past it the field scrolls.
-- The elements sheet styles a disabled button but not a disabled field, so the composer gives its
-  disabled field the first elevated surface, a divider's border, and text a tier quieter, still
-  apart from the placeholder's `--fg-3`.
+- A disabled field takes the elements sheet's disabled look: the first elevated surface, a
+  divider's border, and text a tier quieter, still apart from the placeholder's `--fg-3`.
 
 ## Pagination
 

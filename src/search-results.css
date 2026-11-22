@@ -1,9 +1,10 @@
 /* From spike-html-apps-components (10dde51): src/search-results.css. */
 
 /*
- * The search results' shadow-root sheet: the status line over the list of matches, each a
- * button of the name and field over the snippet.
- * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
+ * The search results' shadow-root sheet: the utilities' status line over the bare list of
+ * matches, each a button of the name and field, on the utilities' head row, over the snippet.
+ * Unlayered, above the foundation's reset, elements, and utilities sheets; it reads only the
+ * baseline tokens.
  * See docs/layout.md
  */
 
@@ -13,8 +14,6 @@
 .status {
   margin: 0;
   font-family: var(--font-ui);
-  font-size: var(--text-s);
-  color: var(--fg-2);
   overflow-wrap: anywhere;
 }
 .status .prompt {
@@ -27,11 +26,6 @@
   display: grid;
   gap: var(--space-2xs);
   margin: var(--space-xs) 0 0;
-  padding: 0;
-  list-style: none;
-}
-.matches > li {
-  margin: 0;
 }
 .match {
   display: grid;
@@ -41,29 +35,13 @@
   padding-block: var(--space-2xs);
   text-align: start;
 }
-.head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 var(--space-xs);
-  min-inline-size: 0;
-}
 .name {
-  flex: 1 1 16ch;
-  max-inline-size: max-content;
-  min-inline-size: 0;
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 .field {
-  margin-inline-start: auto;
   font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: var(--fg-2);
-  white-space: nowrap;
 }
 .snippet {
-  font-size: var(--text-s);
-  color: var(--fg-2);
   overflow-wrap: anywhere;
 }

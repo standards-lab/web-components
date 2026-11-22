@@ -10,6 +10,7 @@ import { html, LitElement, nothing, type PropertyDeclarations, type PropertyValu
 
 import elements from "@standards-lab/web-foundation/baseline/elements.css" with { type: "css" };
 import reset from "@standards-lab/web-foundation/baseline/reset.css" with { type: "css" };
+import utilities from "@standards-lab/web-foundation/utilities.css" with { type: "css" };
 import { define } from "@standards-lab/web-foundation/dom.js";
 import { formatJson } from "./json.ts";
 import { markdown } from "./markdown.ts";
@@ -170,7 +171,7 @@ function pretty(content: string): Json {
  * native element. Display-only: it sends no event.
  */
 export class ArtifactViewer extends LitElement {
-  static styles = [reset, elements, styles];
+  static styles = [reset, elements, utilities, styles];
 
   static properties = {
     name: { type: String },
@@ -286,11 +287,11 @@ export class ArtifactViewer extends LitElement {
 
   #region(content: unknown, markdownView = false, describedBy: string | typeof nothing = nothing) {
     return markdownView
-      ? html`<div class="body markdown" tabindex="0" role="region" aria-label=${this.#label}>
+      ? html`<div class="body scroll-frame markdown" tabindex="0" role="region" aria-label=${this.#label}>
           <div class="document">${content}</div>
         </div>`
       : html`<pre
-          class="body"
+          class="body scroll-frame"
           tabindex="0"
           role="region"
           aria-label=${this.#label}
@@ -310,7 +311,7 @@ export class ArtifactViewer extends LitElement {
   ) {
     return html`<p class="note ${kind}" id=${kind} role=${kind === "loading" ? "status" : nothing}>
       <strong class="label">${label}</strong>
-      ${detail === nothing ? nothing : html`<span class="detail">${detail}</span>`} ${action}
+      ${detail === nothing ? nothing : html`<span class="detail text-quiet-s">${detail}</span>`} ${action}
     </p>`;
   }
 
@@ -392,9 +393,9 @@ export class ArtifactViewer extends LitElement {
   render() {
     const header =
       !this.noHeader && (this.name || this.contentType)
-        ? html`<header class="header">
-            ${this.name ? html`<span class="name">${this.name}</span>` : nothing}
-            ${this.contentType ? html`<span class="type">${this.contentType}</span>` : nothing}
+        ? html`<header class="header head-row">
+            ${this.name ? html`<span class="name head-name">${this.name}</span>` : nothing}
+            ${this.contentType ? html`<span class="type head-end text-quiet-s">${this.contentType}</span>` : nothing}
           </header>`
         : nothing;
     return html`${header}${this.#frame()}`;

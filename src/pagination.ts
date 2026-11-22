@@ -6,6 +6,7 @@ import { html, LitElement, nothing, type PropertyDeclarations } from "lit";
 
 import elements from "@standards-lab/web-foundation/baseline/elements.css" with { type: "css" };
 import reset from "@standards-lab/web-foundation/baseline/reset.css" with { type: "css" };
+import utilities from "@standards-lab/web-foundation/utilities.css" with { type: "css" };
 import { define, emit } from "@standards-lab/web-foundation/dom.js";
 import styles from "./pagination.css" with { type: "css" };
 
@@ -48,7 +49,7 @@ export function summaryRange(
  * it sends `page-change` and `page-size-change` and the host sets the next page's fields.
  */
 export class Pagination extends LitElement {
-  static styles = [reset, elements, styles];
+  static styles = [reset, elements, utilities, styles];
 
   static properties = {
     page: { type: Number },
@@ -138,7 +139,7 @@ export class Pagination extends LitElement {
     const range = summaryRange(this.page, this.size, this.total);
     if (range === null) return nothing;
     const { first, last } = range;
-    return html`<p class="summary">Showing ${first}–${last} of ${this.total}<slot name="status"></slot></p>`;
+    return html`<p class="summary text-quiet-s">Showing ${first}–${last} of ${this.total}<slot name="status"></slot></p>`;
   }
 
   render() {
@@ -148,7 +149,7 @@ export class Pagination extends LitElement {
       <slot></slot>
       <div class="pagination">
         <label class="page-size">
-          <span class="page-size-label"><slot name="label">Page Size</slot></span>
+          <span class="page-size-label text-quiet-s text-nowrap"><slot name="label">Page Size</slot></span>
           <select ?disabled=${this.disabled} @change=${this.#handleSizeChange}>
             ${(this.pageSizes ?? []).map(
               (n) => html`<option value=${n} ?selected=${n === this.size}>${n}</option>`,
@@ -165,7 +166,7 @@ export class Pagination extends LitElement {
           >
             ‹
           </button>
-          <span class="page-indicator">
+          <span class="page-indicator text-quiet-s text-nowrap">
             <input
               class="page-input"
               type="number"

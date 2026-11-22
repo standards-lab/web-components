@@ -2,8 +2,10 @@
 
 /*
  * The drawer's shadow-root sheet: the docked aside's frame and the modal dialog covering the
- * viewport, each a header over a scrolling body, and the dialog's slide.
- * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
+ * viewport, each a dialog header over a scrolling body, and the dialog's slide, in the motion
+ * sheet's --duration-m.
+ * Unlayered, above the foundation's reset, elements, utilities, dialog, and motion sheets; it reads
+ * only the baseline tokens.
  * See docs/layout.md
  */
 
@@ -44,19 +46,12 @@ dialog[open] {
   translate: 0 0;
 }
 header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-s);
+  margin-block-end: 0;
   padding: var(--space-s);
   border-block-end: var(--line-s) solid var(--border);
 }
 h2 {
-  margin: 0;
   font-size: var(--text-l);
-}
-h2[tabindex="-1"]:focus {
-  outline: none;
 }
 .body {
   flex: 1 1 auto;
@@ -66,20 +61,12 @@ h2[tabindex="-1"]:focus {
   padding: var(--space-s);
   scroll-padding: var(--space-s);
 }
-.hidden {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
 @media (prefers-reduced-motion: no-preference) {
   dialog {
     transition:
-      translate 200ms ease-out,
-      overlay 200ms allow-discrete,
-      display 200ms allow-discrete;
+      translate var(--duration-m) ease-out,
+      overlay var(--duration-m) allow-discrete,
+      display var(--duration-m) allow-discrete;
   }
   @starting-style {
     dialog[open] {

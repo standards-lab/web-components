@@ -40,7 +40,8 @@ package keeps the standard syntax, with no pack-time rewrite.
 
 The package is `@standards-lab/web-components`. Each module defines its element when it is
 imported, and the element's shadow root adopts the foundation's reset and elements sheets, then
-its own layout-only sheet. The modules import `lit` and the foundation by package name and their
+the foundation's utilities, dialog, and motion sheets where it uses them, then its own layout-only
+sheet. The modules import `lit` and the foundation by package name and their
 sheets as CSS module scripts, so a page reaches them through an import map or a bundler, and links
 the foundation's `page.css`:
 

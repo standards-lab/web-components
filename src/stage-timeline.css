@@ -1,9 +1,11 @@
 /* From spike-html-apps-components (10dde51): src/stage-timeline.css. */
 
 /*
- * The stage timeline's shadow-root sheet: the list of steps, each a marker, a connector to the
- * next, a name, a detail line of the state's label and time, and a failed stage's reason.
- * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
+ * The stage timeline's shadow-root sheet: the bare list of steps, each a marker, with the active
+ * one's ring, which the motion sheet's ring runs, a connector to the next, a name, a detail line of
+ * the state's label and time, each on the utilities' alternatives, and a failed stage's reason.
+ * Unlayered, above the foundation's reset, elements, utilities, and motion sheets; it reads only
+ * the baseline tokens.
  * See docs/layout.md
  */
 
@@ -12,15 +14,12 @@
 }
 .stages {
   margin: 0;
-  padding: 0;
-  list-style: none;
 }
 .stage {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   grid-template-rows: auto auto auto var(--space-s);
   column-gap: var(--space-xs);
-  margin: 0;
 }
 .stage:last-child {
   grid-template-rows: auto auto auto;
@@ -79,23 +78,11 @@
   color: var(--bg);
 }
 @media (prefers-reduced-motion: no-preference) {
-  .active .marker::after {
-    content: "";
+  .marker > .ring {
     position: absolute;
     inset: calc(-1 * var(--line-m));
     border: var(--line-m) solid var(--color-accent, var(--magenta));
     border-radius: var(--radius-full);
-    animation: ring 1.6s ease-out infinite;
-  }
-}
-@keyframes ring {
-  from {
-    opacity: 0.6;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(1.6);
   }
 }
 .name {
@@ -115,23 +102,13 @@
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0 var(--space-xs);
-  font-size: var(--text-s);
-  color: var(--fg-2);
 }
 .slot {
-  display: inline-grid;
   justify-items: start;
-}
-.slot > * {
-  grid-area: 1 / 1;
-}
-.slot > .hold {
-  visibility: hidden;
 }
 .label {
   font-family: var(--font-ui);
   font-weight: 600;
-  white-space: nowrap;
 }
 .active .label {
   color: var(--color-accent, var(--magenta));
@@ -142,15 +119,9 @@
 .failed .label {
   color: var(--red);
 }
-.when {
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
 .reason {
   grid-column: 2;
   grid-row: 3;
   contain: inline-size;
-  font-size: var(--text-s);
-  color: var(--fg-2);
   overflow-wrap: anywhere;
 }

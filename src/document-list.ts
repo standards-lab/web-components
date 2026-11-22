@@ -12,6 +12,7 @@ import { repeat } from "lit/directives/repeat.js";
 
 import elements from "@standards-lab/web-foundation/baseline/elements.css" with { type: "css" };
 import reset from "@standards-lab/web-foundation/baseline/reset.css" with { type: "css" };
+import utilities from "@standards-lab/web-foundation/utilities.css" with { type: "css" };
 import { define } from "@standards-lab/web-foundation/dom.js";
 import "./entry.ts";
 import type { FileItem, StatusTone } from "./entry.ts";
@@ -73,7 +74,7 @@ function entryItem(item: DocumentItem): FileItem {
  * busy, so a page change doesn't empty and refill the list; an error lists none.
  */
 export class DocumentList extends LitElement {
-  static styles = [reset, elements, styles];
+  static styles = [reset, elements, utilities, styles];
 
   static properties = {
     items: { attribute: false },
@@ -118,15 +119,16 @@ export class DocumentList extends LitElement {
     this.disabled = false;
   }
 
-  #status(documents: readonly DocumentItem[]) {
+  #status(documents: readonly DocumentItem[], joins: boolean) {
+    const label = joins ? "label text-nowrap" : "label";
     switch (this.state) {
       case "loading":
-        return html`<span class="label">Loading documents…</span>`;
+        return html`<span class=${label}>Loading documents…</span>`;
       case "error":
-        return html`<strong class="label">Couldn't load the documents.</strong>
+        return html`<strong class=${label}>Couldn't load the documents.</strong>
           ${this.message ? html`<span class="detail">${this.message}</span>` : nothing}`;
     }
-    return documents.length ? nothing : html`<span class="label empty">No documents.</span>`;
+    return documents.length ? nothing : html`<span class="${label} empty">No documents.</span>`;
   }
 
   #entry(item: DocumentItem) {
@@ -151,10 +153,10 @@ export class DocumentList extends LitElement {
       .pageSizes=${this.pageSizes}
       .disabled=${this.disabled}
     >
-      <p class="status ${this.state}" role="status" slot=${joins ? "status" : nothing}>${this.#status(documents)}</p>
+      <p class="status ${this.state}${joins ? "" : " status-line"}" role="status" slot=${joins ? "status" : nothing}>${this.#status(documents, joins)}</p>
       ${
         documents.length
-          ? html`<ul class="documents" aria-label="Documents" aria-busy=${this.state === "loading" ? "true" : nothing}>
+          ? html`<ul class="documents list-bare" aria-label="Documents" aria-busy=${this.state === "loading" ? "true" : nothing}>
             ${repeat(
               documents,
               (item) => item.id,

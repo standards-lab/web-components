@@ -11,6 +11,9 @@ import { html, LitElement, type PropertyDeclarations, type PropertyValues } from
 
 import elements from "@standards-lab/web-foundation/baseline/elements.css" with { type: "css" };
 import reset from "@standards-lab/web-foundation/baseline/reset.css" with { type: "css" };
+import dialogSheet from "@standards-lab/web-foundation/dialog.css" with { type: "css" };
+import motion from "@standards-lab/web-foundation/motion.css" with { type: "css" };
+import utilities from "@standards-lab/web-foundation/utilities.css" with { type: "css" };
 import { define, emit } from "@standards-lab/web-foundation/dom.js";
 import styles from "./drawer.css" with { type: "css" };
 
@@ -58,7 +61,7 @@ export type CloseDetail = Record<string, never>;
  * is the custom state `docked` or `drawer`, which a page may style.
  */
 export class Drawer extends LitElement {
-  static styles = [reset, elements, styles];
+  static styles = [reset, elements, utilities, dialogSheet, motion, styles];
 
   static properties = {
     open: { type: Boolean, reflect: true },
@@ -181,15 +184,15 @@ export class Drawer extends LitElement {
   render() {
     if (!this.#narrow) {
       return html`<aside aria-labelledby="title">
-        <header><h2 id="title">${this.label}</h2></header>
+        <header class="dialog-header"><h2 id="title">${this.label}</h2></header>
         <div class="body"><slot></slot></div>
       </aside>`;
     }
     return html`<dialog aria-labelledby="title" @close=${this.#closed}>
-      <header>
+      <header class="dialog-header">
         <h2 id="title" tabindex="-1" autofocus>${this.label}</h2>
         <button type="button" @click=${this.close}>
-          <slot name="close">Close</slot><span class="hidden"> ${this.label}</span>
+          <slot name="close">Close</slot><span class="visually-hidden"> ${this.label}</span>
         </button>
       </header>
       <div class="body"><slot></slot></div>

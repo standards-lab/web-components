@@ -337,7 +337,7 @@ describe("document list", { timeout: 60_000 }, () => {
     await mount({ total: 0 });
     const { state, status, statusSlot, summary, list, entries } = await read();
     assert.equal(state, "ready");
-    assert.deepEqual(status, ["status", "No documents.", "status ready"]);
+    assert.deepEqual(status, ["status", "No documents.", "status ready status-line"]);
     assert.deepEqual([summary, statusSlot], [null, ""]);
     assert.equal(list, null);
     assert.deepEqual(entries, []);
@@ -362,7 +362,7 @@ describe("document list", { timeout: 60_000 }, () => {
     await mount({ state: "loading" });
     let shown = await read();
     assert.equal(shown.state, "loading");
-    assert.deepEqual(shown.status, ["status", "Loading documents…", "status loading"]);
+    assert.deepEqual(shown.status, ["status", "Loading documents…", "status loading status-line"]);
     assert.equal(shown.statusSlot, "", "a first load has no summary to join");
     assert.equal(shown.list, null);
     await mount({ ...paging, items: documents });
@@ -413,7 +413,7 @@ describe("document list", { timeout: 60_000 }, () => {
     assert.deepEqual(status, [
       "status",
       "Couldn't load the documents. 503 Service Unavailable.",
-      "status error",
+      "status error status-line",
     ]);
     assert.equal(list, null);
     assert.deepEqual(entries, []);
