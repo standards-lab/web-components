@@ -4,11 +4,6 @@
 [settings]
 task.run_auto_install = false
 
-[env]
-HOLDS = '''
-@standards-lab/web-foundation v0.3.0: v0.4.0 renames --accent-color and --interaction-color and changes adopted element rules; v1.client.stack's components-settings takes it with its design review
-'''
-
 [tools]
 "github:standards-lab/claude-plugins" = { version = "0.23.0", version_prefix = "marathon/v" }
 actionlint = "1.7.12"

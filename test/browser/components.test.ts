@@ -299,7 +299,7 @@ describe("components", { timeout: 60_000 }, () => {
           byAttribute.item = { id: "d-attr", name: "designs", status: "failed", updated_at: "2026-10-12T16:41:07Z" };
           main.append(byAttribute);
         }
-        ${hook ? `main.style.setProperty("--accent-color", "rgb(1, 2, 3)");` : ""}
+        ${hook ? `main.style.setProperty("--color-accent", "rgb(1, 2, 3)");` : ""}
         const entries = [...main.querySelectorAll("sl-entry")];
         await Promise.all(entries.map((entry) => entry.updateComplete));
         const root = entries[0].shadowRoot;
@@ -311,7 +311,7 @@ describe("components", { timeout: 60_000 }, () => {
           return resolved;
         };
         const hues = {
-          accent: resolve("var(--accent-color, var(--magenta))"),
+          accent: resolve("var(--color-accent, var(--magenta))"),
           green: resolve("var(--green)"),
           orange: resolve("var(--orange)"),
           red: resolve("var(--red)"),
@@ -328,7 +328,7 @@ describe("components", { timeout: 60_000 }, () => {
         };
       })()`);
       for (const hook of [false, true]) {
-        const where = hook ? "--accent-color set" : "at the accent hook's fallback";
+        const where = hook ? "--color-accent set" : "at the accent hook's fallback";
         const shown: { distinct: boolean; entries: unknown[][] } = await read(hook);
         assert.ok(shown.distinct, `${where}: the hues differ`);
         assert.deepEqual(
@@ -1016,7 +1016,7 @@ describe("components", { timeout: 60_000 }, () => {
         const root = entry.shadowRoot;
         const button = root.querySelector(".entry");
         const probe = root.appendChild(document.createElement("span"));
-        probe.style.color = "var(--accent-color, var(--magenta))";
+        probe.style.color = "var(--color-accent, var(--magenta))";
         const accent = getComputedStyle(probe).color;
         probe.remove();
         const look = () => {
@@ -1069,7 +1069,7 @@ describe("components", { timeout: 60_000 }, () => {
         const entry = document.querySelector("#focus sl-entry");
         const button = entry.shadowRoot.querySelector(".entry");
         const probe = entry.shadowRoot.appendChild(document.createElement("span"));
-        probe.style.color = "var(--accent-color, var(--magenta))";
+        probe.style.color = "var(--color-accent, var(--magenta))";
         const accent = getComputedStyle(probe).color;
         probe.remove();
         const style = getComputedStyle(button);
@@ -1182,11 +1182,11 @@ describe("components", { timeout: 60_000 }, () => {
           probe.remove();
           return resolved;
         };
-        const accent = resolve("color", "var(--accent-color, var(--magenta))");
-        const interaction = resolve("color", "var(--interaction-color, var(--blue))");
+        const accent = resolve("color", "var(--color-accent, var(--magenta))");
+        const interaction = resolve("color", "var(--color-primary, var(--blue))");
         const tint = resolve(
           "backgroundColor",
-          "color-mix(in srgb, var(--accent-color, var(--magenta)) 12%, transparent)",
+          "color-mix(in srgb, var(--color-accent, var(--magenta)) 12%, transparent)",
         );
         const root = (selector) => subtree.querySelector(selector).shadowRoot;
         const [framed, focused] = [...subtree.querySelectorAll("sl-entry")]
@@ -1233,7 +1233,7 @@ describe("components", { timeout: 60_000 }, () => {
         "the drag-over zone's border": "interaction",
         "the focus ring": "interaction",
       };
-      for (const hook of ["", "--accent-color", "--interaction-color"]) {
+      for (const hook of ["", "--color-accent", "--color-primary"]) {
         const shown: { distinct: boolean; focused: boolean; over: boolean; marks: object } =
           await read(hook);
         const { marks, ...state } = shown;

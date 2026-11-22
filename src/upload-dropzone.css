@@ -24,8 +24,8 @@
 }
 .zone.over {
   border-style: solid;
-  border-color: var(--interaction-color, var(--blue));
-  background-color: color-mix(in srgb, var(--interaction-color, var(--blue)) 10%, transparent);
+  border-color: var(--color-primary, var(--blue));
+  background-color: color-mix(in srgb, var(--color-primary, var(--blue)) 10%, transparent);
   color: var(--fg);
 }
 @media (prefers-reduced-motion: no-preference) {

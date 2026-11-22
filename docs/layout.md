@@ -11,8 +11,8 @@ layout each one promises.
   details and summary, and the focus outline their look. The sheet is unlayered, so it sits above
   both, and it gives a native control no look of its own beyond its layout.
 - A sheet reads only the foundation's baseline tokens, which a shadow root inherits from the page's
-  entry. A component in progress takes `--accent-color`, the foundation's hook for what is current
-  or in progress, falling back to `--magenta`; an interaction takes `--interaction-color`, falling
+  entry. A component in progress takes `--color-accent`, the foundation's hook for what is current
+  or in progress, falling back to `--magenta`; an interaction takes `--color-primary`, falling
   back to `--blue`.
 - A component that draws one frame around content that scrolls (the artifact viewer, the event log,
   the chat thread) makes it a flex child of a flex-column host with `min-block-size: 0`, so a

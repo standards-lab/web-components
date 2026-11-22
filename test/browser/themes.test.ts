@@ -86,7 +86,7 @@ const READ = `async (choice) => {
     return resolved;
   };
   const tokens = Object.fromEntries(${JSON.stringify(TOKENS)}.map((token) => [token, resolve("var(" + token + ")")]));
-  const interaction = resolve("var(--interaction-color, var(--blue))");
+  const interaction = resolve("var(--color-primary, var(--blue))");
   const texts = [];
   const walk = (root, path) => {
     for (const element of root.querySelectorAll("*")) {

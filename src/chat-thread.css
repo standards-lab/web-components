@@ -132,7 +132,7 @@ summary,
   inline-size: 0.5em;
   block-size: 0.5em;
   border-radius: var(--radius-full);
-  background-color: var(--accent-color, var(--magenta));
+  background-color: var(--color-accent, var(--magenta));
 }
 @media (prefers-reduced-motion: no-preference) {
   .status.in_progress::before {
