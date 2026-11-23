@@ -6,6 +6,7 @@ import { html, LitElement, nothing, type PropertyDeclarations } from "lit";
 
 import elements from "@standards-lab/web-foundation/baseline/elements.css" with { type: "css" };
 import reset from "@standards-lab/web-foundation/baseline/reset.css" with { type: "css" };
+import utilities from "@standards-lab/web-foundation/utilities.css" with { type: "css" };
 import { define, emit } from "@standards-lab/web-foundation/dom.js";
 import { formatBytes, formatDate, formatDateTime } from "@standards-lab/web-foundation/format.js";
 import styles from "./entry.css" with { type: "css" };
@@ -67,7 +68,7 @@ function renderTime(updatedAt: string) {
   return html`<time datetime=${updatedAt}
     >${
       split
-        ? html`<span class="date">${day}</span>${between}<span class="clock">${clock}</span>`
+        ? html`<span class="date">${day}</span>${between}<span class="clock text-nowrap">${clock}</span>`
         : whole
     }</time
   >`;
@@ -87,7 +88,7 @@ function renderTime(updatedAt: string) {
  * consumer's reading of the status, not the item's data, so the item keeps its API's shape.
  */
 export class Entry extends LitElement {
-  static styles = [reset, elements, styles];
+  static styles = [reset, elements, utilities, styles];
 
   static properties = {
     item: { attribute: false },
@@ -121,15 +122,15 @@ export class Entry extends LitElement {
     const file = "content_type" in item ? item : null;
     return html`
       <button type="button" class="entry" @click=${this.#open}>
-        <span class="head">
-          <span class="name">${item.name}</span>
-          <span class="status">${item.status}</span>
+        <span class="head head-row">
+          <span class="name head-name">${item.name}</span>
+          <span class="status head-end text-quiet-xs text-nowrap">${item.status}</span>
         </span>
-        <span class="kind">${kindOf(item)}</span>
-        <span class="meta">
+        <span class="kind visually-hidden">${kindOf(item)}</span>
+        <span class="meta text-quiet-s">
           ${
             file && file.size !== null
-              ? html`<span class="size">${formatBytes(file.size)}</span>`
+              ? html`<span class="size text-nowrap">${formatBytes(file.size)}</span>`
               : nothing
           }
           ${file ? html`<span class="type">${renderType(file.content_type)}</span>` : nothing}

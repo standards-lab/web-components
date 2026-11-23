@@ -22,6 +22,8 @@ for (const page of [
   "search-results",
   "document-list",
   "drawer",
+  "settings",
+  "shortcuts",
 ]) {
   console.log(`${server.origin}/demo/${page}.html`);
 }

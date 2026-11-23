@@ -10,8 +10,8 @@ import type { ServeOptions } from "@standards-lab/web-tooling/server.js";
 /** The repository root, the served tree. */
 export const root = join(import.meta.dirname, "../../..");
 
-/** The packages served under /deps/: lit, marked, and the foundation. */
-export const deps = ["lit", "marked", "@standards-lab/web-foundation"];
+/** The packages served under /deps/: lit, marked, the foundation, and the icons. */
+export const deps = ["lit", "marked", "@standards-lab/web-foundation", "@standards-lab/web-icons"];
 
 /** The serve options for the repository: the root and its deps. */
 export const served: ServeOptions = { root, deps };

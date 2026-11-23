@@ -2,8 +2,9 @@
 
 /*
  * The pagination's shadow-root sheet: the summary, and the row of the page size, the steps, and
- * the page field; it gives no control a look of its own.
- * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
+ * the page field, in the utilities' quiet type; it gives no control a look of its own.
+ * Unlayered, above the foundation's reset, elements, and utilities sheets; it reads only the
+ * baseline tokens.
  * See docs/layout.md
  */
 
@@ -12,8 +13,6 @@
 }
 .summary {
   margin-block-end: var(--space-2xs);
-  font-size: var(--text-s);
-  color: var(--fg-2);
 }
 .pagination {
   display: flex;
@@ -31,12 +30,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-2xs);
-}
-.page-size-label,
-.page-indicator {
-  font-size: var(--text-s);
-  color: var(--fg-2);
-  white-space: nowrap;
 }
 .page-input {
   box-sizing: content-box;

@@ -1,8 +1,11 @@
 // The capture description web-tooling's web-screenshots bin reads for mise run screenshots: each
-// specimen page under demo/, whole in tiles, and the drawer's page in its viewport at a wide and a
-// narrow width in four states; the palette, space, and type facets at the foundation's defaults;
-// --all's profiles; each page's registered profiles; and the repository served as the browser tier
-// serves it.
+// specimen page under demo/, whole in tiles; the drawer's page in its viewport at a wide and a
+// narrow width in four states, and its modal drawer open at the wide width, then with its Close
+// reached by Tab and its hint shown; the settings' page whole, then with the Settings dialog opened
+// by S, wide and narrow, focus in its rows; the shortcuts' page whole, then with the Help dialog
+// opened by ?, its Close reached by Tab and its hint shown; the palette, space, and type facets at
+// the foundation's defaults; --all's profiles; each page's registered profiles; and the repository
+// served as the browser tier serves it.
 // Adapted from spike-html-apps-components (10dde51): scripts/screenshots.config.ts, on web-tooling.
 
 import type {
@@ -33,6 +36,64 @@ const openedByEnter =
     })()`);
   };
 
+const tabToHint: Step = async (page) => {
+  const key = { key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 };
+  await page.cdp("Input.dispatchKeyEvent", { type: "keyDown", ...key });
+  await page.cdp("Input.dispatchKeyEvent", { type: "keyUp", ...key });
+  await page.evaluate(`(async () => {
+    let active = document.activeElement;
+    while (active.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+    const hint = active.getRootNode().getElementById(active.getAttribute("interestfor"));
+    while (!hint.matches(":popover-open")) {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+    }
+    await Promise.all(hint.getAnimations().map((a) => a.finished));
+  })()`);
+};
+
+const modalOpened =
+  (then?: Step): Step =>
+  async (page) => {
+    await page.cdp("Emulation.setFocusEmulationEnabled", { enabled: true });
+    await page.evaluate(`(async () => {
+      const drawer = document.querySelector("#outline");
+      document.querySelector("#open-outline").click();
+      await drawer.updateComplete;
+      const dialog = drawer.shadowRoot.querySelector("dialog");
+      await Promise.all(dialog.getAnimations({ subtree: true }).map((a) => a.finished));
+    })()`);
+    await then?.(page);
+  };
+
+const pressed =
+  (key: "s" | "?", dialog: string, then?: Step): Step =>
+  async (page) => {
+    await page.cdp("Emulation.setFocusEmulationEnabled", { enabled: true });
+    const press =
+      key === "s"
+        ? { key: "s", code: "KeyS", windowsVirtualKeyCode: 83 }
+        : { key: "?", code: "Slash", windowsVirtualKeyCode: 191, modifiers: 8 };
+    await page.cdp("Input.dispatchKeyEvent", {
+      type: "keyDown",
+      ...press,
+      text: key,
+      unmodifiedText: key,
+    });
+    await page.cdp("Input.dispatchKeyEvent", { type: "keyUp", ...press });
+    await page.evaluate(`(async () => {
+      const dialog = document.querySelector("${dialog}");
+      while (!dialog.open) await new Promise((resolve) => requestAnimationFrame(resolve));
+      const hosts = dialog.querySelectorAll("sl-settings, sl-shortcuts");
+      await Promise.all([...hosts].map((host) => host.updateComplete));
+      const settled = () => {
+        const active = document.activeElement;
+        return dialog.contains(active) && (!active.shadowRoot || active.shadowRoot.activeElement);
+      };
+      while (!settled()) await new Promise((resolve) => requestAnimationFrame(resolve));
+    })()`);
+    await then?.(page);
+  };
+
 const drawerStates: DescribedState[] = [
   {
     name: "drawer-docked",
@@ -60,6 +121,51 @@ const drawerStates: DescribedState[] = [
     full: false,
     open: openedByEnter("rtl"),
   },
+  {
+    name: "drawer-modal",
+    caption: "the modal drawer, open at 1280px",
+    viewport: docked,
+    full: false,
+    open: modalOpened(),
+  },
+  {
+    name: "drawer-modal-close",
+    caption: "the modal drawer, open at 1280px, its Close reached by Tab, its hint shown",
+    viewport: docked,
+    full: false,
+    open: modalOpened(tabToHint),
+  },
+];
+
+const narrow = { width: 390, height: 844 };
+
+const settingsStates: DescribedState[] = [
+  { name: "settings", caption: "the settings", full: true },
+  {
+    name: "settings-dialog",
+    caption: "the Settings dialog, opened by S",
+    viewport: docked,
+    full: false,
+    open: pressed("s", "#settings"),
+  },
+  {
+    name: "settings-dialog-narrow",
+    caption: "the Settings dialog at 390px, opened by S",
+    viewport: narrow,
+    full: false,
+    open: pressed("s", "#settings"),
+  },
+];
+
+const shortcutsStates: DescribedState[] = [
+  { name: "shortcuts", caption: "the shortcuts", full: true },
+  {
+    name: "shortcuts-dialog",
+    caption: "the Help dialog, opened by ?, then Tab to its Close, its hint shown",
+    viewport: docked,
+    full: false,
+    open: pressed("?", "#help", tabToHint),
+  },
 ];
 
 const pages: DescribedPage[] = (
@@ -78,12 +184,26 @@ const pages: DescribedPage[] = (
   ] satisfies [name: string, caption: string][]
 )
   .map(([name, caption]): DescribedPage => ({ name, caption, path: `demo/${name}.html` }))
-  .concat({
-    name: "drawer",
-    caption: "the drawer",
-    path: "demo/drawer.html",
-    states: drawerStates,
-  });
+  .concat(
+    {
+      name: "drawer",
+      caption: "the drawer",
+      path: "demo/drawer.html",
+      states: drawerStates,
+    },
+    {
+      name: "settings",
+      caption: "the settings",
+      path: "demo/settings.html",
+      states: settingsStates,
+    },
+    {
+      name: "shortcuts",
+      caption: "the shortcuts",
+      path: "demo/shortcuts.html",
+      states: shortcutsStates,
+    },
+  );
 
 const REGISTRY = `(() => {
   const store = globalThis[Symbol.for("web-foundation.registry")] ?? {};

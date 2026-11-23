@@ -22,10 +22,10 @@ each sheet is laid out as it is.
   up to two pixels between, more where a device pixel is more than a CSS one, and within one CSS
   pixel the follow would stop by itself at a zoom of 0.9 or 1.1. A browser without `currentCSSZoom`
   is taken as unzoomed.
-- Valid JSON is shown by `formatJson()` from its own tokens: `JSON.parse` decides validity alone and
-  its value is thrown away, since printing it would move integer-like keys first, rewrite numbers,
-  and drop duplicate keys. Text whose formatting would pass the longest string, a `RangeError`,
-  shows as it is.
+- Valid JSON is shown by the foundation's `tryFormatJson()`, formatted from its own tokens:
+  `JSON.parse` decides validity alone and its value is thrown away, since printing it would move
+  integer-like keys first, rewrite numbers, and drop duplicate keys. Text whose formatting would
+  pass the longest string, a `RangeError`, shows as it is.
 
 ## Artifact viewer
 

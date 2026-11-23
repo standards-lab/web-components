@@ -1,7 +1,7 @@
 # web-components context
 
 web-components is the set of Lit elements with a shadow root that applications compose, built on
-web-foundation as a peer. A component takes properties and attributes, sends events, and may hold
+web-foundation and web-icons as peers. A component takes properties and attributes, sends events, and may hold
 its own UI state; it holds no services, fetches no data, holds no application state, and never
 imports the SDK. An application's internal element becomes a component once a second application
 needs it.
@@ -19,14 +19,16 @@ line; the workflows and CHANGELOG.md name theirs, web-foundation's at ceaab61. T
 line have their provenance here:
 
 - `package.json` is adapted from spike-html-apps-components (10dde51): package.json. It is renamed
-  `@standards-lab/web-components` at 0.1.0, takes `@standards-lab/web-foundation` as its peer,
-  and replaces the spike's foundation and tooling devDependencies with web-foundation's and
-  web-tooling's release tags; it pins marked and typescript-eslint exactly.
+  `@standards-lab/web-components` at 0.1.0, takes `@standards-lab/web-foundation` and
+  `@standards-lab/web-icons` as its peers, and replaces the spike's foundation and tooling
+  devDependencies with web-foundation's and web-tooling's release tags, adds web-icons' release
+  tag, and pins marked and typescript-eslint exactly.
 - `.prettierrc.json` is from spike-html-apps-components (10dde51): .prettierrc.json.
 - `LICENSE` is from spike-html-apps-components (10dde51): LICENSE, unchanged.
 - `pnpm-lock.yaml` is generated, not copied.
-- `test/unit/marked.test.ts`, `test/browser/themes.test.ts`, and
-  `test/browser/support/profiles.ts` are written here, with no source.
+- `test/unit/marked.test.ts`, `test/browser/themes.test.ts`,
+  `test/browser/shortcut-dialogs.test.ts`, `test/browser/support/profiles.ts`, and
+  `demo/glyphs.js` are written here, with no source.
 - `CLAUDE.md`, `.claude/`, and this directory are marathon's working files, written here.
 
 ## Capability map
@@ -37,3 +39,6 @@ line have their provenance here:
   list](../docs/components.md#inspection).
 - **Controls** (built): [the status badge, entry, pagination, and
   drawer](../docs/components.md#controls).
+- **Settings and Help** (built): [the reader's settings and the keyboard shortcuts
+  list](../docs/components.md#controls), and [the page pattern that opens
+  them](../README.md#settings-and-help).

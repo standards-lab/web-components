@@ -1,4 +1,5 @@
 // Adapted from spike-html-apps-components (10dde51): test/browser/drawer.test.ts, on @standards-lab/web-tooling.
+// Adapted from spike-html-hosting-components (9fa5850): test/browser/drawer.test.ts, its Close glyph button and hint cases.
 
 import assert from "node:assert/strict";
 import { after, before, beforeEach, describe, test } from "node:test";
@@ -8,6 +9,16 @@ import type { Browser, Page } from "@standards-lab/web-tooling/browser.js";
 import { serve } from "@standards-lab/web-tooling/server.js";
 import type { Server } from "@standards-lab/web-tooling/server.js";
 
+import x from "@standards-lab/web-icons/octicon/x-16";
+
+import {
+  descriptions,
+  glyphButton,
+  hintShown,
+  hover,
+  pointAway,
+  untilHint,
+} from "./support/glyph-button.ts";
 import { served } from "./support/served.ts";
 
 interface Heard {
@@ -49,6 +60,7 @@ const DOCK = 768;
 const WIDE = 1280;
 const NARROW = 480;
 const HEIGHT = 800;
+const CLOSE = `document.querySelector("sl-drawer").shadowRoot.querySelector("header button")`;
 
 describe("drawer", { timeout: 60_000 }, () => {
   let server: Server;
@@ -206,6 +218,15 @@ describe("drawer", { timeout: 60_000 }, () => {
       .filter((node) => !node.ignored && node.role?.value === role)
       .map((node) => node.name?.value ?? "");
   };
+  const closeText = (): Promise<{ box: number[]; text: string }> =>
+    page.evaluate(`(() => {
+      const hidden = ${CLOSE}.querySelector("slot[name=close]").closest("span");
+      const box = hidden.getBoundingClientRect();
+      return {
+        box: [box.width, box.height],
+        text: hidden.textContent.replace(/\\s+/g, " ").trim(),
+      };
+    })()`);
   const headings = (): Promise<{
     texts: string[];
     inWrapper: boolean;
@@ -484,6 +505,93 @@ describe("drawer", { timeout: 60_000 }, () => {
     }
   });
 
+  for (const width of [WIDE, NARROW]) {
+    test(`with modal, at ${width}px, it is a closed drawer that opens as a modal dialog, the page behind inert; open goes out once`, async () => {
+      await mount(width, {}, "", HEIGHT, { attributes: "modal", mode: "drawer" });
+      let shown = await read();
+      assert.deepEqual(
+        [shown.mode, shown.wrapper, shown.dialogOpen, shown.open, shown.sent],
+        ["drawer", "dialog", false, false, []],
+      );
+      await openByKeyboard();
+      shown = await read();
+      assert.deepEqual(
+        [shown.mode, shown.dialogOpen, shown.modal, shown.open, shown.attribute, shown.visible],
+        ["drawer", true, true, true, true, true],
+      );
+      assert.equal(shown.box.width, width, "the dialog covers the viewport");
+      assert.deepEqual(await exposed("dialog"), ["Documents"]);
+      assert.deepEqual(await exposed("complementary"), []);
+      assert.equal(shown.focused, "drawer h2");
+      assert.equal(await pageLive(), false, "the page behind takes no focus");
+      assert.deepEqual(shown.heard, [{ type: "open", detail: {}, bubbles: true, composed: true }]);
+    });
+  }
+
+  test("with modal, dock is ignored: a dock below the viewport, one the query can't read, and a resize across dock leave it a drawer, open", async () => {
+    for (const dock of ["20rem", "wide"]) {
+      await mount(WIDE, { dock }, "", HEIGHT, { attributes: "modal", mode: "drawer" });
+      const shown = await read();
+      assert.deepEqual([shown.mode, shown.wrapper], ["drawer", "dialog"], `with dock ${dock}`);
+    }
+    await call("show");
+    await resize(NARROW);
+    await resize(WIDE);
+    await page.evaluate(`document.querySelector("sl-drawer").dock = "48rem"`);
+    const shown = await read();
+    assert.deepEqual(
+      [shown.mode, shown.wrapper, shown.modal, shown.open, shown.sent],
+      ["drawer", "dialog", true, true, ["open"]],
+    );
+  });
+
+  test("modal reflects from the property, and removing it docks the drawer again at dock and wider", async () => {
+    await mount(WIDE);
+    await page.evaluate(`document.querySelector("sl-drawer").modal = true`);
+    await settled("drawer");
+    let shown = await read();
+    assert.equal(
+      await page.evaluate(`document.querySelector("sl-drawer").hasAttribute("modal")`),
+      true,
+    );
+    assert.deepEqual([shown.wrapper, shown.dialogOpen, shown.sent], ["dialog", false, []]);
+    await page.evaluate(`document.querySelector("sl-drawer").modal = false`);
+    await settled("docked");
+    shown = await read();
+    assert.equal(
+      await page.evaluate(`document.querySelector("sl-drawer").hasAttribute("modal")`),
+      false,
+    );
+    assert.deepEqual([shown.wrapper, shown.sent], ["aside", []]);
+  });
+
+  test("modal set or removed while open closes it silently, either way, whether or not the mode changes", async () => {
+    const quiet = async (modal: boolean, mode: "docked" | "drawer", wrapper: string) => {
+      await page.evaluate(`document.querySelector("sl-drawer").modal = ${modal}`);
+      await settled(mode);
+      await page.evaluate("new Promise((resolve) => setTimeout(resolve, 50))");
+      const shown = await read();
+      assert.deepEqual(
+        [shown.wrapper, shown.dialogOpen, shown.modal, shown.open, shown.attribute],
+        [wrapper, false, false, false, false],
+        `modal set ${modal}, ${mode}`,
+      );
+      return shown.sent;
+    };
+    await mount(NARROW);
+    await call("show");
+    assert.deepEqual(await quiet(true, "drawer", "dialog"), ["open"]);
+    await call("show");
+    assert.deepEqual(await quiet(false, "drawer", "dialog"), ["open", "open"]);
+    await mount(WIDE, {}, "", HEIGHT, { attributes: "modal", mode: "drawer" });
+    await call("show");
+    assert.deepEqual(await quiet(false, "docked", "aside"), ["open"]);
+    await call("show");
+    assert.deepEqual(await quiet(true, "drawer", "dialog"), ["open"]);
+    await call("show");
+    assert.deepEqual((await read()).modal, true, "it opens again");
+  });
+
   test("docked, show(), toggle(), and open leave it docked and send nothing", async () => {
     await mount(WIDE);
     await call("show");
@@ -618,31 +726,107 @@ describe("drawer", { timeout: 60_000 }, () => {
     await mount(NARROW);
     await openByKeyboard();
     assert.ok((await exposed("button")).includes("Close Documents"), "the button's name");
+    const shown = await glyphButton(page, CLOSE, x);
+    assert.deepEqual(
+      [shown.glyphs, shown.matches, shown.hidden, shown.drawn],
+      [1, true, "true", true],
+      "it shows web-icons' x-16 alone, hidden from the accessibility tree",
+    );
+    assert.deepEqual(await closeText(), { box: [1, 1], text: "Close Documents" });
     await clickAt(await center("header button", true));
     await closedHeard(1);
-    const shown = await read();
+    const closed = await read();
     assert.deepEqual(
-      [shown.dialogOpen, shown.modal, shown.open, shown.attribute, shown.focused],
+      [closed.dialogOpen, closed.modal, closed.open, closed.attribute, closed.focused],
       [false, false, false, false, "opener"],
     );
     assert.equal(await pageLive(), true);
-    assert.deepEqual(shown.sent, ["open", "close"]);
+    assert.deepEqual(closed.sent, ["open", "close"]);
   });
 
-  test("a replacement for the Close button's text, through its close slot, shows and leads its name", async () => {
+  test("a replacement for the Close button's text, through its close slot, leads its name, visually hidden beside the glyph", async () => {
     await mount(NARROW, {}, '<span slot="close" id="fermer">Fermer</span>');
     await openByKeyboard();
     const names = await exposed("button");
     assert.ok(names.includes("Fermer Documents"), `the button's name: ${names}`);
     assert.ok(!names.some((name) => name.startsWith("Close")), "the default text is replaced");
-    const shown: { visible: boolean; inButton: boolean } = await page.evaluate(`(() => {
-      const fermer = document.querySelector("#fermer");
-      return {
-        visible: fermer.checkVisibility(),
-        inButton: fermer.assignedSlot?.closest("button") != null,
-      };
+    const slotted: boolean = await page.evaluate(
+      `document.querySelector("#fermer").assignedSlot === ${CLOSE}.querySelector("slot[name=close]")`,
+    );
+    assert.ok(slotted, "the replacement fills the Close button's close slot");
+    assert.deepEqual((await closeText()).box, [1, 1], "visually hidden");
+    assert.equal((await glyphButton(page, CLOSE, x)).matches, true, "the glyph stays");
+  });
+
+  for (const [what, extra, name] of [
+    ["its default text", "", "Close Documents"],
+    [
+      "a replacement through its close slot",
+      '<span slot="close">Fermer</span>',
+      "Fermer Documents",
+    ],
+  ]) {
+    test(`the Close button is a glyph button whose hint, by interestfor, is its name, with ${what}, announced once`, async () => {
+      await mount(NARROW, {}, extra);
+      await openByKeyboard();
+      const shown = await glyphButton(page, CLOSE, x);
+      assert.ok(shown.classed, "a native button of the class glyph-button");
+      assert.equal(shown.surface, shown.native, "the native button's border and surface");
+      assert.deepEqual(
+        [shown.interestfor !== null, shown.resolves, shown.popover, shown.hintHidden],
+        [true, true, "hint", "true"],
+        "interestfor names a hint popover in its tree, hidden from the accessibility tree",
+      );
+      assert.equal(shown.hint, name, "the hint's text is the button's name");
+      assert.ok((await exposed("button")).includes(name), "the button's name");
+      assert.deepEqual(await descriptions(page, name), [""], "no description");
+    });
+  }
+
+  test("the Close button's hint follows a changed label and a close slot filled after it opens", async () => {
+    await mount(NARROW);
+    await openByKeyboard();
+    await page.evaluate(`(async () => {
+      const drawer = document.querySelector("sl-drawer");
+      drawer.label = "Pages";
+      const text = document.createElement("span");
+      text.slot = "close";
+      text.textContent = "Fermer";
+      drawer.append(text);
+      await new Promise((resolve) => setTimeout(resolve));
+      await drawer.updateComplete;
     })()`);
-    assert.deepEqual(shown, { visible: true, inButton: true });
+    assert.equal((await glyphButton(page, CLOSE, x)).hint, "Fermer Pages");
+    assert.ok((await exposed("button")).includes("Fermer Pages"), "the button's name");
+  });
+
+  test("keyboard focus on the Close button, tabbed to from the heading, shows its hint beside it, and focus moved on hides it", async () => {
+    await mount(NARROW);
+    await openByKeyboard();
+    await untilHint(page, CLOSE, false);
+    await press("Tab", 9);
+    await until(page, `document.querySelector("sl-drawer").shadowRoot.activeElement === ${CLOSE}`);
+    await untilHint(page, CLOSE, true);
+    const shown = await hintShown(page, CLOSE);
+    assert.ok(shown.open && (shown.below || shown.above) && shown.overlaps, JSON.stringify(shown));
+    await page.evaluate(`document.querySelector("#filter").focus()`);
+    await untilHint(page, CLOSE, false);
+    assert.equal((await read()).focused, "filter");
+  });
+
+  test("hovering the Close button, focus elsewhere, shows its hint beside it, and pointing away hides it", async () => {
+    await mount(NARROW);
+    await openByKeyboard();
+    await page.evaluate(`document.querySelector("#filter").focus()`);
+    await pointAway(page);
+    await untilHint(page, CLOSE, false);
+    await hover(page, CLOSE);
+    await untilHint(page, CLOSE, true);
+    const shown = await hintShown(page, CLOSE);
+    assert.ok(shown.open && (shown.below || shown.above) && shown.overlaps, JSON.stringify(shown));
+    assert.equal((await read()).focused, "filter", "the hint shows with focus elsewhere");
+    await pointAway(page);
+    await untilHint(page, CLOSE, false);
   });
 
   test("Escape closes it, focus returns to the opener, and close goes out once", async () => {
@@ -889,6 +1073,19 @@ describe("drawer", { timeout: 60_000 }, () => {
     await mount(NARROW);
     const motion = await running();
     assert.ok(motion.transitions.includes("translate"), `transitions ${motion.transitions}`);
+    const durations = (duration: string) => new Set(duration.split(", "));
+    assert.equal(durations(motion.duration).size, 1, `durations ${motion.duration}`);
+    assert.notEqual(
+      motion.duration.split(", ")[0],
+      "0s",
+      "the motion sheet's --duration-m resolves",
+    );
+    await mount(NARROW, {}, "", HEIGHT, { attributes: 'style="--duration-m: 345ms"' });
+    assert.deepEqual(
+      durations((await running()).duration),
+      new Set(["0.345s"]),
+      "the slide takes --duration-m",
+    );
     await page.cdp("Emulation.setEmulatedMedia", {
       features: [{ name: "prefers-reduced-motion", value: "reduce" }],
     });

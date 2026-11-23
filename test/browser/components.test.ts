@@ -68,6 +68,8 @@ describe("components", { timeout: 60_000 }, () => {
     "sl-pagination",
     "sl-entry",
     "sl-status-badge",
+    "sl-shortcuts",
+    "sl-settings",
   ];
 
   const schemes = ["light", "dark"];
@@ -132,7 +134,7 @@ describe("components", { timeout: 60_000 }, () => {
       assert.match(verdict, /^ok: /, verdict);
     });
 
-    test(`each component adopts the foundation's reset and elements sheets, then its own, ${run.name}`, async () => {
+    test(`each component adopts the foundation's reset and elements sheets, then the opt-in sheets it uses, then its own, ${run.name}`, async () => {
       const page = await open(run);
       try {
         const { adopted, label }: { adopted: Record<string, string[]>; label: string } =
@@ -142,6 +144,16 @@ describe("components", { timeout: 60_000 }, () => {
         const foundation = "@standards-lab/web-foundation";
         const reset = await sheet(foundation + "/baseline/reset.css");
         const elements = await sheet(foundation + "/baseline/elements.css");
+        const named = new Map([
+          [reset, "reset"],
+          [elements, "elements"],
+          [await sheet(foundation + "/meta.css"), "meta"],
+          [await sheet(foundation + "/structure.css"), "structure"],
+          [await sheet(foundation + "/utilities.css"), "utilities"],
+          [await sheet(foundation + "/glyph-button.css"), "glyph-button"],
+          [await sheet(foundation + "/dialog.css"), "dialog"],
+          [await sheet(foundation + "/motion.css"), "motion"],
+        ]);
         const components = [
           ["sl-drawer", "drawer", "drawer.css"],
           ["sl-document-list", "document-list", "document-list.css"],
@@ -155,6 +167,8 @@ describe("components", { timeout: 60_000 }, () => {
           ["sl-pagination", "pagination", "pagination.css"],
           ["sl-entry", "entry", "entry.css"],
           ["sl-status-badge", "status-badge", "status-badge.css"],
+          ["sl-shortcuts", "shortcuts", "shortcuts.css"],
+          ["sl-settings", "settings", "settings.css"],
         ];
         const adopted = {};
         for (const [tag, module, own] of components) {
@@ -163,15 +177,24 @@ describe("components", { timeout: 60_000 }, () => {
           const element = document.body.appendChild(document.createElement(tag));
           await element.updateComplete;
           adopted[tag] = element.shadowRoot.adoptedStyleSheets.map((s) =>
-            s === reset ? "reset" : s === elements ? "elements" : s === ownSheet ? "own" : "other");
+            s === ownSheet ? "own" : named.get(s) ?? "other");
         }
         const badge = document.querySelector("sl-status-badge");
         badge.label = "Draft";
         await badge.updateComplete;
         return { adopted, label: badge.shadowRoot.querySelector("button").textContent };
       })()`);
+        const base = ["reset", "elements"];
+        const expected: Record<string, string[]> = {
+          "sl-drawer": [...base, "utilities", "glyph-button", "dialog", "motion", "own"],
+          "sl-stage-timeline": [...base, "utilities", "motion", "own"],
+          "sl-upload-dropzone": [...base, "utilities", "motion", "own"],
+          "sl-chat-thread": [...base, "utilities", "motion", "own"],
+          "sl-status-badge": [...base, "own"],
+          "sl-settings": [...base, "meta", "structure", "utilities", "own"],
+        };
         for (const tag of tags) {
-          assert.deepEqual(adopted[tag], ["reset", "elements", "own"], tag);
+          assert.deepEqual(adopted[tag], expected[tag] ?? [...base, "utilities", "own"], tag);
         }
         assert.equal(label, "Draft");
       } finally {
@@ -235,7 +258,7 @@ describe("components", { timeout: 60_000 }, () => {
           root.querySelector("button").click();
           const meta = root.querySelector(".meta");
           return {
-            parts: [...meta.children].map((part) => part.className || part.localName),
+            parts: [...meta.children].map((part) => part.classList[0] ?? part.localName),
             meta: meta.textContent.replace(/\\s+/g, " ").trim(),
             opened,
           };
@@ -299,7 +322,7 @@ describe("components", { timeout: 60_000 }, () => {
           byAttribute.item = { id: "d-attr", name: "designs", status: "failed", updated_at: "2026-10-12T16:41:07Z" };
           main.append(byAttribute);
         }
-        ${hook ? `main.style.setProperty("--accent-color", "rgb(1, 2, 3)");` : ""}
+        ${hook ? `main.style.setProperty("--color-accent", "rgb(1, 2, 3)");` : ""}
         const entries = [...main.querySelectorAll("sl-entry")];
         await Promise.all(entries.map((entry) => entry.updateComplete));
         const root = entries[0].shadowRoot;
@@ -311,7 +334,7 @@ describe("components", { timeout: 60_000 }, () => {
           return resolved;
         };
         const hues = {
-          accent: resolve("var(--accent-color, var(--magenta))"),
+          accent: resolve("var(--color-accent, var(--magenta))"),
           green: resolve("var(--green)"),
           orange: resolve("var(--orange)"),
           red: resolve("var(--red)"),
@@ -328,7 +351,7 @@ describe("components", { timeout: 60_000 }, () => {
         };
       })()`);
       for (const hook of [false, true]) {
-        const where = hook ? "--accent-color set" : "at the accent hook's fallback";
+        const where = hook ? "--color-accent set" : "at the accent hook's fallback";
         const shown: { distinct: boolean; entries: unknown[][] } = await read(hook);
         assert.ok(shown.distinct, `${where}: the hues differ`);
         assert.deepEqual(
@@ -359,7 +382,7 @@ describe("components", { timeout: 60_000 }, () => {
     tag: string;
     width: number;
     height: number;
-    look: { color: string; font: string; padding: number };
+    look: { color: string; font: string; body: string; padding: number };
   }
 
   test(`each component renders under each of the ${profiles.length} profile combinations`, async () => {
@@ -373,8 +396,10 @@ describe("components", { timeout: 60_000 }, () => {
         await page.evaluate(`(async () => {
         const registry = await import("@standards-lab/web-foundation/registry.js");
         const { directories, files } = await import("/demo/documents.js");
-        await Promise.all(["drawer", "document-list", "search-results", "event-log", "stage-timeline", "upload-dropzone", "composer", "chat-thread", "artifact-viewer", "pagination", "entry", "status-badge"].map(
+        await Promise.all(["drawer", "document-list", "search-results", "event-log", "stage-timeline", "upload-dropzone", "composer", "chat-thread", "artifact-viewer", "pagination", "entry", "status-badge", "shortcuts", "settings"].map(
           (module) => import("/dist/" + module + ".js")));
+        const keys = await import("@standards-lab/web-foundation/keys.js");
+        keys.register("Alt+n", "New note", () => {});
         const components = {
           "sl-drawer": () => {
             const drawer = Object.assign(document.createElement("sl-drawer"), { label: "Documents" });
@@ -440,6 +465,8 @@ describe("components", { timeout: 60_000 }, () => {
             Object.assign(document.createElement("sl-entry"), { item: files.items[0] }),
           "sl-status-badge": () =>
             Object.assign(document.createElement("sl-status-badge"), { label: "Draft" }),
+          "sl-shortcuts": () => document.createElement("sl-shortcuts"),
+          "sl-settings": () => document.createElement("sl-settings"),
         };
         const defaults = ${JSON.stringify(defaults)};
         const attributes = { color: "data-palette", space: "data-space", type: "data-type", scheme: "data-scheme" };
@@ -459,10 +486,12 @@ describe("components", { timeout: 60_000 }, () => {
             const thread = tag === "sl-chat-thread";
             const timeline = tag === "sl-stage-timeline";
             const log = tag === "sl-event-log";
+            const shortcuts = tag === "sl-shortcuts";
+            const settings = tag === "sl-settings";
             const style = getComputedStyle(entries.length
               ? entries[0].shadowRoot.querySelector("button")
               : element.shadowRoot.querySelector(
-                drawer ? "aside" : viewer ? ".body > *" : thread ? ".user > .message" : timeline ? ".complete > .marker" : log ? ".events" : "button"));
+                drawer ? "aside" : viewer ? ".body > *" : thread ? ".user > .message" : timeline ? ".complete > .marker" : log ? ".events" : shortcuts ? "th" : settings ? ".theme-menu-preview" : "button"));
             const font = drawer
               ? getComputedStyle(element.querySelector("button"))
               : viewer
@@ -473,10 +502,15 @@ describe("components", { timeout: 60_000 }, () => {
                     ? getComputedStyle(element.shadowRoot.querySelector(".label"))
                     : log
                       ? getComputedStyle(element.shadowRoot.querySelector(".when"))
-                      : style;
+                      : shortcuts
+                        ? getComputedStyle(element.shadowRoot.querySelector(".note"))
+                        : settings
+                          ? getComputedStyle(element.shadowRoot.querySelector(".theme-menu-preview button"))
+                          : style;
             const look = {
               color: style.color + " on " + style.backgroundColor,
               font: font.fontFamily,
+              body: getComputedStyle(document.body).fontFamily,
               padding: timeline
                 ? parseFloat(getComputedStyle(element.shadowRoot.querySelector(".stage")).columnGap)
                 : drawer
@@ -526,7 +560,13 @@ describe("components", { timeout: 60_000 }, () => {
             tag,
             (shown) => shown.scheme === scheme && shown.space === "compact",
           );
-          assert.notEqual(sans.font, mono.font, `${tag}, ${scheme}: sans sets the font`);
+          if (tag === "sl-shortcuts") {
+            for (const look of [mono, sans]) {
+              assert.equal(look.font, look.body, `${tag}, ${scheme}: its note in the body font`);
+            }
+          } else {
+            assert.notEqual(sans.font, mono.font, `${tag}, ${scheme}: sans sets the font`);
+          }
           assert.ok(
             compact.padding < mono.padding,
             `${tag}, ${scheme}: compact pads ${compact.padding}, regular ${mono.padding}`,
@@ -571,9 +611,13 @@ describe("components", { timeout: 60_000 }, () => {
   }
 
   const LINES = `(element) => {
-    const range = document.createRange();
-    range.selectNodeContents(element);
-    const rects = [...range.getClientRects()].filter((rect) => rect.width > 0);
+    const texts = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+    const rects = [];
+    for (let text = texts.nextNode(); text; text = texts.nextNode()) {
+      const range = document.createRange();
+      range.selectNodeContents(text);
+      rects.push(...[...range.getClientRects()].filter((rect) => rect.width > 0));
+    }
     return new Set(rects.map((rect) => Math.round(rect.top))).size;
   }`;
   const ENTRIES = `(section) => [...document.querySelectorAll(section + " sl-entry")]
@@ -598,7 +642,7 @@ describe("components", { timeout: 60_000 }, () => {
         return {
           name: entry.item.name,
           sizes: { name: size(".name"), status: size(".status"), meta: size(".meta") },
-          first: first.className || first.localName,
+          first: first.classList[0] ?? first.localName,
           starts: [rect(root.querySelector(".name")).left, rect(first).left],
           under: rect(first).top >= rect(root.querySelector(".name")).bottom - 0.5,
         };
@@ -701,7 +745,7 @@ describe("components", { timeout: 60_000 }, () => {
         .flatMap((selector) => [...root.querySelectorAll(selector)]);
       return {
         name: entry.item.name,
-        parts: [...time.children].map((part) => part.className),
+        parts: [...time.children].map((part) => part.classList[0]),
         lines: values.map((value) => [value.textContent, (${LINES})(value)]),
       };
     }) })`;
@@ -1016,7 +1060,7 @@ describe("components", { timeout: 60_000 }, () => {
         const root = entry.shadowRoot;
         const button = root.querySelector(".entry");
         const probe = root.appendChild(document.createElement("span"));
-        probe.style.color = "var(--accent-color, var(--magenta))";
+        probe.style.color = "var(--color-accent, var(--magenta))";
         const accent = getComputedStyle(probe).color;
         probe.remove();
         const look = () => {
@@ -1069,7 +1113,7 @@ describe("components", { timeout: 60_000 }, () => {
         const entry = document.querySelector("#focus sl-entry");
         const button = entry.shadowRoot.querySelector(".entry");
         const probe = entry.shadowRoot.appendChild(document.createElement("span"));
-        probe.style.color = "var(--accent-color, var(--magenta))";
+        probe.style.color = "var(--color-accent, var(--magenta))";
         const accent = getComputedStyle(probe).color;
         probe.remove();
         const style = getComputedStyle(button);
@@ -1182,11 +1226,11 @@ describe("components", { timeout: 60_000 }, () => {
           probe.remove();
           return resolved;
         };
-        const accent = resolve("color", "var(--accent-color, var(--magenta))");
-        const interaction = resolve("color", "var(--interaction-color, var(--blue))");
+        const accent = resolve("color", "var(--color-accent, var(--magenta))");
+        const interaction = resolve("color", "var(--color-primary, var(--blue))");
         const tint = resolve(
           "backgroundColor",
-          "color-mix(in srgb, var(--accent-color, var(--magenta)) 12%, transparent)",
+          "color-mix(in srgb, var(--color-accent, var(--magenta)) 12%, transparent)",
         );
         const root = (selector) => subtree.querySelector(selector).shadowRoot;
         const [framed, focused] = [...subtree.querySelectorAll("sl-entry")]
@@ -1206,10 +1250,10 @@ describe("components", { timeout: 60_000 }, () => {
             "the active marker's border": is(style.borderTopColor),
             "the active marker's tint": style.backgroundColor === tint ? "accent" : style.backgroundColor,
             "the active marker's glyph": is(style.color),
-            "the active marker's ring": is(getComputedStyle(marker, "::after").borderTopColor),
+            "the active marker's ring": is(getComputedStyle(marker.querySelector(".ring")).borderTopColor),
             "the active label": is(getComputedStyle(timeline.querySelector(".active .label")).color),
             "the streaming dot": is(getComputedStyle(
-              root("sl-chat-thread").querySelector(".status.in_progress"), "::before").backgroundColor),
+              root("sl-chat-thread").querySelector(".status.in_progress > .dot")).backgroundColor),
             "the selected frame's border": is(getComputedStyle(framed).borderTopColor),
             "the selected frame's shadow": getComputedStyle(framed).boxShadow.includes(accent)
               ? "accent" : getComputedStyle(framed).boxShadow,
@@ -1233,7 +1277,7 @@ describe("components", { timeout: 60_000 }, () => {
         "the drag-over zone's border": "interaction",
         "the focus ring": "interaction",
       };
-      for (const hook of ["", "--accent-color", "--interaction-color"]) {
+      for (const hook of ["", "--color-accent", "--color-primary"]) {
         const shown: { distinct: boolean; focused: boolean; over: boolean; marks: object } =
           await read(hook);
         const { marks, ...state } = shown;
@@ -1245,6 +1289,57 @@ describe("components", { timeout: 60_000 }, () => {
         );
         assert.deepEqual(marks, expected, where);
       }
+    } finally {
+      await page.close();
+    }
+  });
+
+  test("the motion sheet runs the streaming dot's pulse and the active marker's ring inside their shadow roots, and the drag-over's change in its --duration-s; under reduced motion none of them", async () => {
+    const page = await browser.open(`${server.origin}/test/fixtures/components.html`);
+    try {
+      await page.evaluate(`window.verdict.then(async () => {
+        await Promise.all(["stage-timeline", "chat-thread", "upload-dropzone"]
+          .map((name) => import("/dist/" + name + ".js")));
+        window.motion = async () => {
+          const subtree = document.createElement("div");
+          subtree.append(
+            Object.assign(document.createElement("sl-stage-timeline"), { stages: [
+              { name: "extraction", position: 1, state: "active", completedAt: null },
+            ] }),
+            Object.assign(document.createElement("sl-chat-thread"), { items: [
+              { type: "message", id: "m-1", role: "assistant", status: "in_progress",
+                content: [{ type: "output_text", text: "Reading" }] },
+            ] }),
+            Object.assign(document.createElement("sl-upload-dropzone"), { uploads: [] }),
+          );
+          document.querySelector("main").replaceChildren(subtree);
+          await Promise.all([...subtree.children].map((element) => element.updateComplete));
+          const [timeline, thread, dropzone] = [...subtree.children].map((element) => element.shadowRoot);
+          const names = (element) => element.getAnimations().map((animation) => animation.animationName);
+          const zone = dropzone.querySelector(".zone");
+          const durations = () => getComputedStyle(zone).transitionDuration;
+          const before = durations();
+          dropzone.host.style.setProperty("--duration-s", "345ms");
+          return {
+            ring: names(timeline.querySelector(".active .marker > .ring")),
+            dot: names(thread.querySelector(".status.in_progress > .dot")),
+            zone: [before, durations()],
+          };
+        };
+      })`);
+      const shown = (): Promise<{ ring: string[]; dot: string[]; zone: string[] }> =>
+        page.evaluate(`window.motion()`);
+      await page.cdp("Emulation.setEmulatedMedia", {
+        features: [{ name: "prefers-reduced-motion", value: "no-preference" }],
+      });
+      const moving = await shown();
+      assert.deepEqual([moving.ring, moving.dot], [["ring"], ["pulse"]]);
+      assert.notEqual(moving.zone[0], "0s", "the motion sheet's --duration-s resolves");
+      assert.equal(moving.zone[1], "0.345s, 0.345s", "the drag-over's change takes --duration-s");
+      await page.cdp("Emulation.setEmulatedMedia", {
+        features: [{ name: "prefers-reduced-motion", value: "reduce" }],
+      });
+      assert.deepEqual(await shown(), { ring: [], dot: [], zone: ["0s", "0s"] });
     } finally {
       await page.close();
     }
@@ -1825,8 +1920,8 @@ describe("components", { timeout: 60_000 }, () => {
             .filter((part) => lines(part) > 1)
             .map((part) => part.textContent),
           identifiers: [...root.querySelectorAll(".event")].map((event, index) => ({
-            texts: [...event.querySelectorAll("dd.cut")].map((dd) => dd.textContent),
-            titles: [...event.querySelectorAll("dd.cut")].map((dd) => dd.title),
+            texts: [...event.querySelectorAll("dd.text-truncate")].map((dd) => dd.textContent),
+            titles: [...event.querySelectorAll("dd.text-truncate")].map((dd) => dd.title),
             expected: [log.events[index].subject, log.events[index].id].filter(Boolean),
           })),
           scrolls: frame.scrollHeight > frame.clientHeight,
@@ -1904,7 +1999,7 @@ describe("components", { timeout: 60_000 }, () => {
         width: box.width / rem,
         events: log.events.length,
         values: [...root.querySelectorAll(".event")].flatMap((event, index) =>
-          [...event.querySelectorAll("dd.cut")].map((dd, at) => {
+          [...event.querySelectorAll("dd.text-truncate")].map((dd, at) => {
             const rect = dd.getBoundingClientRect();
             return {
               expected: [log.events[index].subject, log.events[index].id].filter(Boolean)[at],

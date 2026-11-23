@@ -1,4 +1,4 @@
-// Adapted from spike-html-apps-components (10dde51): test/unit/release.test.ts, on @standards-lab/web-foundation.
+// Adapted from spike-html-apps-components (10dde51): test/unit/release.test.ts, on @standards-lab/web-foundation and @standards-lab/web-icons.
 
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
@@ -76,8 +76,80 @@ describe("release pack", () => {
     assert.equal(packed.scripts, undefined);
   });
 
-  const foundation = "@standards-lab/web-foundation";
-  const github = "github:standards-lab/web-foundation";
+  const peers = {
+    "@standards-lab/web-foundation": "standards-lab/web-foundation",
+    "@standards-lab/web-icons": "standards-lab/web-icons",
+  };
+  const peerFaults = (peer: string, repository: string): Record<string, [Change, string]> => {
+    const github = `github:${repository}`;
+    const name = repository.split("/")[1];
+    return {
+      "in dependencies": [
+        (_, copy) => (copy.dependencies[peer] = `${github}#v0.3.0`),
+        `package.json declares ${peer} in dependencies, not as a peer`,
+      ],
+      "a peer by a git spec": [
+        (_, copy) => (copy.peerDependencies[peer] = `${github}#v0.3.0`),
+        `package.json declares peer ${peer} ${github}#v0.3.0, not a caret range`,
+      ],
+      "a peer by a #semver: spec": [
+        (_, copy) => (copy.peerDependencies[peer] = `${github}#semver:^0.3.0`),
+        `package.json declares peer ${peer} ${github}#semver:^0.3.0, not a caret range`,
+      ],
+      "a peer by an exact version": [
+        (_, copy) => (copy.peerDependencies[peer] = "0.3.0"),
+        `package.json declares peer ${peer} 0.3.0, not a caret range`,
+      ],
+      "a peer by a tilde range": [
+        (_, copy) => (copy.peerDependencies[peer] = "~0.3.0"),
+        `package.json declares peer ${peer} ~0.3.0, not a caret range`,
+      ],
+      "a peer by any version": [
+        (_, copy) => (copy.peerDependencies[peer] = "*"),
+        `package.json declares peer ${peer} *, not a caret range`,
+      ],
+      "no peer": [
+        (_, copy) => delete copy.peerDependencies[peer],
+        `package.json doesn't declare peer ${peer}`,
+      ],
+      "the devDependency by a #semver: range": [
+        (_, copy) => (copy.devDependencies[peer] = `${github}#semver:^0.3.0`),
+        `package.json declares devDependency ${peer} ${github}#semver:^0.3.0, not an exact release tag`,
+      ],
+      "the devDependency by a branch": [
+        (_, copy) => (copy.devDependencies[peer] = `${github}#main`),
+        `package.json declares devDependency ${peer} ${github}#main, not an exact release tag`,
+      ],
+      "the devDependency by a commit": [
+        (_, copy) => (copy.devDependencies[peer] = `${github}#29d16c0`),
+        `package.json declares devDependency ${peer} ${github}#29d16c0, not an exact release tag`,
+      ],
+      "the devDependency by its default branch": [
+        (_, copy) => (copy.devDependencies[peer] = github),
+        `package.json declares devDependency ${peer} ${github}, not an exact release tag`,
+      ],
+      "the devDependency from the registry": [
+        (_, copy) => (copy.devDependencies[peer] = "0.3.0"),
+        `package.json declares devDependency ${peer} 0.3.0, not an exact release tag`,
+      ],
+      "the devDependency by a local path": [
+        (_, copy) => (copy.devDependencies[peer] = `link:../${name}`),
+        `package.json declares devDependency ${peer} link:../${name}, not an exact release tag`,
+      ],
+      "the devDependency from another repository": [
+        (_, copy) => (copy.devDependencies[peer] = "github:standards-lab/web-tooling#v0.3.0"),
+        `package.json declares devDependency ${peer} github:standards-lab/web-tooling#v0.3.0, not an exact release tag`,
+      ],
+      "the devDependency from another owner's fork": [
+        (_, copy) => (copy.devDependencies[peer] = `github:fork/${name}#v0.3.0`),
+        `package.json declares devDependency ${peer} github:fork/${name}#v0.3.0, not an exact release tag`,
+      ],
+      "no devDependency": [
+        (_, copy) => delete copy.devDependencies[peer],
+        `package.json doesn't declare devDependency ${peer}`,
+      ],
+    };
+  };
   const faults: Record<string, [Change, string]> = {
     "a source .css with no built copy": [
       remove("dist/status-badge.css"),
@@ -137,73 +209,9 @@ describe("release pack", () => {
       (_, copy) => (copy.dependencies.lit = "latest"),
       "package.json declares lit latest, not an exact pin",
     ],
-    "the foundation in dependencies": [
-      (_, copy) => (copy.dependencies[foundation] = `${github}#v0.3.0`),
-      `package.json declares ${foundation} in dependencies, not as a peer`,
-    ],
-    "a peer by a git spec": [
-      (_, copy) => (copy.peerDependencies[foundation] = `${github}#v0.3.0`),
-      `package.json declares peer ${foundation} ${github}#v0.3.0, not a caret range`,
-    ],
-    "a peer by a #semver: spec": [
-      (_, copy) => (copy.peerDependencies[foundation] = `${github}#semver:^0.3.0`),
-      `package.json declares peer ${foundation} ${github}#semver:^0.3.0, not a caret range`,
-    ],
-    "a peer by an exact version": [
-      (_, copy) => (copy.peerDependencies[foundation] = "0.3.0"),
-      `package.json declares peer ${foundation} 0.3.0, not a caret range`,
-    ],
-    "a peer by a tilde range": [
-      (_, copy) => (copy.peerDependencies[foundation] = "~0.3.0"),
-      `package.json declares peer ${foundation} ~0.3.0, not a caret range`,
-    ],
-    "a peer by any version": [
-      (_, copy) => (copy.peerDependencies[foundation] = "*"),
-      `package.json declares peer ${foundation} *, not a caret range`,
-    ],
-    "no peer": [
-      (_, copy: Partial<Packed>) => delete copy.peerDependencies,
-      `package.json doesn't declare peer ${foundation}`,
-    ],
     "an undeclared extra peer": [
       (_, copy) => (copy.peerDependencies["lit-html"] = "^3.3.3"),
       "package.json declares peer lit-html, which no release needs",
-    ],
-    "the devDependency by a #semver: range": [
-      (_, copy) => (copy.devDependencies[foundation] = `${github}#semver:^0.3.0`),
-      `package.json declares devDependency ${foundation} ${github}#semver:^0.3.0, not an exact release tag`,
-    ],
-    "the devDependency by a branch": [
-      (_, copy) => (copy.devDependencies[foundation] = `${github}#main`),
-      `package.json declares devDependency ${foundation} ${github}#main, not an exact release tag`,
-    ],
-    "the devDependency by a commit": [
-      (_, copy) => (copy.devDependencies[foundation] = `${github}#29d16c0`),
-      `package.json declares devDependency ${foundation} ${github}#29d16c0, not an exact release tag`,
-    ],
-    "the devDependency by its default branch": [
-      (_, copy) => (copy.devDependencies[foundation] = github),
-      `package.json declares devDependency ${foundation} ${github}, not an exact release tag`,
-    ],
-    "the devDependency from the registry": [
-      (_, copy) => (copy.devDependencies[foundation] = "0.3.0"),
-      `package.json declares devDependency ${foundation} 0.3.0, not an exact release tag`,
-    ],
-    "the devDependency by a local path": [
-      (_, copy) => (copy.devDependencies[foundation] = "link:../web-foundation"),
-      `package.json declares devDependency ${foundation} link:../web-foundation, not an exact release tag`,
-    ],
-    "the devDependency from another repository": [
-      (_, copy) => (copy.devDependencies[foundation] = "github:standards-lab/web-tooling#v0.3.0"),
-      `package.json declares devDependency ${foundation} github:standards-lab/web-tooling#v0.3.0, not an exact release tag`,
-    ],
-    "the devDependency from another owner's fork": [
-      (_, copy) => (copy.devDependencies[foundation] = "github:fork/web-foundation#v0.3.0"),
-      `package.json declares devDependency ${foundation} github:fork/web-foundation#v0.3.0, not an exact release tag`,
-    ],
-    "no devDependency": [
-      (_, copy) => delete copy.devDependencies[foundation],
-      `package.json doesn't declare devDependency ${foundation}`,
     ],
     "marked by a range": [
       (_, copy) => (copy.dependencies.marked = "^18.1.2"),
@@ -248,25 +256,37 @@ describe("release pack", () => {
     "^0.0.3": ["v0.0.2", "v0.0.4", "v0.1.3"],
     "^1.2.0": ["v1.1.9", "v2.2.0"],
   };
-  for (const [range, tags] of Object.entries(admitted)) {
-    for (const tag of tags) {
-      test(`a devDependency tag ${tag} passes a peer range ${range}`, () => {
-        const problems = faulted((_, copy) => {
-          copy.peerDependencies[foundation] = range;
-          copy.devDependencies[foundation] = `${github}#${tag}`;
+  for (const [peer, repository] of Object.entries(peers)) {
+    const github = `github:${repository}`;
+    for (const [range, tags] of Object.entries(admitted)) {
+      for (const tag of tags) {
+        test(`a ${peer} devDependency tag ${tag} passes a peer range ${range}`, () => {
+          const problems = faulted((_, copy) => {
+            copy.peerDependencies[peer] = range;
+            copy.devDependencies[peer] = `${github}#${tag}`;
+          });
+          assert.deepEqual(problems, []);
         });
-        assert.deepEqual(problems, []);
-      });
+      }
     }
-  }
-  for (const [range, tags] of Object.entries(denied)) {
-    for (const tag of tags) {
-      test(`fails on a devDependency tag ${tag} with a peer range ${range}`, () => {
-        const problems = faulted((_, copy) => {
-          copy.peerDependencies[foundation] = range;
-          copy.devDependencies[foundation] = `${github}#${tag}`;
+    for (const [range, tags] of Object.entries(denied)) {
+      for (const tag of tags) {
+        test(`fails on a ${peer} devDependency tag ${tag} with a peer range ${range}`, () => {
+          const problems = faulted((_, copy) => {
+            copy.peerDependencies[peer] = range;
+            copy.devDependencies[peer] = `${github}#${tag}`;
+          });
+          const problem = `package.json's devDependency ${peer} ${github}#${tag} is outside its peer range ${range}`;
+          assert.ok(
+            problems.includes(problem),
+            `expected: ${problem}\ngot: ${problems.join("\n")}`,
+          );
         });
-        const problem = `package.json's devDependency ${foundation} ${github}#${tag} is outside its peer range ${range}`;
+      }
+    }
+    for (const [fault, [change, problem]] of Object.entries(peerFaults(peer, repository))) {
+      test(`fails on ${peer} ${fault}`, () => {
+        const problems = faulted(change);
         assert.ok(problems.includes(problem), `expected: ${problem}\ngot: ${problems.join("\n")}`);
       });
     }

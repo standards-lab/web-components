@@ -1,9 +1,11 @@
 /* From spike-html-apps-components (10dde51): src/chat-thread.css. */
 
 /*
- * The chat thread's shadow-root sheet: one frame that scrolls the list of items, each message's
- * place and label row, a verbose item's line, a refusal's mark, and the streaming indicator.
- * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
+ * The chat thread's shadow-root sheet: the utilities' scrolling frame around the bare list of
+ * items, each message's place and label row, a verbose item's line, a refusal's mark, and the
+ * streaming indicator's dot, which the motion sheet's pulse runs.
+ * Unlayered, above the foundation's reset, elements, utilities, and motion sheets; it reads only
+ * the baseline tokens.
  * See docs/layout.md
  */
 
@@ -12,12 +14,6 @@
   flex-direction: column;
 }
 .frame {
-  flex: 1 1 auto;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-content: start;
-  min-block-size: 0;
-  overflow: auto;
   border: var(--line-s) solid var(--border);
   border-radius: var(--radius-sm);
 }
@@ -27,11 +23,9 @@
   gap: var(--space-s);
   margin: 0;
   padding: var(--space-s);
-  list-style: none;
 }
 .thread > .item {
   min-inline-size: 0;
-  margin: 0;
 }
 .thread > .user {
   align-self: flex-end;
@@ -48,8 +42,6 @@
   align-items: baseline;
   gap: var(--space-3xs) var(--space-xs);
   font-family: var(--font-ui);
-  font-size: var(--text-s);
-  color: var(--fg-2);
 }
 .message > .meta {
   display: flex;
@@ -61,8 +53,6 @@
 summary,
 .line {
   font-family: var(--font-ui);
-  font-size: var(--text-s);
-  color: var(--fg-2);
 }
 .gutter {
   display: inline list-item;
@@ -83,17 +73,8 @@ summary,
   font-weight: 600;
 }
 .kind,
-.name,
-.id,
 .status {
   display: inline-block;
-  white-space: nowrap;
-}
-.name,
-.id {
-  max-inline-size: 100%;
-  white-space: normal;
-  overflow-wrap: anywhere;
 }
 .id {
   color: var(--fg-3);
@@ -124,25 +105,14 @@ summary,
 .refusal > .label {
   color: var(--orange);
 }
-.status.in_progress::before {
-  content: "";
+.status > .dot {
   display: inline-block;
   margin-inline-end: var(--space-3xs);
   vertical-align: 0.1em;
   inline-size: 0.5em;
   block-size: 0.5em;
   border-radius: var(--radius-full);
-  background-color: var(--accent-color, var(--magenta));
-}
-@media (prefers-reduced-motion: no-preference) {
-  .status.in_progress::before {
-    animation: pulse 1.4s ease-in-out infinite;
-  }
-}
-@keyframes pulse {
-  50% {
-    opacity: 0.25;
-  }
+  background-color: var(--color-accent, var(--magenta));
 }
 .status.incomplete {
   color: var(--orange);
@@ -158,9 +128,5 @@ summary,
 }
 .empty-thread {
   padding: var(--space-xs) var(--space-s);
-  color: var(--fg-2);
-}
-.empty {
-  font-size: var(--text-s);
   color: var(--fg-2);
 }

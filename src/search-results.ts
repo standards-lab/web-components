@@ -11,6 +11,7 @@ import { repeat } from "lit/directives/repeat.js";
 
 import elements from "@standards-lab/web-foundation/baseline/elements.css" with { type: "css" };
 import reset from "@standards-lab/web-foundation/baseline/reset.css" with { type: "css" };
+import utilities from "@standards-lab/web-foundation/utilities.css" with { type: "css" };
 import { define, emit } from "@standards-lab/web-foundation/dom.js";
 import styles from "./search-results.css" with { type: "css" };
 
@@ -124,7 +125,7 @@ function count(shown: number, total: number): string {
  * again with it.
  */
 export class SearchResults extends LitElement {
-  static styles = [reset, elements, styles];
+  static styles = [reset, elements, utilities, styles];
 
   static properties = {
     query: { type: String },
@@ -189,11 +190,11 @@ export class SearchResults extends LitElement {
   #match(match: SearchMatch, needle: readonly string[]) {
     return html`<li>
       <button type="button" class="match" data-field=${match.field} @click=${() => this.#open(match)}>
-        <span class="head">
-          <span class="name">${withMarks(match.name, needle)}</span>
-          <span class="field">${fields[match.field] ?? match.field}</span>
+        <span class="head head-row">
+          <span class="name head-name">${withMarks(match.name, needle)}</span>
+          <span class="field head-end text-quiet-xs text-nowrap">${fields[match.field] ?? match.field}</span>
         </span>
-        ${repeatsName(match) ? nothing : html`<span class="snippet">${withMarks(joined(match.snippet), needle)}</span>`}
+        ${repeatsName(match) ? nothing : html`<span class="snippet text-quiet-s">${withMarks(joined(match.snippet), needle)}</span>`}
       </button>
     </li>`;
   }
@@ -203,10 +204,10 @@ export class SearchResults extends LitElement {
     const needle = needleOf(this.#answered);
     const answered = needle.join("");
     const matches = this.state === "error" ? [] : (this.items ?? []);
-    return html`<p class="status ${this.state}" role="status">${this.#status(query, answered, matches)}</p>
+    return html`<p class="status status-line ${this.state}" role="status">${this.#status(query, answered, matches)}</p>
       ${
         matches.length
-          ? html`<ul class="matches" aria-label="Matches" aria-busy=${this.state === "loading" ? "true" : nothing}>
+          ? html`<ul class="matches list-bare" aria-label="Matches" aria-busy=${this.state === "loading" ? "true" : nothing}>
             ${repeat(
               matches,
               (match) => match.id,

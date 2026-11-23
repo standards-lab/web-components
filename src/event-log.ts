@@ -11,6 +11,7 @@ import { repeat } from "lit/directives/repeat.js";
 
 import elements from "@standards-lab/web-foundation/baseline/elements.css" with { type: "css" };
 import reset from "@standards-lab/web-foundation/baseline/reset.css" with { type: "css" };
+import utilities from "@standards-lab/web-foundation/utilities.css" with { type: "css" };
 import { define } from "@standards-lab/web-foundation/dom.js";
 import { formatDateTime } from "@standards-lab/web-foundation/format.js";
 import styles from "./event-log.css" with { type: "css" };
@@ -80,7 +81,7 @@ function atEnd(frame: HTMLElement): boolean {
  * scrolled up keeps their place, and the first events shown open at the top.
  */
 export class EventLog extends LitElement {
-  static styles = [reset, elements, styles];
+  static styles = [reset, elements, utilities, styles];
 
   static properties = {
     events: { attribute: false },
@@ -111,8 +112,8 @@ export class EventLog extends LitElement {
 
   #pair(label: string, value: string, cut = false) {
     return html`<div class="pair">
-      <dt>${label}</dt>
-      <dd class=${cut ? "cut" : nothing} title=${cut ? value : nothing}>${value}</dd>
+      <dt class="text-nowrap">${label}</dt>
+      <dd class=${cut ? "text-truncate" : "text-break"} title=${cut ? value : nothing}>${value}</dd>
     </div>`;
   }
 
@@ -121,16 +122,16 @@ export class EventLog extends LitElement {
     const subject = event.subject ?? undefined;
     return html`<li class="event">
       <div class="head">
-        <span class="type">${event.type}</span>
+        <span class="type text-nowrap">${event.type}</span>
         ${
           date
-            ? html`<time class="when" datetime=${date.toISOString()}
+            ? html`<time class="when text-quiet-s text-numeric" datetime=${date.toISOString()}
                 >${formatDateTime(date, undefined, timeFormat)}</time
               >`
             : nothing
         }
       </div>
-      <dl class="meta">
+      <dl class="meta text-quiet-xs">
         ${this.#pair("source", event.source)}
         ${subject === undefined || subject === "" ? nothing : this.#pair("subject", subject, true)}
         ${this.#pair("id", event.id, true)}
@@ -139,7 +140,7 @@ export class EventLog extends LitElement {
         event.data === undefined
           ? html`<p class="no-data">No data</p>`
           : html`<details class="data">
-              <summary>Data</summary>
+              <summary class="text-quiet-s">Data</summary>
               <pre>${pretty(event.data)}</pre>
             </details>`
       }
@@ -148,10 +149,10 @@ export class EventLog extends LitElement {
 
   render() {
     const events = this.events ?? [];
-    return html`<div class="frame" role="log" aria-live="polite" aria-relevant="additions" aria-label="Events">
+    return html`<div class="frame scroll-frame" role="log" aria-live="polite" aria-relevant="additions" aria-label="Events">
       ${
         events.length
-          ? html`<ol class="events">
+          ? html`<ol class="events list-bare">
             ${repeat(
               events,
               (event) => `${event.source}\u0000${event.id}`,

@@ -1,9 +1,11 @@
 /* From spike-html-apps-components (10dde51): src/artifact-viewer.css. */
 
 /*
- * The artifact viewer's shadow-root sheet: a header of the name and content type over one
- * frame that holds a note, the scrolling region, or a native view.
- * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
+ * The artifact viewer's shadow-root sheet: a header of the name and content type, on the
+ * utilities' head row, over one frame that holds a note, the utilities' scrolling frame as the
+ * region, or a native view.
+ * Unlayered, above the foundation's reset, elements, and utilities sheets; it reads only the
+ * baseline tokens.
  * See docs/layout.md
  */
 
@@ -13,25 +15,12 @@
 }
 .header {
   flex: none;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-3xs) var(--space-xs);
   margin-block-end: var(--space-2xs);
-  min-inline-size: 0;
   overflow-wrap: anywhere;
 }
 .name {
-  flex: 1 1 16ch;
-  max-inline-size: max-content;
-  min-inline-size: 0;
   font-size: var(--text-s);
   font-weight: 600;
-}
-.type {
-  margin-inline-start: auto;
-  font-size: var(--text-s);
-  color: var(--fg-2);
 }
 .frame {
   flex: 1 1 auto;
@@ -42,11 +31,6 @@
   border-radius: var(--radius-sm);
 }
 .body {
-  flex: 1 1 auto;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  min-block-size: 0;
-  overflow: auto;
   margin: 0;
   padding: 0;
   border: 0;
@@ -86,10 +70,6 @@
 }
 .error > .label {
   color: var(--red);
-}
-.detail {
-  font-size: var(--text-s);
-  color: var(--fg-2);
 }
 .download {
   justify-self: start;

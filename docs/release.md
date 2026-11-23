@@ -36,7 +36,7 @@ the tag's tree to the pack, file for file; and creates the GitHub release from t
 
 - **CI** runs the check on each pull request to main and each push to it. `mise run install` first
   installs every pin `mise.toml` names, the chrome-headless-shell the browser tier runs in
-  included, and `node_modules`, the foundation and the tooling at their release tags.
+  included, and `node_modules`, the foundation, the icons, and the tooling at their release tags.
 - **Release** checks out every branch and tag, so the pack commit's parent and main are both at
   hand. The parent must be main's merge commit, so it has two parents of its own. The tagged tree
   must be the tarball's `package/`, file for file. The release action releases the tag its `ref`
@@ -46,10 +46,11 @@ the tag's tree to the pack, file for file; and creates the GitHub release from t
 ## Dependencies
 
 `test/unit/release.ts` holds every release to its dependencies. lit and marked are its two
-dependencies, each at one version, never a range. The foundation is a peer, by a caret range on its
-versions, never a git spec, so a consumer declares it from whichever source; the
-[README](../README.md#install) says why it is a peer. The repository's own install of it is a
-devDependency at one release tag on GitHub, never a range, a branch, a commit, or a `#semver:` spec,
+dependencies, each at one version, never a range. The foundation and the icons,
+`@standards-lab/web-icons`, are its two peers, each by a caret range on its versions, never a git
+spec, so a consumer declares each from whichever source; the [README](../README.md#install) says
+why each is a peer. The repository's own install of each is a devDependency at one
+release tag on its own GitHub repository, never a range, a branch, a commit, or a `#semver:` spec,
 which bun fails, and a tag the peer range admits: the same leftmost nonzero part and no lower, so
 `^0.1.0` admits 0.1.x only. Which version, range, and tag is `package.json`'s, and
 `mise run currency` reports each behind its latest. The packed manifest carries no scripts, since

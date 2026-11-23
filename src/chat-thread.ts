@@ -18,8 +18,10 @@ import { repeat } from "lit/directives/repeat.js";
 
 import elements from "@standards-lab/web-foundation/baseline/elements.css" with { type: "css" };
 import reset from "@standards-lab/web-foundation/baseline/reset.css" with { type: "css" };
+import motion from "@standards-lab/web-foundation/motion.css" with { type: "css" };
+import utilities from "@standards-lab/web-foundation/utilities.css" with { type: "css" };
 import { define } from "@standards-lab/web-foundation/dom.js";
-import { formatJson } from "./json.ts";
+import { tryFormatJson } from "@standards-lab/web-foundation/format.js";
 import { markdown } from "./markdown.ts";
 import styles from "./chat-thread.css" with { type: "css" };
 
@@ -101,12 +103,8 @@ export interface FunctionCallOutputItem {
 export type ThreadItem = MessageItem | ReasoningItem | FunctionCallItem | FunctionCallOutputItem;
 
 function pretty(text: string): string {
-  try {
-    JSON.parse(text);
-    return formatJson(text);
-  } catch {
-    return text;
-  }
+  const json = tryFormatJson(text);
+  return json.ok ? json.text : text;
 }
 
 const STATUS_LABELS: Partial<Record<ItemStatus, string>> = {
@@ -157,7 +155,7 @@ function end(frame: HTMLElement) {
  * holds it to a height.
  */
 export class ChatThread extends LitElement {
-  static styles = [reset, elements, styles];
+  static styles = [reset, elements, utilities, motion, styles];
 
   static properties = {
     items: { attribute: false },
@@ -252,7 +250,11 @@ export class ChatThread extends LitElement {
   #status(status: ItemStatus | undefined) {
     const label = status ? STATUS_LABELS[status] : undefined;
     if (!label) return nothing;
-    return html`<span class="status ${status}">${label}</span>`;
+    const dot =
+      status === "in_progress"
+        ? html`<span class="dot motion-pulse" aria-hidden="true"></span>`
+        : nothing;
+    return html`<span class="status text-nowrap ${status}">${dot}${label}</span>`;
   }
 
   #message(item: MessageItem) {
@@ -275,14 +277,14 @@ export class ChatThread extends LitElement {
       class="message ${item.role}"
       aria-busy=${item.status === "in_progress" ? "true" : nothing}
     >
-      <header class="meta"><span class="role">${role}</span>${this.#status(item.status)}</header>
+      <header class="meta text-quiet-s"><span class="role">${role}</span>${this.#status(item.status)}</header>
       <div class="content">${parts}</div>
     </article>`;
   }
 
   #line(item: ThreadItem, kind: string, names: TemplateResult[], described: TemplateResult[]) {
     const status = this.#status(item.status);
-    const parts = [html`<span class="kind">${kind}</span>`, ...names];
+    const parts = [html`<span class="kind text-nowrap">${kind}</span>`, ...names];
     if (status !== nothing) parts.push(status);
     parts.push(...described);
     return parts.map((part, index) => (index ? html` ${part}` : part));
@@ -296,7 +298,7 @@ export class ChatThread extends LitElement {
     described: TemplateResult[] = [],
   ) {
     return html`<details class="verbose ${item.type}">
-      <summary>${this.#line(item, kind, names, described)}</summary>
+      <summary class="text-quiet-s">${this.#line(item, kind, names, described)}</summary>
       <div class="content">${body}</div>
     </details>`;
   }
@@ -314,7 +316,7 @@ export class ChatThread extends LitElement {
     if (summary && !thought) {
       const gutter = html`<span class="gutter" aria-hidden="true"></span>`;
       const line = this.#line(item, "Reasoning", [], described);
-      return html`<p class="verbose reasoning line">${gutter}${line}</p>`;
+      return html`<p class="verbose reasoning line text-quiet-s">${gutter}${line}</p>`;
     }
     return this.#details(
       item,
@@ -322,7 +324,7 @@ export class ChatThread extends LitElement {
       [],
       thought
         ? content.map((part) => html`<p class="text reasoning_text">${part.text}</p>`)
-        : html`<p class="empty">No reasoning text.</p>`,
+        : html`<p class="empty text-quiet-s">No reasoning text.</p>`,
       described,
     );
   }
@@ -332,8 +334,13 @@ export class ChatThread extends LitElement {
     return this.#details(
       item,
       "Function call",
-      [html`<code class="name">${item.name}</code>`, html`<span class="id">${item.call_id}</span>`],
-      args.trim() ? html`<pre>${pretty(args)}</pre>` : html`<p class="empty">No arguments.</p>`,
+      [
+        html`<code class="name text-break">${item.name}</code>`,
+        html`<span class="id text-break">${item.call_id}</span>`,
+      ],
+      args.trim()
+        ? html`<pre>${pretty(args)}</pre>`
+        : html`<p class="empty text-quiet-s">No arguments.</p>`,
     );
   }
 
@@ -349,10 +356,12 @@ export class ChatThread extends LitElement {
       item,
       "Function output",
       [
-        ...(name ? [html`<code class="name">${name}</code>`] : []),
-        html`<span class="id">${item.call_id}</span>`,
+        ...(name ? [html`<code class="name text-break">${name}</code>`] : []),
+        html`<span class="id text-break">${item.call_id}</span>`,
       ],
-      output.trim() ? html`<pre>${pretty(output)}</pre>` : html`<p class="empty">No output.</p>`,
+      output.trim()
+        ? html`<pre>${pretty(output)}</pre>`
+        : html`<p class="empty text-quiet-s">No output.</p>`,
     );
   }
 
@@ -381,10 +390,10 @@ export class ChatThread extends LitElement {
           return;
       }
     });
-    return html`<div class="frame" tabindex="0" role="region" aria-label="Conversation">
+    return html`<div class="frame scroll-frame" tabindex="0" role="region" aria-label="Conversation">
       ${
         shown.length
-          ? html`<ol class="thread">
+          ? html`<ol class="thread list-bare">
             ${repeat(
               shown,
               ({ key }) => key,

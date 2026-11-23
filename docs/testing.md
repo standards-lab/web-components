@@ -15,8 +15,8 @@ the behavior and layout each one holds to.
   the browser tier, `mise run demo`, and the screenshots description all serve, so the list is kept
   once. Of the served packages, lit's own dependencies (lit-html, lit-element, and
   `@lit/reactive-element`) sit beside it in pnpm's store and the server brings them with it; the
-  foundation is the install the components' `dist/` imports by name, reached as a consumer reaches
-  it.
+  foundation and the icons are the installs the components' `dist/` imports by name, reached as a
+  consumer reaches them.
 - `test/browser/support/types.js` is run by no page: tsc checks it with the in-page modules against
   the same `dist/`, so a declaration that narrows what a consumer may write fails `types:browser`.
 
@@ -52,8 +52,11 @@ the behavior and layout each one holds to.
   out: it links only the lean entry, so it shows one profile.
 - Text in a fully transparent color shows nothing, as a hidden mark does, so it takes no color
   token.
-- The stage timeline holds no control, so the focus ring cases skip it; a case pins that it renders
-  nothing focusable, so a control it gains must get a ring case.
+- The stage timeline and the shortcuts list hold no control, so the focus ring cases skip their
+  pages; a case pins that each renders nothing focusable, so a control one gains must get a ring
+  case.
+- `shortcut-dialogs.test.ts` runs on the demo pages that carry the Settings and Help pattern, so
+  the README's markup is held to working with the components.
 
 ## Components
 
@@ -91,13 +94,6 @@ the behavior and layout each one holds to.
   and drop the first duplicate, so these values show the output comes from the text's own tokens.
 - `test/browser/support/deep.ts` writes out the formatter's output for deep nesting rather than
   reading it from `formatJson`, so a test that compares a view with it checks the formatter too.
-- The depth-65 case puts an opening brace in a key, an escaped quote before closing brackets, and an
-  escaped backslash before a string's real end, then at depth 64 a string holding the brackets that
-  would close it. A bracket count any of these fools ends the kept container early or late.
-- The 20,000-deep case bounds the output at the text's length plus 4·64·64 characters: the 64
-  formatted levels each add a line break and at most 128 spaces at their opening and closing
-  brackets, and the levels below are kept as written. Indenting every level would take some 800
-  million spaces.
 
 ## Artifact viewer
 

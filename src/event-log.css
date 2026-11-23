@@ -1,9 +1,10 @@
 /* From spike-html-apps-components (10dde51): src/event-log.css. */
 
 /*
- * The event log's shadow-root sheet: one frame that scrolls the list of events, each its type
- * and time, its labelled source, subject, and id, and its data's details.
- * Unlayered, above the foundation's reset and elements sheets; it reads only the baseline tokens.
+ * The event log's shadow-root sheet: the utilities' scrolling frame around the bare list of events,
+ * each its type and time, its labelled source, subject, and id, and its data's details.
+ * Unlayered, above the foundation's reset, elements, and utilities sheets; it reads only the
+ * baseline tokens.
  * See docs/layout.md
  */
 
@@ -12,25 +13,17 @@
   flex-direction: column;
 }
 .frame {
-  flex: 1 1 auto;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-content: start;
-  min-block-size: 0;
-  overflow: auto;
   border: var(--line-s) solid var(--border);
   border-radius: var(--radius-sm);
 }
 .events {
   margin: 0;
   padding: 0 var(--space-2xs);
-  list-style: none;
 }
 .event {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3xs);
-  margin: 0;
   padding-block: var(--space-xs);
 }
 .event > * {
@@ -49,21 +42,14 @@
 .type {
   font-family: var(--font-code);
   font-weight: 600;
-  white-space: nowrap;
 }
 .when {
   font-family: var(--font-ui);
-  font-size: var(--text-s);
-  color: var(--fg-2);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
 }
 .meta {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   container-type: inline-size;
-  font-size: var(--text-xs);
-  color: var(--fg-2);
 }
 .pair {
   display: flex;
@@ -85,24 +71,15 @@
 .meta dt {
   font-family: var(--font-ui);
   color: var(--fg-3);
-  white-space: nowrap;
 }
 .meta dd {
   max-inline-size: 100%;
   min-inline-size: 0;
   margin: 0;
   font-family: var(--font-code);
-  overflow-wrap: anywhere;
-}
-.meta dd.cut {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 .data > summary {
   inline-size: fit-content;
-  font-size: var(--text-s);
-  color: var(--fg-2);
 }
 .data > pre {
   overflow-x: auto;

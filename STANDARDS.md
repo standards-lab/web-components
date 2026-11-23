@@ -42,7 +42,7 @@ The architecture pages that apply, in the architecture repository:
 ## Package
 
 - The package is `@standards-lab/web-components`, the components layer of the web client stack,
-  built on `@standards-lab/web-foundation`, its one peer.
+  built on `@standards-lab/web-foundation` and `@standards-lab/web-icons`, its two peers.
 - lit and marked are each pinned exactly, and only the Markdown module imports marked
   (`test/unit/marked.test.ts` enforces it).
 - `dist/` lives only in a release tag's tree, the pack, never on a branch.

@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { after, before, describe, test } from "node:test";
 import { allowed, lint, manifest, sources, violations, watched, writeTree } from "./layers-tree.ts";
 
@@ -19,13 +19,15 @@ describe("layer imports", () => {
 
   const files = { ...sources(violations), ...allowed };
   let scratch: string;
+  let dir: string;
   let found: Record<string, string[]>;
   before(() => {
     scratch = mkdtempSync(join(tmpdir(), "layers-"));
-    const code = writeTree(scratch, files);
-    const report = lint(scratch);
+    dir = join(scratch, basename(root));
+    const code = writeTree(dir, files);
+    const report = lint(dir);
     assert.deepEqual(
-      report.map((file) => file.filePath.slice(scratch.length + 1)).sort(),
+      report.map((file) => file.filePath.slice(dir.length + 1)).sort(),
       code.sort(),
       "ESLint lints every code file under src/",
     );
@@ -40,7 +42,7 @@ describe("layer imports", () => {
       const rules = [...new Set(file.messages.map((m) => m.ruleId))].filter(
         (id): id is string => id !== null && watched.includes(id),
       );
-      if (rules.length > 0) found[file.filePath.slice(scratch.length + 1)] = rules.sort();
+      if (rules.length > 0) found[file.filePath.slice(dir.length + 1)] = rules.sort();
     }
   });
   after(() => rmSync(scratch, { recursive: true, force: true }));

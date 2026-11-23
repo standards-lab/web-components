@@ -10,6 +10,8 @@ import { repeat } from "lit/directives/repeat.js";
 
 import elements from "@standards-lab/web-foundation/baseline/elements.css" with { type: "css" };
 import reset from "@standards-lab/web-foundation/baseline/reset.css" with { type: "css" };
+import motion from "@standards-lab/web-foundation/motion.css" with { type: "css" };
+import utilities from "@standards-lab/web-foundation/utilities.css" with { type: "css" };
 import { define, emit } from "@standards-lab/web-foundation/dom.js";
 import { formatBytes } from "@standards-lab/web-foundation/format.js";
 import styles from "./upload-dropzone.css" with { type: "css" };
@@ -66,7 +68,7 @@ function carriesFiles(event: DragEvent): boolean {
  * cancelled.
  */
 export class UploadDropzone extends LitElement {
-  static styles = [reset, elements, styles];
+  static styles = [reset, elements, utilities, motion, styles];
 
   static properties = {
     uploads: { attribute: false },
@@ -155,18 +157,18 @@ export class UploadDropzone extends LitElement {
         >
           Cancel
         </button>`
-        : html`<span class="state">${finished[upload.state]}</span>`;
+        : html`<span class="state text-nowrap">${finished[upload.state]}</span>`;
     const sent = Math.min(Math.max(upload.sent, 0), upload.size);
     const detail = uploading
       ? html`<progress value=${sent} max=${upload.size} aria-label="Uploading ${upload.name}"></progress
-          ><span class="bytes"><span class="sent">${formatBytes(sent)}</span> of ${size}</span>`
+          ><span class="bytes text-numeric"><span class="sent">${formatBytes(sent)}</span> of ${size}</span>`
       : upload.state === "failed" && upload.message
-        ? html`<span class="bytes">${size}</span><span class="message">${upload.message}</span>`
-        : html`<span class="bytes">${size}</span>`;
+        ? html`<span class="bytes text-numeric">${size}</span><span class="message">${upload.message}</span>`
+        : html`<span class="bytes text-numeric">${size}</span>`;
     return html`<li class="upload ${upload.state}" data-id=${upload.id}>
-      <span class="name" title=${upload.name}>${upload.name}</span>
+      <span class="name text-truncate" title=${upload.name}>${upload.name}</span>
       <span class="end">${end}</span>
-      <span class="detail">${detail}</span>
+      <span class="detail text-quiet-s">${detail}</span>
     </li>`;
   }
 
@@ -195,7 +197,7 @@ export class UploadDropzone extends LitElement {
       </div>
       ${
         uploads.length
-          ? html`<ul class="uploads" aria-label="Uploads">
+          ? html`<ul class="uploads list-bare" aria-label="Uploads">
             ${repeat(
               uploads,
               (upload) => upload.id,

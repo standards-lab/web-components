@@ -4,13 +4,8 @@
 [settings]
 task.run_auto_install = false
 
-[env]
-HOLDS = '''
-@standards-lab/web-foundation v0.3.0: v0.4.0 renames --accent-color and --interaction-color and changes adopted element rules; v1.client.stack's components-settings takes it with its design review
-'''
-
 [tools]
-"github:standards-lab/claude-plugins" = { version = "0.22.0", version_prefix = "marathon/v" }
+"github:standards-lab/claude-plugins" = { version = "0.23.0", version_prefix = "marathon/v" }
 actionlint = "1.7.12"
 node = "26.13.1"
 pnpm = "12.21.0"
@@ -110,6 +105,6 @@ raw = true
 run = "BROWSER_EXECUTABLE=$(mise which chrome-headless-shell) pnpm exec web-screenshots scripts/screenshots.config.ts"
 
 [tasks.currency]
-description = "Report every mise tool, package.json pin, action pin, the foundation's and the tooling's tags, and the foundation's peer range behind its latest, a held pin with its reason, exiting nonzero if any isn't held; reads the network"
+description = "Report every mise tool, package.json pin, action pin, the foundation's, the icons', and the tooling's tags, and the foundation's and the icons' peer ranges behind their latest, a held pin with its reason, exiting nonzero if any isn't held; reads the network"
 run = "scripts/currency.sh"
 quiet = true

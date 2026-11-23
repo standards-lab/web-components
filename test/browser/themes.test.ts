@@ -86,14 +86,14 @@ const READ = `async (choice) => {
     return resolved;
   };
   const tokens = Object.fromEntries(${JSON.stringify(TOKENS)}.map((token) => [token, resolve("var(" + token + ")")]));
-  const interaction = resolve("var(--interaction-color, var(--blue))");
+  const interaction = resolve("var(--color-primary, var(--blue))");
   const texts = [];
   const walk = (root, path) => {
     for (const element of root.querySelectorAll("*")) {
       if (element.shadowRoot) walk(element.shadowRoot, path + " " + element.localName);
       if (root === document) continue;
       const shows = [...element.childNodes].some((node) => node.nodeType === Node.TEXT_NODE && node.data.trim())
-        || (element.matches("input, textarea") && (element.value || element.placeholder));
+        || (element.matches("textarea, input:not([type=radio], [type=checkbox])") && (element.value || element.placeholder));
       if (!shows || element.getClientRects().length === 0) continue;
       const style = getComputedStyle(element);
       if (style.visibility !== "visible") continue;
@@ -225,7 +225,9 @@ describe("themes", { timeout: 120_000 }, () => {
     for (let press = 0; press < presses; press++) await tab(page);
   }
 
-  for (const name of pages.filter((page) => page !== "stage-timeline")) {
+  const unfocusable = { "stage-timeline": "sl-stage-timeline", shortcuts: "sl-shortcuts" };
+
+  for (const name of pages.filter((page) => !Object.hasOwn(unfocusable, page))) {
     test(`the ${name} page's focus ring, brought by the keyboard, is the interaction color each color profile resolves, light and dark`, async () => {
       const page = await open(name);
       try {
@@ -250,17 +252,25 @@ describe("themes", { timeout: 120_000 }, () => {
     });
   }
 
-  test("the stage timeline, which the focus ring cases skip, renders nothing the keyboard can focus", async () => {
-    const page = await open("stage-timeline");
-    try {
-      const focusable: string[] =
-        await page.evaluate(`[...document.querySelectorAll("sl-stage-timeline")]
-        .flatMap((timeline) => [...timeline.shadowRoot.querySelectorAll("*")])
-        .filter((element) => element.tabIndex >= 0)
-        .map((element) => element.localName)`);
-      assert.deepEqual(focusable, []);
-    } finally {
-      await page.close();
-    }
-  });
+  for (const [name, tag] of Object.entries(unfocusable)) {
+    test(`the ${name} page's ${tag}, which the focus ring cases skip, renders nothing the keyboard can focus`, async () => {
+      const page = await open(name);
+      try {
+        const found: { hosts: number; focusable: string[] } = await page.evaluate(`(() => {
+          const hosts = [...document.querySelectorAll("${tag}")];
+          return {
+            hosts: hosts.length,
+            focusable: hosts
+              .flatMap((host) => [...host.shadowRoot.querySelectorAll("*")])
+              .filter((element) => element.tabIndex >= 0)
+              .map((element) => element.localName),
+          };
+        })()`);
+        assert.ok(found.hosts > 0, `${name}: no ${tag} rendered`);
+        assert.deepEqual(found.focusable, []);
+      } finally {
+        await page.close();
+      }
+    });
+  }
 });

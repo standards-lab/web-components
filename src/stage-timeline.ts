@@ -10,6 +10,8 @@ import { repeat } from "lit/directives/repeat.js";
 
 import elements from "@standards-lab/web-foundation/baseline/elements.css" with { type: "css" };
 import reset from "@standards-lab/web-foundation/baseline/reset.css" with { type: "css" };
+import motion from "@standards-lab/web-foundation/motion.css" with { type: "css" };
+import utilities from "@standards-lab/web-foundation/utilities.css" with { type: "css" };
 import { define } from "@standards-lab/web-foundation/dom.js";
 import { formatDateTime } from "@standards-lab/web-foundation/format.js";
 import styles from "./stage-timeline.css" with { type: "css" };
@@ -72,7 +74,7 @@ function timeOf(stage: TimelineStage): Date | null {
  * wrapping to the timeline's width and never widening it.
  */
 export class StageTimeline extends LitElement {
-  static styles = [reset, elements, styles];
+  static styles = [reset, elements, utilities, motion, styles];
 
   static properties = {
     stages: { attribute: false },
@@ -93,7 +95,7 @@ export class StageTimeline extends LitElement {
         glyph === nothing
           ? html`<span class="position">${stage.position}</span>`
           : html`<svg viewBox="0 0 16 16">${glyph}</svg>`
-      }</span
+      }${stage.state === "active" ? html`<span class="ring motion-ring" aria-hidden="true"></span>` : nothing}</span
     >`;
   }
 
@@ -107,15 +109,15 @@ export class StageTimeline extends LitElement {
     >
       ${this.#marker(stage)}
       <span class="name">${stage.name}</span>
-      <span class="detail">
-        <span class="slot label">
+      <span class="detail text-quiet-s">
+        <span class="slot alternatives label text-nowrap">
           ${(Object.keys(labels) as StageState[]).map((state) =>
             state === stage.state
               ? html`<span class="shown">${labels[state]}</span>`
               : html`<span class="hold" aria-hidden="true">${labels[state]}</span>`,
           )}
         </span>
-        <span class="slot when">
+        <span class="slot alternatives when text-numeric">
           ${
             date
               ? html`<time class="shown" datetime=${date.toISOString()}
@@ -126,13 +128,13 @@ export class StageTimeline extends LitElement {
           <span class="hold" aria-hidden="true">${formatDateTime(widest, undefined, timeFormat)}</span>
         </span>
       </span>
-      ${reason === null ? nothing : html`<span class="reason">${reason}</span>`}
+      ${reason === null ? nothing : html`<span class="reason text-quiet-s">${reason}</span>`}
     </li>`;
   }
 
   render() {
     const stages = [...(this.stages ?? [])].sort((a, b) => a.position - b.position);
-    return html`<ol class="stages" aria-label="Stages">
+    return html`<ol class="stages list-bare" aria-label="Stages">
       ${repeat(
         stages,
         (stage) => stage.name,

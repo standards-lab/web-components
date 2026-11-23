@@ -1,7 +1,7 @@
 // The layer's import cases as one file tree in the repository's shape: a file per forbidden import
 // and form, each with the rules that catch it, and the imports the layer may make in the same
-// layout.
-// Adapted from spike-html-apps-components (10dde51): test/unit/layers-tree.ts, its sibling and above layers the stack's web-app-sdk and web-app-sdk-template.
+// layout. The tree sits in a workspace directory beside webappgen's checkout, the layer above.
+// Adapted from spike-html-apps-components (10dde51): test/unit/layers-tree.ts, its sibling and above layers the stack's web-app-sdk and webappgen, and web-icons below.
 // See docs/testing.md
 
 import { spawnSync } from "node:child_process";
@@ -24,8 +24,11 @@ const foundationManifest = readFileSync(
   "utf8",
 );
 
+const icons = components.replace(/components$/, "icons");
+const iconsManifest = readFileSync(join(root, "node_modules", icons, "package.json"), "utf8");
+
 const sdk = components.replace(/components$/, "app-sdk");
-const app = components.replace(/components$/, "app-sdk-template");
+const webappgen = "../webappgen/internal/starter/files/src/main.ts";
 
 /** The layer table's rule. */
 export const table = "boundaries/dependencies";
@@ -66,17 +69,25 @@ const undeclaredPackages = by([table, extraneous], {
   ...forms("src/forms/sdk", `${sdk}/client.js`),
   "src/lit-html.ts": `import { html } from "lit-html";`,
   ...forms("src/forms/lit-html", "lit-html/directives/repeat.js"),
-  "src/app.ts": `import { define } from "${app}/main.js";`,
   ...forms("src/forms/typescript", "typescript"),
 });
 
 const ownName = by([table], forms("src/forms/self-name", `${components}/status-badge.js`));
+
+const siblingCheckout = by([table], {
+  "src/app.ts": `import { define } from "../${webappgen}";`,
+  ...forms("src/forms/app", `../../${webappgen}`),
+});
+
+const installedIcons = `../node_modules/${icons}`;
 
 const relativeIntoNodeModules = by([table, relativePackages], {
   "src/foundation-path.ts": `import { define } from "${installedFoundation}/dist/dom.js";`,
   ...forms("src/forms/foundation-path", `../${installedFoundation}/dist/dom.js`),
   "src/foundation-sheet-path.ts": `import sheet from "${installedFoundation}/dist/baseline/reset.css" with { type: "css" };`,
   "src/lit-path.ts": `import "../node_modules/lit/index.js";`,
+  "src/icons-path.ts": `import x from "${installedIcons}/dist/octicon/x-16.js";`,
+  ...forms("src/forms/icons-path", `../${installedIcons}/dist/octicon/x-16.js`),
 });
 
 const declarationValueImports = by([table], {
@@ -109,6 +120,7 @@ const nonModuleCss = by([cssModule], {
 export const violations = {
   ...undeclaredPackages,
   ...ownName,
+  ...siblingCheckout,
   ...relativeIntoNodeModules,
   ...declarationValueImports,
   ...nonModuleCss,
@@ -143,6 +155,11 @@ export const allowed: Record<string, string> = {
     `await import("${foundation}/dom.js");`,
     `import type { BytesOptions } from "${foundation}/format.js";`,
   ].join("\n"),
+  "src/icons.ts": [
+    `import x from "${icons}/octicon/x-16";`,
+    `export { default } from "${icons}/octicon/x-16";`,
+    `await import("${icons}/octicon/x-16");`,
+  ].join("\n"),
   "src/foundation-sheets.ts": [
     `import reset from "${foundation}/baseline/reset.css" with { type: "css" };`,
     `import elements from "${foundation}/baseline/elements.css" with { "type": "css" };`,
@@ -161,9 +178,10 @@ const targets = {
   "src/x.css": ".x {}",
   "dist/status-badge.js": "export {};",
   "dist/status-badge.d.ts": "export interface X {}",
+  [webappgen]: "export const define = () => {};",
 };
 
-const externals = ["lit", "lit-html", sdk, app, "typescript"];
+const externals = ["lit", "lit-html", sdk, "typescript"];
 const stub = (name: string): Record<string, string> => ({
   "package.json": JSON.stringify({
     name,
@@ -198,7 +216,16 @@ const foundationFiles = {
   "dist/baseline/elements.css": ".elements {}",
 };
 
-/** Writes `files` and everything they import under `dir`, returning the code files under src/. */
+const iconsFiles = {
+  "package.json": iconsManifest,
+  "dist/octicon/x-16.js": 'export default "<svg></svg>";',
+  "dist/octicon/x-16.d.ts": "declare const svg: string;\nexport default svg;",
+};
+
+/**
+ * Writes `files` and everything they import under `dir`, and webappgen's checkout beside it in
+ * `dir`'s parent, returning the code files under src/.
+ */
 export function writeTree(dir: string, files: Record<string, string>): string[] {
   const written: Record<string, string> = {
     ...files,
@@ -212,6 +239,9 @@ export function writeTree(dir: string, files: Record<string, string>): string[] 
   }
   for (const [path, source] of Object.entries(foundationFiles)) {
     written[join("node_modules", foundation, path)] = source;
+  }
+  for (const [path, source] of Object.entries(iconsFiles)) {
+    written[join("node_modules", icons, path)] = source;
   }
   for (const [path, source] of Object.entries(written)) {
     mkdirSync(dirname(join(dir, path)), { recursive: true });
