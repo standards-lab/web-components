@@ -10,7 +10,7 @@ The architecture pages that apply, in the architecture repository:
 - `architecture/principles/minimal-footprint.md`: lit and marked the only runtime dependencies,
   and each devDependency deliberate; a consumer installs the tag with no build step.
 - `architecture/principles/rolling-currency.md`: every tool, package, and action pin explicit and
-  at its latest, and the foundation's peer range admitting its latest release.
+  at its latest.
 - `architecture/principles/independent-releases.md`: the package releases on its own tags.
 - `architecture/principles/downward-dependencies.md`: the components sit on the foundation and
   import nothing above them.
