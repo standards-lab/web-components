@@ -1,6 +1,3 @@
-// Adapted from spike-html-apps-components (10dde51): test/browser/drawer.test.ts, on @standards-lab/web-tooling.
-// Adapted from spike-html-hosting-components (9fa5850): test/browser/drawer.test.ts, its Close glyph button and hint cases.
-
 import assert from "node:assert/strict";
 import { after, before, beforeEach, describe, test } from "node:test";
 

@@ -1,5 +1,3 @@
-// Adapted from spike-html-hosting-components (9fa5850): test/browser/shortcuts.test.ts, on @standards-lab/web-tooling, its key presses inside the open list and the document change cases added.
-
 import assert from "node:assert/strict";
 import { after, before, beforeEach, describe, test } from "node:test";
 

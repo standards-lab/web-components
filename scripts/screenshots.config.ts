@@ -6,7 +6,6 @@
 // opened by ?, its Close reached by Tab and its hint shown; the palette, space, and type facets at
 // the foundation's defaults; --all's profiles; each page's registered profiles; and the repository
 // served as the browser tier serves it.
-// Adapted from spike-html-apps-components (10dde51): scripts/screenshots.config.ts, on web-tooling.
 
 import type {
   DescribedPage,

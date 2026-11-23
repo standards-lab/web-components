@@ -1,5 +1,4 @@
 // Entry, Lit with a shadow root: one directory or file of a document hierarchy, as a button.
-// Adapted from spike-html-apps-components (10dde51): src/entry.ts, on @standards-lab/web-foundation.
 // See docs/internals.md
 
 import { html, LitElement, nothing, type PropertyDeclarations } from "lit";

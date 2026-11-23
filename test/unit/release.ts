@@ -1,6 +1,5 @@
 // A release's shape: a pack of the build checked against the sources, package.json's files and
 // exports as Node resolves them, the Apache 2.0 LICENSE its manifest declares, and its dependencies.
-// Adapted from spike-html-apps-components (10dde51): test/unit/release.ts, on @standards-lab/web-foundation and @standards-lab/web-icons.
 // See docs/release.md
 
 import { execFileSync } from "node:child_process";

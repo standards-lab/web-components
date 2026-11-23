@@ -3,7 +3,6 @@
 // the same root; the interest hint its interestfor names, resolved in the button's own tree, a
 // hint popover holding the button's name; the descriptions the accessibility tree exposes for it;
 // and the mouse moved onto the button, or off it, as a user points at it to show the hint.
-// Adapted from spike-html-hosting-components (9fa5850): test/browser/support/glyph-button.ts and test/browser/support/glyphs.ts, as one module, its name and tokens read without the target size.
 // See docs/testing.md
 
 import { until } from "@standards-lab/web-tooling/browser.js";

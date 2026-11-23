@@ -1,5 +1,3 @@
-<!-- Adapted from web-foundation (ceaab61): README.md, its Release section. -->
-
 # Release
 
 A release is an annotated `v<version>` tag on a pack commit: a commit, on no branch, whose tree is

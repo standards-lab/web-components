@@ -2,7 +2,6 @@
 // imports in src/, and every .css import a CSS module script. test/unit/layers.test.ts runs it over
 // test/unit/layers-tree.ts.
 // See docs/development.md
-// Adapted from spike-html-apps-components (10dde51): eslint.config.js, on web-foundation.
 
 import comments from "@eslint-community/eslint-plugin-eslint-comments";
 import js from "@eslint/js";

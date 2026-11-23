@@ -1,5 +1,3 @@
-// Adapted from spike-html-apps-components (10dde51): test/browser/markdown.test.ts, on @standards-lab/web-tooling.
-
 import assert from "node:assert/strict";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";

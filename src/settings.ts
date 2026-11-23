@@ -3,8 +3,6 @@
 // presses, for a Settings dialog that holds the element. Every change applies and is stored at
 // once, with no Save and no Cancel, and fires a bubbling, composed change at the host. It binds no
 // page key.
-// Adapted from spike-html-hosting-components (9fa5850): src/settings.ts, on @standards-lab/web-foundation, its theme layout in its own sheet.
-// Adapted from spike-html-apps-foundation (618cb83): src/theme-menu.ts, its rows, steppers, preview, and moves, without Save, Cancel, and the snapshot; and src/keys-help.ts, its settings form.
 
 import { html, LitElement, nothing, type PropertyDeclarations } from "lit";
 import { live } from "lit/directives/live.js";

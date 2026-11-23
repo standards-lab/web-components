@@ -1,6 +1,5 @@
 // A static fixture of document listings in go-web-service's wire shape at commit 15e0bc3, for the
 // demo and the browser tier's components cases.
-// From spike-html-apps-components (10dde51): demo/documents.js.
 
 /**
  * go-web-sdk's paginated read: `page` omitted under a cursor, `total` uncounted, `next` at the end.

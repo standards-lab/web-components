@@ -1,5 +1,3 @@
-// Adapted from spike-html-apps-components (10dde51): test/browser/document-list.test.ts, on @standards-lab/web-tooling.
-
 import assert from "node:assert/strict";
 import { after, before, describe, test } from "node:test";
 

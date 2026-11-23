@@ -1,6 +1,5 @@
 # The check on each pull request to main and each push to it, every pin installed first.
 # See docs/release.md
-# Adapted from web-foundation (ceaab61): .github/workflows/ci.yml, its mise-action at its latest.
 
 name: CI
 

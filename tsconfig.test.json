@@ -1,6 +1,5 @@
 // The Node-side tests, their helpers, and scripts/ TypeScript, type-checked and never emitted.
 // See docs/development.md
-// From spike-html-apps-components (10dde51): tsconfig.test.json.
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {

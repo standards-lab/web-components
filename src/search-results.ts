@@ -3,7 +3,6 @@
 // that says where the search stands. Each match is a native button that sends `open` with its
 // document's id. The match is a structural shape of its own, which a search API's match fits as
 // it is; the component knows no SDK and no domain. It binds no key.
-// Adapted from spike-html-apps-components (10dde51): src/search-results.ts, on @standards-lab/web-foundation.
 // See docs/internals.md
 
 import { html, LitElement, nothing, type PropertyDeclarations, type PropertyValues } from "lit";

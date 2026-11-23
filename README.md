@@ -1,5 +1,3 @@
-<!-- Adapted from spike-html-apps-components (10dde51): README.md, for @standards-lab/web-components. -->
-
 # web-components
 
 The Lit components of the standards-lab web client stack: fourteen elements with a shadow root
@@ -216,9 +214,7 @@ the procedure.
 
 ## Provenance
 
-The package is seeded by copy from spike-html-apps-components at 10dde51, the parent of its
-v0.10.3 pack commit, and moved onto web-foundation v0.3.0 and web-tooling v0.1.0. Each copied file
-that takes comments names each of its sources in a provenance line.
+The package's lineage is recorded in the workspace's [references catalog](https://github.com/standards-lab/org/blob/main/references.md).
 
 ## License
 

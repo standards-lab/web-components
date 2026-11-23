@@ -1,6 +1,3 @@
-<!-- Adapted from web-foundation (ceaab61): CHANGELOG.md, for @standards-lab/web-components, with
-none of spike-html-apps-components' versions. -->
-
 # Changelog
 
 All notable changes to `@standards-lab/web-components` are documented here. The format follows

@@ -1,5 +1,3 @@
-<!-- Adapted from spike-html-apps-components (10dde51): README.md, its Use section. -->
-
 # Components
 
 The modules of `@standards-lab/web-components`, by capability. The

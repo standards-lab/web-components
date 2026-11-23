@@ -1,5 +1,3 @@
-// Adapted from spike-html-hosting-components (9fa5850): test/browser/settings.test.ts, on @standards-lab/web-tooling, its stores read back through the foundation's modules, the host's change events and the arrow keys, open, document change, and focus cases added, and the theme-menu request case dropped.
-
 import assert from "node:assert/strict";
 import { after, before, beforeEach, describe, test } from "node:test";
 

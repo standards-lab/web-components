@@ -2,7 +2,6 @@
 // file picker, and the list of the uploads the app reports, each with its progress or its finished
 // state. It knows no SDK and no domain: files go out as File objects, a cancel goes out by the
 // upload's id, and the app does the uploading. It binds no key.
-// Adapted from spike-html-apps-components (10dde51): src/upload-dropzone.ts, on @standards-lab/web-foundation.
 // See docs/internals.md
 
 import { html, LitElement, nothing, type PropertyDeclarations } from "lit";

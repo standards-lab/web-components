@@ -1,6 +1,5 @@
 # The components' tools and tasks.
 # See docs/development.md
-# Adapted from spike-html-apps-components (10dde51): mise.toml, its browser at web-foundation's pin.
 [settings]
 task.run_auto_install = false
 

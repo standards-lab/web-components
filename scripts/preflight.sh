@@ -3,7 +3,6 @@
 # dependencies the build reads, lit, marked, and the foundation and the icons at their tags, and
 # with `browser`, the pinned chrome-headless-shell.
 # See docs/development.md
-# Adapted from spike-html-apps-components (10dde51): scripts/preflight.sh, on web-foundation.
 set -euo pipefail
 
 fail() {
