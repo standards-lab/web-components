@@ -15,8 +15,8 @@ the behavior and layout each one holds to.
   the browser tier, `mise run demo`, and the screenshots description all serve, so the list is kept
   once. Of the served packages, lit's own dependencies (lit-html, lit-element, and
   `@lit/reactive-element`) sit beside it in pnpm's store and the server brings them with it; the
-  foundation is the install the components' `dist/` imports by name, reached as a consumer reaches
-  it.
+  foundation and the icons are the installs the components' `dist/` imports by name, reached as a
+  consumer reaches them.
 - `test/browser/support/types.js` is run by no page: tsc checks it with the in-page modules against
   the same `dist/`, so a declaration that narrows what a consumer may write fails `types:browser`.
 

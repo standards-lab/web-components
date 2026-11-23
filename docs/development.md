@@ -37,8 +37,8 @@ build ships. `types:test` doesn't: the tests import nothing from `dist/`.
 
 ## pnpm
 
-`pnpm-workspace.yaml` lists no packages: the repository is one package. The foundation, a peer, and
-the tooling, each a `github:` devDependency installed at its release tag, need no setting there:
+`pnpm-workspace.yaml` lists no packages: the repository is one package. The foundation and the icons,
+the peers, and the tooling, each a `github:` devDependency installed at its release tag, need no setting there:
 pnpm guards only a git dependency below the top level (`blockExoticSubdeps`).
 
 - `allowBuilds` refuses unrs-resolver's postinstall. unrs-resolver, under eslint-plugin-import-x and
@@ -52,9 +52,9 @@ pnpm guards only a git dependency below the top level (`blockExoticSubdeps`).
 ## Currency
 
 `scripts/currency.sh` reads mise's outdated report at the error log level: mise warns on every run
-that a GitHub release has no assets. A `github:` devDependency, the foundation or the tooling, is
+that a GitHub release has no assets. A `github:` devDependency, the foundation, the icons, or the tooling, is
 pinned to its repository's release tag, which the registry doesn't hold, so it is compared with that
-repository's latest release. A peer, the foundation, is declared by a caret range, which must admit
+repository's latest release. A peer, the foundation or the icons, is declared by a caret range, which must admit
 that latest release so a consumer can declare it beside the components, by the release test's own
 rule, `caretAdmits`. typescript is held to the newest version typescript-eslint's peer range
 accepts. A pin held back from its latest is named, with its reason, in `mise.toml`'s `HOLDS` list,
@@ -94,7 +94,7 @@ The layer's import rules:
 - The rule judges the file an import resolves to, never the specifier's text, and `no-unresolved`
   fails a specifier that names no file, so no import passes by naming none.
 - `no-extraneous-dependencies` judges an import against `package.json`: a package name it doesn't
-  declare in dependencies or peerDependencies, where the foundation is (a devDependency alone ships
+  declare in dependencies or peerDependencies, where the foundation and the icons are (a devDependency alone ships
   nothing, and `includeInternal` holds the package's own name, which resolves inside it, to the
   same), in every import form (`includeTypes`). `no-relative-packages` refuses a relative path that
   reaches another package's files.

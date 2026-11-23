@@ -2,11 +2,12 @@
 
 # web-components
 
-The Lit components of the standards-lab web client stack: twelve elements with a shadow root that
-applications compose, their sheets, a Markdown renderer, and a JSON formatter. It is ES modules
-with their type declarations and stylesheets, built on
-[`@standards-lab/web-foundation`](https://github.com/standards-lab/web-foundation), which it takes
-as a peer, and is released by git tag. A component takes properties and attributes, sends events,
+The Lit components of the standards-lab web client stack: fourteen elements with a shadow root
+that applications compose, their sheets, and a Markdown renderer. It is ES modules with their type
+declarations and stylesheets, built on
+[`@standards-lab/web-foundation`](https://github.com/standards-lab/web-foundation) with the glyphs
+of [`@standards-lab/web-icons`](https://github.com/standards-lab/web-icons), which it takes as
+peers, and is released by git tag. A component takes properties and attributes, sends events,
 and may hold its own UI state; it holds no services, fetches no data, and binds no key.
 
 ## Install
@@ -16,18 +17,18 @@ Each release is a tag, `v<version>`, of
 package as `pnpm pack` builds it: `package.json`, this README, the LICENSE, and `dist/`, the build.
 The build lives only in the tag's tree, so the tag installs with no build step, and its manifest
 has no scripts. It depends on lit 3.3.3 and marked 18.2.1, and takes the foundation as a peer at
-`^0.3.0`: a consumer declares the foundation beside the components, and the one copy serves both,
-so a restyle of the foundation's sheets by package name reaches the components' shadow roots too.
-Install both by their tags:
+`^0.4.0` and the icons at `^0.1.0`: a consumer declares each beside the components, and the one
+copy serves both, so a restyle of the foundation's sheets by package name reaches the components'
+shadow roots too. Install all three by their tags:
 
 ```
-pnpm add github:standards-lab/web-components#v0.1.0 github:standards-lab/web-foundation#v0.3.0
-bun add github:standards-lab/web-components#v0.1.0 github:standards-lab/web-foundation#v0.3.0
-npm install --allow-git=root github:standards-lab/web-components#v0.1.0 github:standards-lab/web-foundation#v0.3.0
+pnpm add github:standards-lab/web-components#v0.2.0 github:standards-lab/web-foundation#v0.4.0 github:standards-lab/web-icons#v0.1.0
+bun add github:standards-lab/web-components#v0.2.0 github:standards-lab/web-foundation#v0.4.0 github:standards-lab/web-icons#v0.1.0
+npm install --allow-git=root github:standards-lab/web-components#v0.2.0 github:standards-lab/web-foundation#v0.4.0 github:standards-lab/web-icons#v0.1.0
 ```
 
 npm 12 refuses git dependencies unless `--allow-git` allows them; `root` allows the ones the
-project itself declares, which both packages are. Without the foundation declared, the install
+project itself declares, which all three packages are. Without either peer declared, the install
 fails. Each GitHub release also carries the tarball.
 
 ### Safari
@@ -173,7 +174,7 @@ focuses its first row. `demo/settings.html` and `demo/shortcuts.html` carry the 
 Tasks run through [mise](https://mise.jdx.dev):
 
 ```
-mise run install                          # the pinned tools, and node_modules with the foundation and the tooling at their tags; reads the network
+mise run install                          # the pinned tools, and node_modules with the foundation, the icons, and the tooling at their tags; reads the network
 mise run check                            # lint, lint-context, lint-references, types, build, and both test tiers; reads no network
 mise run build                            # src/ into dist/
 mise run demo                             # serve the components demo page and the specimen pages on dist/
@@ -187,7 +188,7 @@ mise run screenshots --scheme dark        # only the scheme named, light or dark
 mise run screenshots --output browser     # a gallery of the captures, opened in the browser; directory keeps the files
 mise run screenshots --dir <path>         # write the captures into the directory named, with any of the above
 mise run screenshots --keep               # keep the terminal output's captures, with any of the above
-mise run currency                         # report every tool, package, and action pin, the foundation's and the tooling's tags, and the foundation's peer range, behind its latest; a held pin with its reason
+mise run currency                         # report every tool, package, and action pin, the foundation's, the icons', and the tooling's tags, and both peer ranges, behind its latest; a held pin with its reason
 ```
 
 `mise run screenshots` captures each specimen page light and dark, in vertical tiles at most
