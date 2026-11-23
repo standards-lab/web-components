@@ -1,11 +1,11 @@
 // The capture description web-tooling's web-screenshots bin reads for mise run screenshots: each
 // specimen page under demo/, whole in tiles; the drawer's page in its viewport at a wide and a
 // narrow width in four states, and its modal drawer open at the wide width, then with its Close
-// reached by Tab; the settings' page whole, then with the Settings dialog opened by S, wide and
-// narrow, focus in its rows; the shortcuts' page whole, then with the Help dialog opened by ?, its
-// Close reached by Tab; the palette, space, and type facets at the foundation's defaults;
-// --all's profiles; each page's registered profiles; and the repository served as the browser tier
-// serves it.
+// reached by Tab and its hint shown; the settings' page whole, then with the Settings dialog opened
+// by S, wide and narrow, focus in its rows; the shortcuts' page whole, then with the Help dialog
+// opened by ?, its Close reached by Tab and its hint shown; the palette, space, and type facets at
+// the foundation's defaults; --all's profiles; each page's registered profiles; and the repository
+// served as the browser tier serves it.
 // Adapted from spike-html-apps-components (10dde51): scripts/screenshots.config.ts, on web-tooling.
 
 import type {
@@ -36,10 +36,19 @@ const openedByEnter =
     })()`);
   };
 
-const tab: Step = async (page) => {
+const tabToHint: Step = async (page) => {
   const key = { key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 };
   await page.cdp("Input.dispatchKeyEvent", { type: "keyDown", ...key });
   await page.cdp("Input.dispatchKeyEvent", { type: "keyUp", ...key });
+  await page.evaluate(`(async () => {
+    let active = document.activeElement;
+    while (active.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+    const hint = active.getRootNode().getElementById(active.getAttribute("interestfor"));
+    while (!hint.matches(":popover-open")) {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+    }
+    await Promise.all(hint.getAnimations().map((a) => a.finished));
+  })()`);
 };
 
 const modalOpened =
@@ -121,10 +130,10 @@ const drawerStates: DescribedState[] = [
   },
   {
     name: "drawer-modal-close",
-    caption: "the modal drawer, open at 1280px, its Close reached by Tab",
+    caption: "the modal drawer, open at 1280px, its Close reached by Tab, its hint shown",
     viewport: docked,
     full: false,
-    open: modalOpened(tab),
+    open: modalOpened(tabToHint),
   },
 ];
 
@@ -152,10 +161,10 @@ const shortcutsStates: DescribedState[] = [
   { name: "shortcuts", caption: "the shortcuts", full: true },
   {
     name: "shortcuts-dialog",
-    caption: "the Help dialog, opened by ?, then Tab to its Close",
+    caption: "the Help dialog, opened by ?, then Tab to its Close, its hint shown",
     viewport: docked,
     full: false,
-    open: pressed("?", "#help", tab),
+    open: pressed("?", "#help", tabToHint),
   },
 ];
 
