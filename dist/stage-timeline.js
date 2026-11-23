@@ -1,0 +1,99 @@
+// The stage timeline, Lit with a shadow root: a run's stages as a connected, ordered list of steps,
+// each its name, its state in words and by its marker, and when it completed or failed, a failed
+// stage with why. It knows no SDK and no domain: the app maps its run's stages onto the shape
+// below. It is display-only: it sends no event, holds nothing focusable, and binds no key.
+// Adapted from spike-html-apps-components (10dde51): src/stage-timeline.ts, on @standards-lab/web-foundation.
+// See docs/internals.md
+import { html, LitElement, nothing, svg } from "lit";
+import { repeat } from "lit/directives/repeat.js";
+import elements from "@standards-lab/web-foundation/baseline/elements.css" with { type: "css" };
+import reset from "@standards-lab/web-foundation/baseline/reset.css" with { type: "css" };
+import motion from "@standards-lab/web-foundation/motion.css" with { type: "css" };
+import utilities from "@standards-lab/web-foundation/utilities.css" with { type: "css" };
+import { define } from "@standards-lab/web-foundation/dom.js";
+import { formatDateTime } from "@standards-lab/web-foundation/format.js";
+import styles from "./stage-timeline.css" with { type: "css" };
+/** The tag the element defines. */
+export const tagName = "sl-stage-timeline";
+const labels = {
+    pending: "Pending",
+    active: "In progress",
+    complete: "Complete",
+    failed: "Failed",
+};
+const timeFormat = { dateStyle: "medium", timeStyle: "medium" };
+const widest = new Date(2026, 4, 28, 22, 58, 58);
+const check = svg `<path d="M3.5 8.5l3 3 6-7" />`;
+const cross = svg `<path d="M4.5 4.5l7 7M11.5 4.5l-7 7" />`;
+function timeOf(stage) {
+    const at = stage.state === "failed" ? (stage.failedAt ?? stage.completedAt) : stage.completedAt;
+    if (at === undefined || at === null)
+        return null;
+    const date = new Date(at);
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+/**
+ * A run's stages as an ordered list of steps, connected top to bottom, in their positions' order.
+ * Each step shows its name; under it, its state's label and its time, a complete stage's
+ * completion or a failed one's failure, formatted by the foundation's formatDateTime; under that, a
+ * failed stage's reason, when it has one; and before it a marker, its position for a pending or
+ * active stage, a check for a complete one, a cross for a failed one. The reason is the step's own
+ * text, in its list item, so assistive technology reads it with the stage's name, label, and time.
+ * The active stage is the list's current step. A stage that advances changes in place: its label
+ * and its time each have a slot as wide as the widest they hold, so nothing moves as a state
+ * changes; a failure's reason, the one line a state adds, adds it below the step's detail line,
+ * wrapping to the timeline's width and never widening it.
+ */
+export class StageTimeline extends LitElement {
+    static styles = [reset, elements, utilities, motion, styles];
+    static properties = {
+        stages: { attribute: false },
+    };
+    constructor() {
+        super();
+        this.stages = [];
+    }
+    #marker(stage) {
+        const glyph = stage.state === "complete" ? check : stage.state === "failed" ? cross : nothing;
+        return html `<span class="marker" aria-hidden="true"
+      >${glyph === nothing
+            ? html `<span class="position">${stage.position}</span>`
+            : html `<svg viewBox="0 0 16 16">${glyph}</svg>`}${stage.state === "active" ? html `<span class="ring motion-ring" aria-hidden="true"></span>` : nothing}</span
+    >`;
+    }
+    #stage(stage) {
+        const date = timeOf(stage);
+        const reason = stage.state === "failed" && stage.reason ? stage.reason : null;
+        return html `<li
+      class="stage ${stage.state}"
+      data-name=${stage.name}
+      aria-current=${stage.state === "active" ? "step" : nothing}
+    >
+      ${this.#marker(stage)}
+      <span class="name">${stage.name}</span>
+      <span class="detail text-quiet-s">
+        <span class="slot alternatives label text-nowrap">
+          ${Object.keys(labels).map((state) => state === stage.state
+            ? html `<span class="shown">${labels[state]}</span>`
+            : html `<span class="hold" aria-hidden="true">${labels[state]}</span>`)}
+        </span>
+        <span class="slot alternatives when text-numeric">
+          ${date
+            ? html `<time class="shown" datetime=${date.toISOString()}
+                  >${formatDateTime(date, undefined, timeFormat)}</time
+                >`
+            : nothing}
+          <span class="hold" aria-hidden="true">${formatDateTime(widest, undefined, timeFormat)}</span>
+        </span>
+      </span>
+      ${reason === null ? nothing : html `<span class="reason text-quiet-s">${reason}</span>`}
+    </li>`;
+    }
+    render() {
+        const stages = [...(this.stages ?? [])].sort((a, b) => a.position - b.position);
+        return html `<ol class="stages list-bare" aria-label="Stages">
+      ${repeat(stages, (stage) => stage.name, (stage) => this.#stage(stage))}
+    </ol>`;
+    }
+}
+define(tagName, StageTimeline);
