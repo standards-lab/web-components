@@ -1,5 +1,3 @@
-// Adapted from spike-html-apps-components (10dde51): test/browser/components.test.ts, on @standards-lab/web-tooling and web-foundation v0.3.0's themes.
-
 import assert from "node:assert/strict";
 import { after, before, describe, test } from "node:test";
 

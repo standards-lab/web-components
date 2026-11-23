@@ -1,6 +1,5 @@
 // The components probe: renders the pagination holding one entry per fixture item, drives it
 // through its contract alone, and reports every case as a line.
-// From spike-html-apps-components (10dde51): test/browser/support/probe.js.
 
 import { continued, directories, files, pageSizes } from "../../../demo/documents.js";
 

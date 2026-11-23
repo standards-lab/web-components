@@ -5,8 +5,6 @@
 // media query on `dock`, unless `modal` is set; a switch swaps only the shadow root's wrapper and
 // its slot, so the slotted content, the host's own children, is never moved, disconnected, or
 // re-created.
-// Adapted from spike-html-apps-components (10dde51): src/drawer.ts, on @standards-lab/web-foundation.
-// Adapted from spike-html-hosting-components (9fa5850): src/drawer.ts, its Close a glyph button showing web-icons' x-16.
 // See docs/internals.md
 
 import { html, LitElement, type PropertyDeclarations, type PropertyValues } from "lit";

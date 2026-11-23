@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # The build: src/ into a fresh dist/. tsc emits each module's .js and .d.ts, and the .css is copied
 # beside them as written.
-# From spike-html-apps-components (10dde51): scripts/build.sh.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 

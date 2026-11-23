@@ -1,6 +1,5 @@
 # Publishes the release a pushed vX.Y.Z tag cuts, dispatched by hand with the tag.
 # See docs/release.md
-# Adapted from web-foundation (ceaab61): .github/workflows/release.yml, its mise-action at its latest.
 name: Release
 
 on:

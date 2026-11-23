@@ -3,7 +3,6 @@
 // scrolls when its consumer constrains its block size. The event is a structural subset of
 // CloudEvents 1.0, by its attribute names, so an event as a stream carries it fits as it is. It
 // knows no SDK and no domain. It is display-only: it sends no event and binds no key.
-// Adapted from spike-html-apps-components (10dde51): src/event-log.ts, on @standards-lab/web-foundation.
 // See docs/internals.md
 
 import { html, LitElement, nothing, type PropertyDeclarations, type PropertyValues } from "lit";

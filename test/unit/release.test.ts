@@ -1,5 +1,3 @@
-// Adapted from spike-html-apps-components (10dde51): test/unit/release.test.ts, on @standards-lab/web-foundation and @standards-lab/web-icons.
-
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";

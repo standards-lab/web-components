@@ -44,10 +44,10 @@ need no setting there: pnpm guards only a git dependency below the top level (`b
 - `allowBuilds` refuses unrs-resolver's postinstall. unrs-resolver, under eslint-plugin-import-x and
   eslint-import-resolver-typescript, fetches its native binding when the optional dependency
   holding it is missing; pnpm installs that dependency.
-- `minimumReleaseAge: 0` turns off pnpm's default wait of a day before it installs a release. The
-  currency task moves each pin to its latest release, and that release's notes are read before the
-  bump lands, a review that stands in for the age gate. With the wait on, a frozen install of a
-  lockfile that pins a release under a day old fails.
+- `minimumReleaseAge: 0` is Web Elemental's
+  [narrowing](https://github.com/standards-lab/architecture/blob/main/standards/web-elemental/principles/packages-and-releases.md#pins)
+  of rolling currency's [Why a release installs the day it
+  ships](https://github.com/standards-lab/architecture/blob/main/principles/rolling-currency.md#why-a-release-installs-the-day-it-ships).
 
 ## Currency
 

@@ -1,5 +1,3 @@
-// Adapted from spike-html-apps-components (10dde51): test/browser/upload-dropzone.test.ts, on @standards-lab/web-tooling.
-
 import assert from "node:assert/strict";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";

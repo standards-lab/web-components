@@ -1,6 +1,5 @@
 // The output the foundation's formatJson owes text nested in arrays alone: the outer
 // JSON_MAX_DEPTH levels indented, the levels below them kept as written.
-// From spike-html-apps-components (10dde51): test/browser/support/deep.ts.
 
 /** `"[".repeat(depth) + "1" + "]".repeat(depth)` as formatJson formats it. */
 export function deepFormatted(depth: number): string {

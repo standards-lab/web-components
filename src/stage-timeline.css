@@ -1,5 +1,3 @@
-/* From spike-html-apps-components (10dde51): src/stage-timeline.css. */
-
 /*
  * The stage timeline's shadow-root sheet: the bare list of steps, each a marker, with the active
  * one's ring, which the motion sheet's ring runs, a connector to the next, a name, a detail line of

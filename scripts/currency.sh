@@ -5,7 +5,6 @@
 # reported with `held: <reason>`, and the peer range of a held tag with it. Exits 1 if it reports
 # any pin that isn't held; prints nothing when all are current. Reads the network.
 # See docs/development.md
-# Adapted from spike-html-apps-components (10dde51): scripts/currency.sh, action pins only with a workflow.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 

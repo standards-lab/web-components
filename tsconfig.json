@@ -1,6 +1,5 @@
 // The build, src/ into dist/: tsc emits each module's .js and .d.ts.
 // See docs/development.md
-// Adapted from spike-html-apps-components (10dde51): tsconfig.json, on web-foundation.
 {
   "compilerOptions": {
     "target": "es2024",

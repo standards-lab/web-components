@@ -2,7 +2,6 @@
 // keys module lists them for the dialog that holds the element, in a plain-text table of each
 // binding's keys and its action, with the screen-reader note after it. It runs no binding, binds
 // no key, holds no setting, and renders no [data-keys-list].
-// Adapted from spike-html-hosting-components (9fa5850): src/shortcuts.ts, on @standards-lab/web-foundation, its note in the utilities' quiet type.
 
 import { html, LitElement, nothing, type PropertyDeclarations, type TemplateResult } from "lit";
 

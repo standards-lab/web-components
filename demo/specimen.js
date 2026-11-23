@@ -1,6 +1,5 @@
 // The specimen pages' renderer: every state, labelled, into each of the page's state lists, and
 // the focus state into the focus section.
-// From spike-html-apps-components (10dde51): demo/specimen.js.
 
 /**
  * A state: its label, and a function that builds the component in it, fresh for each list.

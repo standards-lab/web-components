@@ -1,6 +1,5 @@
 // The restyle case: one edit to the elements sheet repaints the buttons in both components' shadow
 // roots.
-// Adapted from spike-html-apps-components (10dde51): test/browser/support/restyle.js, on @standards-lab/web-foundation.
 
 import elements from "@standards-lab/web-foundation/baseline/elements.css" with { type: "css" };
 import { directories } from "../../../demo/documents.js";
