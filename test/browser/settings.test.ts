@@ -108,6 +108,49 @@ const listen = (page: Page): Promise<void> =>
 
 const changes = (page: Page): Promise<Change[]> => page.evaluate(`window.changes ?? []`);
 
+interface Placed {
+  host: number;
+  rows: { left: number; right: number; top: number; bottom: number };
+  preview: { left: number; right: number; top: number; bottom: number };
+  outside: string[];
+  overflowing: string[];
+}
+
+const place = (page: Page, inlineSize: string): Promise<Placed> =>
+  page.evaluate(`(async () => {
+    const host = document.querySelector("sl-settings");
+    const box = document.createElement("div");
+    box.style.inlineSize = ${JSON.stringify(inlineSize)};
+    document.body.append(box);
+    box.append(host);
+    await host.updateComplete;
+    const bounds = host.getBoundingClientRect();
+    const rect = (el) => {
+      const { left, right, top, bottom } = el.getBoundingClientRect();
+      return { left, right, top, bottom };
+    };
+    const name = (el) => el.localName + (el.className ? "." + el.className : "");
+    const drawn = [...${SHADOW}.querySelectorAll("*")].filter((el) => el.checkVisibility() &&
+      el.getBoundingClientRect().width > 1);
+    return {
+      host: bounds.width,
+      rows: rect(${SHADOW}.querySelector(".theme-menu-rows")),
+      preview: rect(${SHADOW}.querySelector(".theme-menu-preview")),
+      outside: drawn.filter((el) => {
+        const { left, right } = el.getBoundingClientRect();
+        return left < bounds.left - 0.5 || right > bounds.right + 0.5;
+      }).map(name),
+      overflowing: [host, ...drawn].filter((el) => el.scrollWidth > el.clientWidth + 1 &&
+        getComputedStyle(el).display !== "inline").map(name),
+    };
+  })()`);
+
+const intersect = ({ rows, preview }: Placed): boolean =>
+  rows.left < preview.right &&
+  preview.left < rows.right &&
+  rows.top < preview.bottom &&
+  preview.top < rows.bottom;
+
 const HOST: Change = { target: "sl-settings", bubbles: true, composed: true };
 
 async function openSettings(page: Page): Promise<void> {
@@ -535,5 +578,44 @@ describe("sl-settings", { timeout: 60_000 }, () => {
       (await listed()).every((row) => !row.off),
       "every row on again",
     );
+  });
+  describe("in a wide viewport", () => {
+    before(async () => {
+      await page.cdp("Emulation.setDeviceMetricsOverride", {
+        width: 1280,
+        height: 800,
+        deviceScaleFactor: 1,
+        mobile: false,
+      });
+    });
+    after(async () => {
+      await page.cdp("Emulation.clearDeviceMetricsOverride");
+    });
+
+    test("at 20rem the preview goes below the rows, nothing overlapping or overflowing the host", async () => {
+      const placed = await place(page, "20rem");
+      assert.ok(placed.preview.top >= placed.rows.bottom, JSON.stringify(placed));
+      assert.ok(!intersect(placed), JSON.stringify(placed));
+      assert.deepEqual(placed.outside, []);
+      assert.deepEqual(placed.overflowing, []);
+    });
+
+    test("at 60rem the preview stands beside the rows, nothing overlapping or overflowing the host", async () => {
+      const placed = await place(page, "60rem");
+      assert.ok(placed.preview.left >= placed.rows.right, JSON.stringify(placed));
+      assert.ok(placed.preview.top < placed.rows.bottom, JSON.stringify(placed));
+      assert.ok(!intersect(placed), JSON.stringify(placed));
+      assert.deepEqual(placed.outside, []);
+      assert.deepEqual(placed.overflowing, []);
+    });
+
+    test("in a shrink-to-fit parent the element is as wide as its content, nothing overlapping or overflowing it", async () => {
+      const placed = await place(page, "max-content");
+      const rows = placed.rows.right - placed.rows.left;
+      assert.ok(placed.host >= rows && placed.host <= 1280, JSON.stringify(placed));
+      assert.ok(!intersect(placed), JSON.stringify(placed));
+      assert.deepEqual(placed.outside, []);
+      assert.deepEqual(placed.overflowing, []);
+    });
   });
 });

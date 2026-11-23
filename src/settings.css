@@ -5,8 +5,9 @@
 
 /*
  * The settings' shadow-root sheet: a block host holding the theme and the keyboard sections, the
- * keyboard's --space-m below the theme's. .theme-menu-body sets the rows beside the preview from
- * 48rem, above it below; .theme-menu-rows stacks the rows; .theme-menu-row is one ◀ value ▶ row,
+ * keyboard's --space-m below the theme's. .theme-menu-body sets the preview beside the rows,
+ * sharing the width two to three, while the element is wide enough for both at their narrowest,
+ * and below them otherwise; .theme-menu-rows stacks the rows; .theme-menu-row is one ◀ value ▶ row,
  * its legend leading, its value in the code font, its other radios and every radio box hidden
  * visually, framed while a radio in it has visible focus; .theme-menu-preview is the card;
  * .theme-menu-buttons lays out its buttons.
@@ -21,18 +22,14 @@ section + section {
   margin-block-start: var(--space-m);
 }
 .theme-menu-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--space-s);
   align-items: start;
 }
-@media (width >= 48rem) {
-  .theme-menu-body {
-    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-  }
-}
 .theme-menu-rows {
   display: grid;
+  flex: 2 1 0;
   gap: var(--space-3xs);
 }
 .theme-menu-row {
@@ -80,8 +77,8 @@ section + section {
 }
 .theme-menu-preview {
   display: grid;
+  flex: 3 1 0;
   gap: var(--space-xs);
-  min-inline-size: 0;
   padding: var(--space-s);
   border: var(--line-s) solid var(--border);
   border-radius: var(--radius-md);
