@@ -7,6 +7,12 @@ All notable changes to `@standards-lab/web-components` are documented here. The 
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the package adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- The repository's tooling takes marathon 0.24.0, pnpm 12.23.0, and typescript-eslint 8.74.0.
+
 ## [0.2.0] - 2026-11-22
 
 ### Removed
