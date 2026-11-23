@@ -176,23 +176,53 @@ describe("shortcuts", { timeout: 60_000 }, () => {
 
   test("the screen-reader note follows the table, and the element holds no setting", async () => {
     await open(page);
-    const shown: { last: string; note: string; after: boolean; fields: number } =
-      await page.evaluate(`(async () => {
-        const { NOTE } = await import("/dist/shortcuts.js");
+    const { note, ...shown }: { last: string; note: string; after: boolean; fields: number } =
+      await page.evaluate(`(() => {
         const note = ${SHADOW}.querySelector("p");
         const table = ${SHADOW}.querySelector("table");
         return {
           last: ${SHADOW}.lastElementChild.localName,
-          note: note.textContent.trim() === NOTE ? "NOTE" : note.textContent.trim(),
+          note: note.textContent.trim(),
           after: Boolean(table.compareDocumentPosition(note) & Node.DOCUMENT_POSITION_FOLLOWING),
           fields: ${SHADOW}.querySelectorAll("input, select, textarea, fieldset").length,
         };
       })()`);
-    assert.deepEqual(shown, { last: "p", note: "NOTE", after: true, fields: 0 });
-    assert.match(
-      await page.evaluate(`${SHADOW}.querySelector("p").textContent.trim()`),
-      /^Screen readers: .*NVDA.*VoiceOver\.$/,
+    assert.deepEqual(shown, { last: "p", after: true, fields: 0 });
+    assert.match(note, /^Screen readers: .*NVDA.*VoiceOver\.$/);
+    await close(page);
+  });
+
+  test("in a shrink-to-fit parent the element is as wide as its table, or sixteen --space-base steps, the note wrapping within it", async () => {
+    await open(page);
+    const sized: { host: number; table: number; floor: number; note: number; lines: number } =
+      await page.evaluate(`(async () => {
+        const host = document.querySelector("sl-shortcuts");
+        const parent = document.createElement("div");
+        parent.style.inlineSize = "max-content";
+        host.replaceWith(parent);
+        parent.append(host);
+        await host.updateComplete;
+        const note = ${SHADOW}.querySelector(".note");
+        const lineHeight = parseFloat(getComputedStyle(note).lineHeight);
+        const probe = parent.appendChild(document.createElement("div"));
+        probe.style.inlineSize = "calc(var(--space-base) * 16)";
+        const floor = probe.getBoundingClientRect().width;
+        probe.remove();
+        return {
+          floor,
+          host: host.getBoundingClientRect().width,
+          table: ${SHADOW}.querySelector("table").getBoundingClientRect().width,
+          note: note.getBoundingClientRect().width,
+          lines: Math.round(note.getBoundingClientRect().height / lineHeight),
+        };
+      })()`);
+    const wide = Math.max(sized.table, sized.floor);
+    assert.ok(
+      Math.abs(sized.host - wide) < 1,
+      `host ${sized.host}, table ${sized.table}, floor ${sized.floor}`,
     );
+    assert.ok(sized.note <= wide + 0.5, `note ${sized.note}, host ${sized.host}`);
+    assert.ok(sized.lines > 1, `the note in ${sized.lines} line`);
     await close(page);
   });
 

@@ -382,7 +382,7 @@ describe("components", { timeout: 60_000 }, () => {
     tag: string;
     width: number;
     height: number;
-    look: { color: string; font: string; padding: number };
+    look: { color: string; font: string; body: string; padding: number };
   }
 
   test(`each component renders under each of the ${profiles.length} profile combinations`, async () => {
@@ -510,6 +510,7 @@ describe("components", { timeout: 60_000 }, () => {
             const look = {
               color: style.color + " on " + style.backgroundColor,
               font: font.fontFamily,
+              body: getComputedStyle(document.body).fontFamily,
               padding: timeline
                 ? parseFloat(getComputedStyle(element.shadowRoot.querySelector(".stage")).columnGap)
                 : drawer
@@ -560,7 +561,9 @@ describe("components", { timeout: 60_000 }, () => {
             (shown) => shown.scheme === scheme && shown.space === "compact",
           );
           if (tag === "sl-shortcuts") {
-            assert.equal(sans.font, mono.font, `${tag}, ${scheme}: body text in either type`);
+            for (const look of [mono, sans]) {
+              assert.equal(look.font, look.body, `${tag}, ${scheme}: its note in the body font`);
+            }
           } else {
             assert.notEqual(sans.font, mono.font, `${tag}, ${scheme}: sans sets the font`);
           }
