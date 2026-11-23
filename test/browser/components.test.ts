@@ -69,6 +69,7 @@ describe("components", { timeout: 60_000 }, () => {
     "sl-entry",
     "sl-status-badge",
     "sl-shortcuts",
+    "sl-settings",
   ];
 
   const schemes = ["light", "dark"];
@@ -146,6 +147,8 @@ describe("components", { timeout: 60_000 }, () => {
         const named = new Map([
           [reset, "reset"],
           [elements, "elements"],
+          [await sheet(foundation + "/meta.css"), "meta"],
+          [await sheet(foundation + "/structure.css"), "structure"],
           [await sheet(foundation + "/utilities.css"), "utilities"],
           [await sheet(foundation + "/glyph-button.css"), "glyph-button"],
           [await sheet(foundation + "/dialog.css"), "dialog"],
@@ -165,6 +168,7 @@ describe("components", { timeout: 60_000 }, () => {
           ["sl-entry", "entry", "entry.css"],
           ["sl-status-badge", "status-badge", "status-badge.css"],
           ["sl-shortcuts", "shortcuts", "shortcuts.css"],
+          ["sl-settings", "settings", "settings.css"],
         ];
         const adopted = {};
         for (const [tag, module, own] of components) {
@@ -187,6 +191,7 @@ describe("components", { timeout: 60_000 }, () => {
           "sl-upload-dropzone": [...base, "utilities", "motion", "own"],
           "sl-chat-thread": [...base, "utilities", "motion", "own"],
           "sl-status-badge": [...base, "own"],
+          "sl-settings": [...base, "meta", "structure", "utilities", "own"],
         };
         for (const tag of tags) {
           assert.deepEqual(adopted[tag], expected[tag] ?? [...base, "utilities", "own"], tag);
@@ -391,7 +396,7 @@ describe("components", { timeout: 60_000 }, () => {
         await page.evaluate(`(async () => {
         const registry = await import("@standards-lab/web-foundation/registry.js");
         const { directories, files } = await import("/demo/documents.js");
-        await Promise.all(["drawer", "document-list", "search-results", "event-log", "stage-timeline", "upload-dropzone", "composer", "chat-thread", "artifact-viewer", "pagination", "entry", "status-badge", "shortcuts"].map(
+        await Promise.all(["drawer", "document-list", "search-results", "event-log", "stage-timeline", "upload-dropzone", "composer", "chat-thread", "artifact-viewer", "pagination", "entry", "status-badge", "shortcuts", "settings"].map(
           (module) => import("/dist/" + module + ".js")));
         const keys = await import("@standards-lab/web-foundation/keys.js");
         keys.register("Alt+n", "New note", () => {});
@@ -461,6 +466,7 @@ describe("components", { timeout: 60_000 }, () => {
           "sl-status-badge": () =>
             Object.assign(document.createElement("sl-status-badge"), { label: "Draft" }),
           "sl-shortcuts": () => document.createElement("sl-shortcuts"),
+          "sl-settings": () => document.createElement("sl-settings"),
         };
         const defaults = ${JSON.stringify(defaults)};
         const attributes = { color: "data-palette", space: "data-space", type: "data-type", scheme: "data-scheme" };
@@ -481,10 +487,11 @@ describe("components", { timeout: 60_000 }, () => {
             const timeline = tag === "sl-stage-timeline";
             const log = tag === "sl-event-log";
             const shortcuts = tag === "sl-shortcuts";
+            const settings = tag === "sl-settings";
             const style = getComputedStyle(entries.length
               ? entries[0].shadowRoot.querySelector("button")
               : element.shadowRoot.querySelector(
-                drawer ? "aside" : viewer ? ".body > *" : thread ? ".user > .message" : timeline ? ".complete > .marker" : log ? ".events" : shortcuts ? "th" : "button"));
+                drawer ? "aside" : viewer ? ".body > *" : thread ? ".user > .message" : timeline ? ".complete > .marker" : log ? ".events" : shortcuts ? "th" : settings ? ".theme-menu-preview" : "button"));
             const font = drawer
               ? getComputedStyle(element.querySelector("button"))
               : viewer
@@ -497,7 +504,9 @@ describe("components", { timeout: 60_000 }, () => {
                       ? getComputedStyle(element.shadowRoot.querySelector(".when"))
                       : shortcuts
                         ? getComputedStyle(element.shadowRoot.querySelector(".note"))
-                        : style;
+                        : settings
+                          ? getComputedStyle(element.shadowRoot.querySelector(".theme-menu-preview button"))
+                          : style;
             const look = {
               color: style.color + " on " + style.backgroundColor,
               font: font.fontFamily,

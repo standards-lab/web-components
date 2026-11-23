@@ -52,6 +52,19 @@ the tests measure as they do.
   table. It reads the bindings again as it connects, as its dialog opens, and at each `change` in
   the document and each `storage` event. Nothing in it takes focus; it binds no key, runs no
   binding, holds no setting, and renders no `[data-keys-list]`.
+- `./settings.js`: `sl-settings`, the reader's settings for a Settings dialog: the theme's color,
+  scheme, space, and type rows, the registry's profile names and `SCHEMES`, each a ◀ value ▶ radio
+  group checked at what applies to the root, beside an inert preview card, and the keys module's
+  character-key switch, `SWITCH_LABEL`, and wait between presses, `WAIT_LABEL`, one of `WAITS`. A
+  click on a row's arrow steps it, wrapping; on a row, H and L step it, J and K or the down and up
+  arrows move between rows, stopping at the ends, and the left and right arrows cycle its radios
+  natively; these keys stay inside its rows, and it binds no page key. Every change is applied to
+  the root and stored at once, through the foundation's preferences module, or the keys module's
+  `changeSettings`, with no Save and no Cancel, and fires a bubbling, composed `change` at the
+  host. It reads both settings again as it connects, as its dialog opens, and at each `change` in
+  the document and each `storage` event; as its dialog opens it focuses the first row's checked
+  radio, unless an element in the dialog has `autofocus`. Its shadow root adopts the foundation's
+  meta and structure sheets too, for the preview card's blue button and field.
 
 ## Rendering
 
