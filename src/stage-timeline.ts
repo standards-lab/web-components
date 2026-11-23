@@ -95,7 +95,7 @@ export class StageTimeline extends LitElement {
         glyph === nothing
           ? html`<span class="position">${stage.position}</span>`
           : html`<svg viewBox="0 0 16 16">${glyph}</svg>`
-      }${stage.state === "active" ? html`<span class="ring motion-ring"></span>` : nothing}</span
+      }${stage.state === "active" ? html`<span class="ring motion-ring" aria-hidden="true"></span>` : nothing}</span
     >`;
   }
 

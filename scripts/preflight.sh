@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Fails naming mise run install when a tool a task needs is missing: the node_modules tooling, the
-# dependencies the build reads, lit, marked, and the foundation at its tag, and with `browser`, the
-# pinned chrome-headless-shell.
+# dependencies the build reads, lit, marked, and the foundation and the icons at their tags, and
+# with `browser`, the pinned chrome-headless-shell.
 # See docs/development.md
 # Adapted from spike-html-apps-components (10dde51): scripts/preflight.sh, on web-foundation.
 set -euo pipefail
@@ -20,6 +20,8 @@ require_node_modules() {
   [[ -f node_modules/marked/package.json ]] || fail "marked (dependencies)"
   [[ -f node_modules/@standards-lab/web-foundation/package.json ]] ||
     fail "@standards-lab/web-foundation (devDependencies)"
+  [[ -f node_modules/@standards-lab/web-icons/package.json ]] ||
+    fail "@standards-lab/web-icons (devDependencies)"
 }
 
 require_browser_at_pin() {

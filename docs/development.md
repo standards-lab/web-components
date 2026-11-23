@@ -8,8 +8,8 @@ workflows.
 
 `mise.toml` pins every tool the tasks run, and no task installs a missing one:
 `task.run_auto_install` is off, and `mise run install` is the one task that reads the network.
-The foundation is a peer, which the repository's devDependency installs at its tag, so
-`scripts/preflight.sh` looks for it in `node_modules` beside lit and marked.
+The foundation and the icons are peers, which the repository's devDependencies install at their
+tags, so `scripts/preflight.sh` looks for each in `node_modules` beside lit and marked.
 
 Chrome for Testing publishes no checksums, so each chrome-headless-shell bump takes the sha256 and
 size from the download by hand. mise caches a download by its checksum, so a version bumped without
