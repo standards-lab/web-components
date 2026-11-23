@@ -55,7 +55,8 @@ the tests measure as they do.
   binding, holds no setting, and renders no `[data-keys-list]`.
 - `./settings.js`: `sl-settings`, the reader's settings for a Settings dialog: the theme's color,
   scheme, space, and type rows, the registry's profile names and `SCHEMES`, each a ◀ value ▶ radio
-  group checked at what applies to the root, beside an inert preview card, and the keys module's
+  group checked at what applies to the root, with an inert preview card beside them where the
+  element's own width fits both and below them where it doesn't, and the keys module's
   character-key switch, `SWITCH_LABEL`, and wait between presses, `WAIT_LABEL`, one of `WAITS`. A
   click on a row's arrow steps it, wrapping; on a row, H and L step it, J and K or the down and up
   arrows move between rows, stopping at the ends, and the left and right arrows cycle its radios
