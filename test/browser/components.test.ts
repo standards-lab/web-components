@@ -68,6 +68,7 @@ describe("components", { timeout: 60_000 }, () => {
     "sl-pagination",
     "sl-entry",
     "sl-status-badge",
+    "sl-shortcuts",
   ];
 
   const schemes = ["light", "dark"];
@@ -163,6 +164,7 @@ describe("components", { timeout: 60_000 }, () => {
           ["sl-pagination", "pagination", "pagination.css"],
           ["sl-entry", "entry", "entry.css"],
           ["sl-status-badge", "status-badge", "status-badge.css"],
+          ["sl-shortcuts", "shortcuts", "shortcuts.css"],
         ];
         const adopted = {};
         for (const [tag, module, own] of components) {
@@ -389,8 +391,10 @@ describe("components", { timeout: 60_000 }, () => {
         await page.evaluate(`(async () => {
         const registry = await import("@standards-lab/web-foundation/registry.js");
         const { directories, files } = await import("/demo/documents.js");
-        await Promise.all(["drawer", "document-list", "search-results", "event-log", "stage-timeline", "upload-dropzone", "composer", "chat-thread", "artifact-viewer", "pagination", "entry", "status-badge"].map(
+        await Promise.all(["drawer", "document-list", "search-results", "event-log", "stage-timeline", "upload-dropzone", "composer", "chat-thread", "artifact-viewer", "pagination", "entry", "status-badge", "shortcuts"].map(
           (module) => import("/dist/" + module + ".js")));
+        const keys = await import("@standards-lab/web-foundation/keys.js");
+        keys.register("Alt+n", "New note", () => {});
         const components = {
           "sl-drawer": () => {
             const drawer = Object.assign(document.createElement("sl-drawer"), { label: "Documents" });
@@ -456,6 +460,7 @@ describe("components", { timeout: 60_000 }, () => {
             Object.assign(document.createElement("sl-entry"), { item: files.items[0] }),
           "sl-status-badge": () =>
             Object.assign(document.createElement("sl-status-badge"), { label: "Draft" }),
+          "sl-shortcuts": () => document.createElement("sl-shortcuts"),
         };
         const defaults = ${JSON.stringify(defaults)};
         const attributes = { color: "data-palette", space: "data-space", type: "data-type", scheme: "data-scheme" };
@@ -475,10 +480,11 @@ describe("components", { timeout: 60_000 }, () => {
             const thread = tag === "sl-chat-thread";
             const timeline = tag === "sl-stage-timeline";
             const log = tag === "sl-event-log";
+            const shortcuts = tag === "sl-shortcuts";
             const style = getComputedStyle(entries.length
               ? entries[0].shadowRoot.querySelector("button")
               : element.shadowRoot.querySelector(
-                drawer ? "aside" : viewer ? ".body > *" : thread ? ".user > .message" : timeline ? ".complete > .marker" : log ? ".events" : "button"));
+                drawer ? "aside" : viewer ? ".body > *" : thread ? ".user > .message" : timeline ? ".complete > .marker" : log ? ".events" : shortcuts ? "th" : "button"));
             const font = drawer
               ? getComputedStyle(element.querySelector("button"))
               : viewer
@@ -489,7 +495,9 @@ describe("components", { timeout: 60_000 }, () => {
                     ? getComputedStyle(element.shadowRoot.querySelector(".label"))
                     : log
                       ? getComputedStyle(element.shadowRoot.querySelector(".when"))
-                      : style;
+                      : shortcuts
+                        ? getComputedStyle(element.shadowRoot.querySelector(".note"))
+                        : style;
             const look = {
               color: style.color + " on " + style.backgroundColor,
               font: font.fontFamily,
@@ -542,7 +550,11 @@ describe("components", { timeout: 60_000 }, () => {
             tag,
             (shown) => shown.scheme === scheme && shown.space === "compact",
           );
-          assert.notEqual(sans.font, mono.font, `${tag}, ${scheme}: sans sets the font`);
+          if (tag === "sl-shortcuts") {
+            assert.equal(sans.font, mono.font, `${tag}, ${scheme}: body text in either type`);
+          } else {
+            assert.notEqual(sans.font, mono.font, `${tag}, ${scheme}: sans sets the font`);
+          }
           assert.ok(
             compact.padding < mono.padding,
             `${tag}, ${scheme}: compact pads ${compact.padding}, regular ${mono.padding}`,

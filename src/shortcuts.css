@@ -1,0 +1,24 @@
+/* Adapted from spike-html-hosting-components (9fa5850): src/shortcuts.css, its note's type the utilities' text-quiet-s. */
+
+/*
+ * The shortcuts list's shadow-root sheet: a block host as wide as its table, a row turned off by
+ * the reader's setting in the muted text tier, and the note below the table, wrapping within the
+ * table's width and counting as sixteen --space-base steps toward the element's intrinsic width.
+ * Unlayered, above the foundation's reset, elements, and utilities sheets; it reads only the
+ * baseline tokens.
+ */
+
+:host {
+  display: block;
+}
+tr.off td:first-child {
+  color: var(--fg-2);
+}
+tr.off kbd {
+  --kbd-color: var(--fg-2);
+}
+.note {
+  margin-block: var(--space-s) 0;
+  contain: inline-size;
+  contain-intrinsic-inline-size: calc(var(--space-2xl) * 4);
+}

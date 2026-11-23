@@ -43,6 +43,15 @@ the tests measure as they do.
   allows motion. `modal`, a reflected boolean, makes it the modal dialog at every width, `dock`
   ignored; setting or removing it is a switch too, closing an open drawer silently. Its mode is the
   custom state `docked` or `drawer`, which a page may style.
+- `./shortcuts.js`: `sl-shortcuts`, the page's keyboard shortcuts for a help dialog, as a plain-text
+  table of Keys and Action: exactly what the foundation's `bindings(dialog)` gives for the dialog
+  that holds it, `bindings(null)` outside one, in its order, each key in a `kbd` as the keys
+  grammar labels it, and each action the binding's registered label or its element's name. A row
+  the reader's setting turns off, character keys alone while character keys are off, carries the
+  word "off" after its keys and the class `off`. The screen-reader note, `NOTE`, follows the
+  table. It reads the bindings again as it connects, as its dialog opens, and at each `change` in
+  the document and each `storage` event. Nothing in it takes focus; it binds no key, runs no
+  binding, holds no setting, and renders no `[data-keys-list]`.
 
 ## Rendering
 

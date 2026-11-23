@@ -58,6 +58,7 @@ the foundation's `page.css`:
 - `./pagination.js`: `sl-pagination`, a page of entries between its summary and its controls.
 - `./drawer.js`: `sl-drawer`, its children docked inline on a wide viewport, in a modal drawer
   below, or in the modal drawer at every width with `modal`.
+- `./shortcuts.js`: `sl-shortcuts`, the keyboard shortcuts of the dialog that holds it, as a table.
 - `./markdown.js`: `markdown(source)`, a Markdown string as a Lit template of plain elements.
 - `./artifact-viewer.js`: `sl-artifact-viewer`, one artifact's content by its content type.
 - `./event-log.js`: `sl-event-log`, events as a log in the order given.
