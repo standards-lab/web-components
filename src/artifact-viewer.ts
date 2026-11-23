@@ -136,9 +136,8 @@ async function textOf(blob: Blob): Promise<string | null> {
  * the foundation's `formatJson()`, two spaces an indent, so its keys, their order, duplicates,
  * numbers, and strings show as written, never parsed and printed again; and other text,
  * text/html, XML, and SVG's source included, is shown as it is, never as a page and from no URL.
- * JSON that doesn't
- * parse shows its raw text under a note saying so, and empty content a note saying so. Long
- * content scrolls inside the viewer, in a region the keyboard reaches.
+ * JSON that doesn't parse shows its raw text under a note saying so, and empty content a note
+ * saying so. Long content scrolls inside the viewer, in a region the keyboard reaches.
  *
  * A PDF, an image, audio, or video shows from a Blob, natively: a PDF in an iframe, the browser's
  * own viewer, as tall as the viewer allows; an image no wider than the viewer and never past its

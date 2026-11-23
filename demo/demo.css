@@ -10,8 +10,6 @@
     padding-block: var(--space-l) var(--space-2xl);
   }
 
-  /* The header row over main, as wide: the page's name at the inline start, and the Help and
-     Settings glyph buttons, the layout sheet's .header-actions, at the inline end. */
   body > header {
     display: flex;
     flex-wrap: wrap;

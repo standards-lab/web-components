@@ -9,8 +9,7 @@
  * 48rem, above it below; .theme-menu-rows stacks the rows; .theme-menu-row is one ◀ value ▶ row,
  * its legend leading, its value in the code font, its other radios and every radio box hidden
  * visually, framed while a radio in it has visible focus; .theme-menu-preview is the card;
- * .theme-menu-buttons lays out its buttons. Its fixed lengths are layout: the breakpoint, a value's
- * width, and the hidden 1px box.
+ * .theme-menu-buttons lays out its buttons.
  * Unlayered, above the foundation's reset, elements, meta, structure, and utilities sheets; it
  * reads only the baseline tokens.
  */

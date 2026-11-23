@@ -72,7 +72,6 @@ export const glyphButton = (page: Page, button: string, markup: string): Promise
     };
   })()`);
 
-/** A node of the page's accessibility tree, with its name and description. */
 interface Described {
   ignored: boolean;
   role?: { value: string };

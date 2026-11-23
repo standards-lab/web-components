@@ -57,7 +57,6 @@ const opener = (dialog: Dialog): string =>
 const closer = (dialog: Dialog): string =>
   `document.querySelector('#${dialog.id} > .dialog-header [commandfor="${dialog.id}"][command="close"]')`;
 
-/** The dialog's state, and where focus is: the focused element's id, or its tag. */
 const shown = (
   page: Page,
   dialog: Dialog,
