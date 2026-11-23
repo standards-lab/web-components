@@ -52,8 +52,11 @@ the behavior and layout each one holds to.
   out: it links only the lean entry, so it shows one profile.
 - Text in a fully transparent color shows nothing, as a hidden mark does, so it takes no color
   token.
-- The stage timeline holds no control, so the focus ring cases skip it; a case pins that it renders
-  nothing focusable, so a control it gains must get a ring case.
+- The stage timeline and the shortcuts list hold no control, so the focus ring cases skip their
+  pages; a case pins that each renders nothing focusable, so a control one gains must get a ring
+  case.
+- `shortcut-dialogs.test.ts` runs on the demo pages that carry the Settings and Help pattern, so
+  the README's markup is held to working with the components.
 
 ## Components
 

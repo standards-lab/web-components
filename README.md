@@ -75,6 +75,99 @@ the foundation's `page.css`:
 [docs/components.md](https://github.com/standards-lab/web-components/blob/main/docs/components.md)
 documents each module in full, and its demo and specimen pages.
 
+### Settings and Help
+
+The components bind no key, so the page binds S and ? itself. The pattern, which
+`demo/components.html` shows: two glyph buttons in the header's `.header-actions`, bound by
+`data-keys` through the foundation's `keys.js`, each opening its dialog with `command="show-modal"`;
+Help, a `.dialog-fit` holding `sl-shortcuts`, and Settings, a `.dialog-wide` holding `sl-settings`,
+each headed by a `.dialog-header` whose Close shows the Esc hint. Close and Escape close either
+with no script, and focus returns to the element that held it. The page links the foundation's
+`glyph-button.css`, `dialog.css`, and `layout.css` after its entry, and the glyphs are web-icons'
+markers, which `iconFill()` fills:
+
+```html
+<header>
+  <strong>App</strong>
+  <div class="header-actions">
+    <button
+      type="button"
+      class="glyph-button"
+      commandfor="help"
+      command="show-modal"
+      aria-label="Help"
+      aria-description=""
+      data-keys="?"
+      interestfor="help-hint"
+    >
+      <svg data-icon="octicon/question-16"></svg>
+      <span aria-hidden="true"><kbd>?</kbd></span>
+    </button>
+    <div id="help-hint" class="glyph-hint" popover="hint" aria-hidden="true">Help</div>
+    <button
+      type="button"
+      class="glyph-button"
+      commandfor="settings"
+      command="show-modal"
+      aria-label="Settings"
+      aria-description=""
+      data-keys="s"
+      interestfor="settings-hint"
+    >
+      <svg data-icon="octicon/gear-16"></svg>
+      <span aria-hidden="true"><kbd>S</kbd></span>
+    </button>
+    <div id="settings-hint" class="glyph-hint" popover="hint" aria-hidden="true">Settings</div>
+  </div>
+</header>
+<dialog id="help" class="dialog-fit" aria-labelledby="help-title">
+  <header class="dialog-header">
+    <h2 id="help-title" tabindex="-1" autofocus>Keyboard shortcuts</h2>
+    <button
+      type="button"
+      class="glyph-button"
+      commandfor="help"
+      command="close"
+      aria-label="Close"
+      aria-description=""
+      interestfor="help-close-hint"
+    >
+      <svg data-icon="octicon/x-16"></svg>
+      <span aria-hidden="true"><kbd>Esc</kbd></span>
+    </button>
+    <div id="help-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
+  </header>
+  <sl-shortcuts></sl-shortcuts>
+</dialog>
+<dialog id="settings" class="dialog-wide" aria-labelledby="settings-title">
+  <header class="dialog-header">
+    <h2 id="settings-title">Settings</h2>
+    <button
+      type="button"
+      class="glyph-button"
+      commandfor="settings"
+      command="close"
+      aria-label="Close"
+      aria-description=""
+      interestfor="settings-close-hint"
+    >
+      <svg data-icon="octicon/x-16"></svg>
+      <span aria-hidden="true"><kbd>Esc</kbd></span>
+    </button>
+    <div id="settings-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
+  </header>
+  <sl-settings></sl-settings>
+</dialog>
+<script type="module">
+  import "@standards-lab/web-foundation/keys.js";
+  import "@standards-lab/web-components/settings.js";
+  import "@standards-lab/web-components/shortcuts.js";
+</script>
+```
+
+The Help heading takes focus as its dialog opens; the Settings heading doesn't, so `sl-settings`
+focuses its first row. `demo/settings.html` and `demo/shortcuts.html` carry the pattern too.
+
 ## Development
 
 Tasks run through [mise](https://mise.jdx.dev):

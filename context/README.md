@@ -25,8 +25,9 @@ line have their provenance here:
 - `.prettierrc.json` is from spike-html-apps-components (10dde51): .prettierrc.json.
 - `LICENSE` is from spike-html-apps-components (10dde51): LICENSE, unchanged.
 - `pnpm-lock.yaml` is generated, not copied.
-- `test/unit/marked.test.ts`, `test/browser/themes.test.ts`, and
-  `test/browser/support/profiles.ts` are written here, with no source.
+- `test/unit/marked.test.ts`, `test/browser/themes.test.ts`,
+  `test/browser/shortcut-dialogs.test.ts`, `test/browser/support/profiles.ts`, and
+  `demo/glyphs.js` are written here, with no source.
 - `CLAUDE.md`, `.claude/`, and this directory are marathon's working files, written here.
 
 ## Capability map

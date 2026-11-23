@@ -172,15 +172,19 @@ the tests measure as they do.
 ## Demo
 
 `demo/components.html` puts the status badge, the entry, and the pagination on one page, with its
-import map. Each component has a specimen page, `demo/<name>.html`, for `status-badge`, `entry`,
+import map, and the Settings and Help pattern in its header (README.md, "Settings and Help"),
+which the settings and shortcuts pages carry too. `demo/glyphs.js` fills the pages' web-icons
+markers. Each component has a specimen page, `demo/<name>.html`, for `status-badge`, `entry`,
 `pagination`, `artifact-viewer`, `chat-thread`, `composer`, `upload-dropzone`, `stage-timeline`,
-`event-log`, `search-results`, `document-list`, and `drawer`. A specimen page shows every state of
+`event-log`, `search-results`, `document-list`, `drawer`, `settings`, and `shortcuts`. A specimen page shows every state of
 its component, labelled, then again in a section 20rem wide, and, for a component that holds a
 control, one instance reached by the keyboard to show its focus ring: the screenshot script focuses
 the focus section's `[data-focus-start]` mark, which takes focus only by script, then presses Tab as
 many times as the mark's value says, so `:focus-visible` matches. A page whose component draws its
 own frame drops the dashed one, so a capture shows the component's frame alone. The drawer's mode is
 the viewport's, so its page is an app's frame instead, its states the page's at two widths: docked
-at 1280px, and closed, open, and open right to left at 480px. The specimen pages link the
+at 1280px, and closed, open, and open right to left at 480px; its Outline drawer is `modal`, and
+its captures open it at 1280px, then reach its Close by Tab. The settings and shortcuts captures add
+each page's dialog, opened by its key. The specimen pages link the
 foundation's `page-full.css` and import its `register-full.js`, so a profile applies by its
 attribute on the root.

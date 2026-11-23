@@ -27,12 +27,15 @@
       import "@standards-lab/web-foundation/register-full.js";
       import "../dist/drawer.js";
 
-      const drawer = document.querySelector("sl-drawer");
-      document.querySelector("#open-documents").addEventListener("click", () => drawer.show());
-      const expanded = () =>
-        document.querySelector("#open-documents").setAttribute("aria-expanded", String(drawer.open));
-      drawer.addEventListener("open", expanded);
-      drawer.addEventListener("close", expanded);
+      for (const [opener, drawer] of [
+        ["#open-documents", "#documents"],
+        ["#open-outline", "#outline"],
+      ].map((ids) => ids.map((id) => document.querySelector(id)))) {
+        opener.addEventListener("click", () => drawer.show());
+        const expanded = () => opener.setAttribute("aria-expanded", String(drawer.open));
+        drawer.addEventListener("open", expanded);
+        drawer.addEventListener("close", expanded);
+      }
     </script>
   </head>
   <body>
@@ -40,7 +43,8 @@
       <h1>Drawer</h1>
       <p>
         <code>sl-drawer</code>, docked beside the content at 48rem and wider, and below it a
-        modal drawer over the whole viewport, sliding in from the inline-start edge.
+        modal drawer over the whole viewport, sliding in from the inline-start edge. The Outline
+        drawer is <code>modal</code>, a modal drawer at every width.
       </p>
 
       <div class="app">
@@ -66,6 +70,9 @@
               Documents
             </button>
             <h2>quarterly-report.md</h2>
+            <button type="button" id="open-outline" aria-controls="outline" aria-expanded="false">
+              Outline
+            </button>
           </div>
           <p>
             Revenue in the three regions grew 4% over the quarter, led by the north, where the new
@@ -82,6 +89,13 @@
           </ul>
         </article>
       </div>
+      <sl-drawer label="Outline" modal id="outline">
+        <ul class="app-documents">
+          <li><a href="#revenue">Revenue by region</a></li>
+          <li><a href="#extraction">The extraction run</a></li>
+          <li><a href="#regions">North, central, and south</a></li>
+        </ul>
+      </sl-drawer>
     </main>
   </body>
 </html>
