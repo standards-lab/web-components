@@ -17,9 +17,9 @@ Each release is a tag, `v<version>`, of
 package as `pnpm pack` builds it: `package.json`, this README, the LICENSE, and `dist/`, the build.
 The build lives only in the tag's tree, so the tag installs with no build step, and its manifest
 has no scripts. It depends on lit 3.3.3 and marked 18.2.1, and takes the foundation as a peer at
-`^0.4.0` and the icons at `^0.1.0`: a consumer declares each beside the components, and the one
-copy serves both, so a restyle of the foundation's sheets by package name reaches the components'
-shadow roots too. Install all three by their tags:
+`^0.4.0` and the icons at `^0.1.0`: a consumer declares each beside the components, so the page
+and the components share one copy of each, and a restyle of the foundation's sheets by package
+name reaches the components' shadow roots too. Install all three by their tags:
 
 ```
 pnpm add github:standards-lab/web-components#v0.2.0 github:standards-lab/web-foundation#v0.4.0 github:standards-lab/web-icons#v0.1.0
@@ -28,8 +28,8 @@ npm install --allow-git=root github:standards-lab/web-components#v0.2.0 github:s
 ```
 
 npm 12 refuses git dependencies unless `--allow-git` allows them; `root` allows the ones the
-project itself declares, which all three packages are. Without either peer declared, the install
-fails. Each GitHub release also carries the tarball.
+project itself declares, which all three packages are. Leaving either peer undeclared fails the
+install. Each GitHub release also carries the tarball.
 
 ### Safari
 
@@ -41,9 +41,9 @@ package keeps the standard syntax, with no pack-time rewrite.
 
 The package is `@standards-lab/web-components`. Each module defines its element when it is
 imported, and the element's shadow root adopts the foundation's reset and elements sheets, then
-the foundation's meta, structure, utilities, dialog, and motion sheets where it uses them, then its
-own layout-only sheet. The modules import `lit` and the foundation by package name and their
-sheets as CSS module scripts, so a page reaches them through an import map or a bundler, and links
+the foundation's meta, structure, utilities, glyph-button, dialog, and motion sheets where it uses
+them, then its own layout-only sheet. The modules import `lit`, the foundation, and the icons by
+package name and their sheets as CSS module scripts, so a page reaches them through an import map or a bundler, and links
 the foundation's `page.css`:
 
 ```html
@@ -78,14 +78,14 @@ documents each module in full, and its demo and specimen pages.
 
 ### Settings and Help
 
-The components bind no key, so the page binds S and ? itself. The pattern, which
-`demo/components.html` shows: two glyph buttons in the header's `.header-actions`, bound by
-`data-keys` through the foundation's `keys.js`, each opening its dialog with `command="show-modal"`;
-Help, a `.dialog-fit` holding `sl-shortcuts`, and Settings, a `.dialog-wide` holding `sl-settings`,
-each headed by a `.dialog-header` whose Close shows the Esc hint. Close and Escape close either
-with no script, and focus returns to the element that held it. The page links the foundation's
-`glyph-button.css`, `dialog.css`, and `layout.css` after its entry, and the glyphs are web-icons'
-markers, which `iconFill()` fills:
+The components bind no key, so the page binds S and ? itself, as `demo/components.html` does. Two
+glyph buttons in the header's `.header-actions` open the dialogs with `command="show-modal"`, and
+the foundation's `keys.js` binds each to its key through `data-keys`. Help is a `.dialog-fit`
+dialog holding `sl-shortcuts`, and Settings is a `.dialog-wide` dialog holding `sl-settings`; each
+has a `.dialog-header` whose Close shows the Esc hint. Close and Escape close either dialog with no
+script, and focus returns to the element that held it. The page links the foundation's
+`glyph-button.css`, `dialog.css`, and `layout.css` after its entry, and web-icons' `iconFill()`
+fills the glyphs' markers:
 
 ```html
 <header>
@@ -192,7 +192,8 @@ mise run currency                         # report every tool, package, and acti
 ```
 
 `mise run screenshots` captures each specimen page light and dark, in vertical tiles at most
-1200px tall, and the drawer's in its viewport at each of its four states. It runs the
+1200px tall; it captures the drawer's page in its viewport at each of its six states, and the
+settings and shortcuts pages again with their dialogs open. It runs the
 `web-screenshots` bin of [web-tooling](https://github.com/standards-lab/web-tooling), the
 devDependency the browser tier's driver and server also come from, over the capture description
 `scripts/screenshots.config.ts`; `mise run screenshots -- --help` lists the flags with the pages

@@ -32,17 +32,18 @@ the tests measure as they do.
   closed until `show()`, `toggle()`, or `open` opens it, `open` in the markup as the page loads
   too, covering the viewport and sliding in from the inline-start edge; docked, `open` in the
   markup is reverted to false. Its header holds `label` as an `h2` that names the dialog, staying
-  in view while the content scrolls, and a Close button named "Close" and the label, its text
-  replaceable through the `close` slot for a translation. As it opens, focus lands on its heading,
+  in view while the content scrolls, and a Close button, a glyph button showing web-icons' x-16,
+  named "Close" and the label, a name it shows as a hint on hover and keyboard focus; the `close`
+  slot replaces "Close" for a translation. As it opens, focus lands on its heading,
   `tabindex="-1"` and `autofocus`, not on the Close button; the heading shows no focus outline and
   is out of the Tab order, so Tab from it reaches the Close button. The Close button, Escape,
   `close()`, or `toggle()` closes it, and focus returns to what opened it. It dispatches `open`
   and `close` as the modal drawer opens and closes, never as the viewport crosses `dock`, which
   swaps only the wrapper, so the slotted content is never moved, disconnected, or re-created: an
   open drawer docks, and docked content becomes a closed drawer. It slides only when the reader
-  allows motion. `modal`, a reflected boolean, makes it the modal dialog at every width, `dock`
-  ignored; setting or removing it is a switch too, closing an open drawer silently. Its mode is the
-  custom state `docked` or `drawer`, which a page may style.
+  allows motion. `modal`, a reflected boolean, makes it the modal dialog at every width, ignoring
+  `dock`; setting or removing it is a switch too, so it closes an open drawer silently. Its mode is
+  the custom state `docked` or `drawer`, which a page may style.
 - `./shortcuts.js`: `sl-shortcuts`, the page's keyboard shortcuts for a help dialog, as a plain-text
   table of Keys and Action: exactly what the foundation's `bindings(dialog)` gives for the dialog
   that holds it, `bindings(null)` outside one, in its order, each key in a `kbd` as the keys
@@ -81,8 +82,8 @@ the tests measure as they do.
   them. Every state, its content or its loading, error, invalid JSON, unsupported, or empty note,
   is in a region named `<name> content`, header or not. Valid JSON is formatted from its own
   tokens by the foundation's `format.js`, never parsed and printed again, so it shows its own
-  keys, their order, and its numbers; JSON that doesn't parse shows as text under a note. `viewOf(contentType)` gives
-  a type's `view` and the `content` it takes, `text` or `blob`, so a consumer knows what to
+  keys, their order, and its numbers; JSON that doesn't parse shows as text under a note.
+  `viewOf(contentType)` gives a type's `view` and the `content` it takes, `text` or `blob`, so a consumer knows what to
   fetch. A text view is always safe, never a URL and never a document, so the viewer shows text
   whenever the content is text: "can't be shown" is left for bytes that aren't. The
   `content-type` decides the view, never a Blob's own type, and the Blob's bytes are shown as
@@ -172,19 +173,19 @@ the tests measure as they do.
 ## Demo
 
 `demo/components.html` puts the status badge, the entry, and the pagination on one page, with its
-import map, and the Settings and Help pattern in its header (README.md, "Settings and Help"),
-which the settings and shortcuts pages carry too. `demo/glyphs.js` fills the pages' web-icons
-markers. Each component has a specimen page, `demo/<name>.html`, for `status-badge`, `entry`,
-`pagination`, `artifact-viewer`, `chat-thread`, `composer`, `upload-dropzone`, `stage-timeline`,
-`event-log`, `search-results`, `document-list`, `drawer`, `settings`, and `shortcuts`. A specimen page shows every state of
-its component, labelled, then again in a section 20rem wide, and, for a component that holds a
-control, one instance reached by the keyboard to show its focus ring: the screenshot script focuses
-the focus section's `[data-focus-start]` mark, which takes focus only by script, then presses Tab as
-many times as the mark's value says, so `:focus-visible` matches. A page whose component draws its
-own frame drops the dashed one, so a capture shows the component's frame alone. The drawer's mode is
-the viewport's, so its page is an app's frame instead, its states the page's at two widths: docked
-at 1280px, and closed, open, and open right to left at 480px; its Outline drawer is `modal`, and
-its captures open it at 1280px, then reach its Close by Tab. The settings and shortcuts captures add
-each page's dialog, opened by its key. The specimen pages link the
+import map, and the [Settings and Help pattern](../README.md#settings-and-help) in its header, which
+the settings and shortcuts pages carry too. `demo/glyphs.js` fills the pages' web-icons markers.
+Each component has a specimen page, `demo/<name>.html`, for `status-badge`, `entry`, `pagination`,
+`artifact-viewer`, `chat-thread`, `composer`, `upload-dropzone`, `stage-timeline`, `event-log`,
+`search-results`, `document-list`, `drawer`, `settings`, and `shortcuts`. A specimen page shows
+every state of its component, labelled, then again in a section 20rem wide, and, for a component
+that holds a control, one instance reached by the keyboard to show its focus ring: the screenshot
+script focuses the focus section's `[data-focus-start]` mark, which takes focus only by script, then
+presses Tab as many times as the mark's value says, so `:focus-visible` matches. A page whose
+component draws its own frame drops the dashed one, so a capture shows the component's frame alone.
+The drawer's mode is the viewport's, so its page is an app's frame instead, its states the page's at
+two widths: docked at 1280px, and closed, open, and open right to left at 480px. Its Outline drawer
+is `modal`, and its captures open it at 1280px, then reach its Close by Tab. The settings and
+shortcuts captures add each page's dialog, opened by its key. The specimen pages link the
 foundation's `page-full.css` and import its `register-full.js`, so a profile applies by its
 attribute on the root.

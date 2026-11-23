@@ -49,7 +49,7 @@ the tag's tree to the pack, file for file; and creates the GitHub release from t
 dependencies, each at one version, never a range. The foundation and the icons,
 `@standards-lab/web-icons`, are its two peers, each by a caret range on its versions, never a git
 spec, so a consumer declares each from whichever source; the [README](../README.md#install) says
-why the foundation is a peer. The repository's own install of each is a devDependency at one
+why each is a peer. The repository's own install of each is a devDependency at one
 release tag on its own GitHub repository, never a range, a branch, a commit, or a `#semver:` spec,
 which bun fails, and a tag the peer range admits: the same leftmost nonzero part and no lower, so
 `^0.1.0` admits 0.1.x only. Which version, range, and tag is `package.json`'s, and

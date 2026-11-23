@@ -24,8 +24,8 @@ each sheet is laid out as it is.
   is taken as unzoomed.
 - Valid JSON is shown by the foundation's `tryFormatJson()`, formatted from its own tokens:
   `JSON.parse` decides validity alone and its value is thrown away, since printing it would move
-  integer-like keys first, rewrite numbers, and drop duplicate keys. Text whose formatting would pass the longest string, a `RangeError`,
-  shows as it is.
+  integer-like keys first, rewrite numbers, and drop duplicate keys. Text whose formatting would
+  pass the longest string, a `RangeError`, shows as it is.
 
 ## Artifact viewer
 

@@ -29,7 +29,7 @@ All notable changes to `@standards-lab/web-components` are documented here. The 
 - **Breaking:** `sl-drawer`'s Close is a glyph button showing web-icons' x-16; the `close` slot's
   text, "Close" by default, is its name and its hint on hover and keyboard focus, no longer its
   visible text.
-- marathon 0.23.0 and mise-action v5.3.0, in the repository's tooling.
+- The repository's tooling takes marathon 0.23.0 and mise-action v5.3.0.
 
 ### Added
 
